@@ -5,7 +5,7 @@ import { DEFAULT_SETTINGS, ReadItLaterSettings, ReadItLaterSettingsTab } from '.
 export default class ReadItLaterPlugin extends Plugin {
 	settings: ReadItLaterSettings;
 
-	async onload() {
+	async onload(): Promise<void> {
 		await this.loadSettings();
 
 		if(!(await this.app.vault.adapter.exists(normalizePath(this.settings.inboxDir)))) {
@@ -31,11 +31,11 @@ export default class ReadItLaterPlugin extends Plugin {
 		this.addSettingTab(new ReadItLaterSettingsTab(this.app, this));
 	}
 
-	async loadSettings() {
+	async loadSettings(): Promise<void>  {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void>  {
 		await this.saveData(this.settings);
 	}
 }

@@ -1,8 +1,8 @@
-export const isValidUrl = (url: string) => {
+export function isValidUrl(url: string): boolean {
 	try {
 		new URL(url);
 	} catch (e) {
 		return false;
 	}
 	return true;
-};
+}

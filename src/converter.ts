@@ -8,7 +8,7 @@ export default class ContentConverter {
     app: App;
     settings: ReadItLaterSettings;
 
-    yt_regex_pattern: RegExp = /(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/;
+    yt_regex_pattern = /(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/;
     twitter_regex_pattern = /(https:\/\/twitter.com\/([a-zA-Z0-9_]+\/)([a-zA-Z0-9_]+\/[a-zA-Z0-9_]+))/
 
     constructor(app: App, settings: ReadItLaterSettings) {
@@ -16,7 +16,7 @@ export default class ContentConverter {
         this.settings = settings;
     }
 
-    async processClipboard() {
+    async processClipboard(): Promise<void> {
         const clipbardContent = await navigator.clipboard.readText();
 
         if(isValidUrl(clipbardContent)) {
@@ -32,7 +32,7 @@ export default class ContentConverter {
         }
     }
 
-    async processWebsite(url: string) {
+    async processWebsite(url: string): Promise<void> {
 		const response = await request({
 			method: 'GET',
 			url: url
@@ -46,9 +46,9 @@ export default class ContentConverter {
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
             if(this.settings.articleDefaultTag) {
-                content += ` [[${this.settings.articleDefaultTag}]]\n`
+                content += ` [[${this.settings.articleDefaultTag}]]\n\n`
             } else {
-                content += '\n'
+                content += '\n\n'
             }
         }
 
@@ -78,9 +78,9 @@ export default class ContentConverter {
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
             if(this.settings.textsnippetDefaultTag) {
-                content += ` [[${this.settings.textsnippetDefaultTag}]]\n`
+                content += ` [[${this.settings.textsnippetDefaultTag}]]\n\n`
             } else {
-                content += '\n'
+                content += '\n\n'
             }
         }
         content += snippet;
@@ -88,7 +88,7 @@ export default class ContentConverter {
         await this.writeFile(fileName, content);
     }
 
-    async processYoutubeLink(url: string) {
+    async processYoutubeLink(url: string): Promise<void> {
         const response = await request({
             method: 'GET',
             url: url
@@ -101,9 +101,9 @@ export default class ContentConverter {
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
             if(this.settings.youtubeDefaultTag) {
-                content += ` [[${this.settings.youtubeDefaultTag}]]\n`
+                content += ` [[${this.settings.youtubeDefaultTag}]]\n\n`
             } else {
-                content += '\n'
+                content += '\n\n'
             }
         }
         content += `# [${doc.title}](${url})\n\n`;
@@ -113,11 +113,11 @@ export default class ContentConverter {
         await this.writeFile(fileName, content);
     }
 
-    async processTweet(url: string) {
+    async processTweet(url: string): Promise<void> {
         const response = JSON.parse(await request({
             method: 'GET',
             contentType: 'application/json',
-            url: `https://publish.twitter.com/oembed\?url=${url}`
+            url: `https://publish.twitter.com/oembed?url=${url}`
         }));
 
         const fileName = `Tweet from ${response.author_name} (${this.getFormattedDateForFilename()}}).md`
@@ -126,9 +126,9 @@ export default class ContentConverter {
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
             if(this.settings.twitterDefaultTag) {
-                content += ` [[${this.settings.twitterDefaultTag}]]\n`
+                content += ` [[${this.settings.twitterDefaultTag}]]\n\n`
             } else {
-                content += '\n'
+                content += '\n\n'
             }
         }
         content = `# [${response.author_name}](${response.url})\n\n`;
@@ -137,7 +137,7 @@ export default class ContentConverter {
         await this.writeFile(fileName, content);
     }
 
-    async writeFile(fileName: string, content: string) {
+    async writeFile(fileName: string, content: string): Promise<void> {
         let filePath;
         if(this.settings.inboxDir) {
             filePath = normalizePath(`${this.settings.inboxDir}/${fileName}`);
