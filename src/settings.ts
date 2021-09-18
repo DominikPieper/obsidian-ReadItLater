@@ -12,10 +12,10 @@ export interface ReadItLaterSettings {
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
 	inboxDir: 'ReadItLater Inbox',
-	twitterDefaultTag: '[[Tweet]]',
-	youtubeDefaultTag: '[[Youtube]]',
-    articleDefaultTag: '[[Article]]',
-    textsnippetDefaultTag: '[[Textsnippet]]',
+	twitterDefaultTag: 'Tweet',
+	youtubeDefaultTag: 'Youtube',
+    articleDefaultTag: 'Article',
+    textsnippetDefaultTag: 'Textsnippet',
     preventTags: false
 }
 

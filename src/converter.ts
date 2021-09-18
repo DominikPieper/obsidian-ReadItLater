@@ -46,7 +46,7 @@ export default class ContentConverter {
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
             if(this.settings.articleDefaultTag) {
-                content += ` ${this.settings.articleDefaultTag}\n`
+                content += ` [[${this.settings.articleDefaultTag}]]\n`
             } else {
                 content += '\n'
             }
@@ -77,8 +77,8 @@ export default class ContentConverter {
         let content = '';
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
-            if(this.settings.youtubeDefaultTag) {
-                content += ` ${this.settings.youtubeDefaultTag}\n`
+            if(this.settings.textsnippetDefaultTag) {
+                content += ` [[${this.settings.textsnippetDefaultTag}]]\n`
             } else {
                 content += '\n'
             }
@@ -101,7 +101,7 @@ export default class ContentConverter {
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
             if(this.settings.youtubeDefaultTag) {
-                content += ` ${this.settings.youtubeDefaultTag}\n`
+                content += ` [[${this.settings.youtubeDefaultTag}]]\n`
             } else {
                 content += '\n'
             }
@@ -126,7 +126,7 @@ export default class ContentConverter {
         if(!this.settings.preventTags) {
             content += '[[ReadItLater]]'
             if(this.settings.twitterDefaultTag) {
-                content += ` ${this.settings.twitterDefaultTag}\n`
+                content += ` [[${this.settings.twitterDefaultTag}]]\n`
             } else {
                 content += '\n'
             }
