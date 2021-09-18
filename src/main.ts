@@ -3,41 +3,41 @@ import ContentConverter from './converter';
 import { DEFAULT_SETTINGS, ReadItLaterSettings, ReadItLaterSettingsTab } from './settings';
 
 export default class ReadItLaterPlugin extends Plugin {
-	settings: ReadItLaterSettings;
+    settings: ReadItLaterSettings;
 
-	async onload(): Promise<void> {
-		await this.loadSettings();
+    async onload(): Promise<void> {
+        await this.loadSettings();
 
-		if(!(await this.app.vault.adapter.exists(normalizePath(this.settings.inboxDir)))) {
-			await this.app.vault.adapter.mkdir(this.settings.inboxDir);
-		}
+        if (!(await this.app.vault.adapter.exists(normalizePath(this.settings.inboxDir)))) {
+            await this.app.vault.adapter.mkdir(this.settings.inboxDir);
+        }
 
-		addIcon('read-it-later', clipboardIcon);
-		
-		this.addRibbonIcon('read-it-later', 'ReadItLater: Save clipboard', async () => {
-			const converter = new ContentConverter(this.app, this.settings);
-			await converter.processClipboard();
-		});
+        addIcon('read-it-later', clipboardIcon);
 
-		this.addCommand({
-			id: 'save-clipboard-to-notice',
-			name: 'Save clipboard',
-			callback: async () => {
-				const converter = new ContentConverter(this.app, this.settings);
-				await converter.processClipboard();
-			}
-		});
+        this.addRibbonIcon('read-it-later', 'ReadItLater: Save clipboard', async () => {
+            const converter = new ContentConverter(this.app, this.settings);
+            await converter.processClipboard();
+        });
 
-		this.addSettingTab(new ReadItLaterSettingsTab(this.app, this));
-	}
+        this.addCommand({
+            id: 'save-clipboard-to-notice',
+            name: 'Save clipboard',
+            callback: async () => {
+                const converter = new ContentConverter(this.app, this.settings);
+                await converter.processClipboard();
+            },
+        });
 
-	async loadSettings(): Promise<void>  {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-	}
+        this.addSettingTab(new ReadItLaterSettingsTab(this.app, this));
+    }
 
-	async saveSettings(): Promise<void>  {
-		await this.saveData(this.settings);
-	}
+    async loadSettings(): Promise<void> {
+        this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+    }
+
+    async saveSettings(): Promise<void> {
+        await this.saveData(this.settings);
+    }
 }
 
 const clipboardIcon = `
