@@ -1,7 +1,7 @@
 import { Notice, request, normalizePath, App, htmlToMarkdown } from 'obsidian';
 import { Readability } from '@mozilla/readability';
 import moment from 'moment';
-import { isValidUrl } from './helper';
+import { getBaseUrl, isValidUrl } from './helper';
 import { ReadItLaterSettings } from './settings';
 
 export default class ContentConverter {
@@ -39,8 +39,14 @@ export default class ContentConverter {
         });
 
         const parser = new DOMParser();
-        const doc = parser.parseFromString(response, 'text/html');
-        const article = new Readability(doc).parse();
+        const dom = parser.parseFromString(response, 'text/html');
+
+        // Set base to allow readability to resolve relative path's
+        const baseEl = dom.createElement('base');
+        baseEl.setAttribute('href', getBaseUrl(url));
+        dom.head.append(baseEl);
+
+        const article = new Readability(dom).parse();
 
         let content = '';
         if (!this.settings.preventTags) {
