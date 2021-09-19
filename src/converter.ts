@@ -103,6 +103,7 @@ export default class ContentConverter {
         const parser = new DOMParser();
         const doc = parser.parseFromString(response, 'text/html');
         const ytVideoId = this.yt_regex_pattern.exec(url)[4];
+        doc.title = doc.title.replace(':', ' ');
 
         let content = '';
         if (!this.settings.preventTags) {
