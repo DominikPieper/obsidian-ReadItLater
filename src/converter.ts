@@ -59,6 +59,7 @@ export default class ContentConverter {
             article.title = article.title.replace(':', ' ');
             const fileName = `${article.title}.md`;
 
+            content += `# [${article.title}](${url})\n\n`;
             content += htmlToMarkdown(article.content);
 
             await this.writeFile(fileName, content);
