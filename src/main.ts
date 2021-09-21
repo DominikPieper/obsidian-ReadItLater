@@ -1,6 +1,6 @@
 import { addIcon, htmlToMarkdown, moment, normalizePath, Notice, Plugin, request } from 'obsidian';
 import { Readability } from '@mozilla/readability';
-import { getBaseUrl, isValidUrl } from './helper';
+import { getBaseUrl, isValidUrl, normalizeFilename } from './helper';
 import { DEFAULT_SETTINGS, ReadItLaterSettings, ReadItLaterSettingsTab } from './settings';
 
 export default class ReadItLaterPlugin extends Plugin {
@@ -172,7 +172,7 @@ export default class ReadItLaterPlugin extends Plugin {
 
     async writeFile(fileName: string, content: string): Promise<void> {
         let filePath;
-        fileName = fileName.replace(':', ' ');
+        fileName = normalizeFilename(fileName);
         if (this.settings.inboxDir) {
             filePath = normalizePath(`${this.settings.inboxDir}/${fileName}`);
         } else {
