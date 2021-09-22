@@ -12,10 +12,6 @@ export default class ReadItLaterPlugin extends Plugin {
     async onload(): Promise<void> {
         await this.loadSettings();
 
-        if (!(await this.app.vault.adapter.exists(normalizePath(this.settings.inboxDir)))) {
-            await this.app.vault.adapter.mkdir(normalizePath(this.settings.inboxDir));
-        }
-
         addIcon('read-it-later', clipboardIcon);
 
         this.addRibbonIcon('read-it-later', 'ReadItLater: Save clipboard', async () => {
@@ -173,6 +169,13 @@ export default class ReadItLaterPlugin extends Plugin {
     async writeFile(fileName: string, content: string): Promise<void> {
         let filePath;
         fileName = normalizeFilename(fileName);
+
+        if (!(await this.app.vault.adapter.exists(normalizePath(this.settings.inboxDir)))) {
+            new Notice('The configured Inbox directory don\'t exist! Please create it first.');
+            return;
+            //await this.app.vault.adapter.mkdir(normalizePath(this.settings.inboxDir));
+        }
+
         if (this.settings.inboxDir) {
             filePath = normalizePath(`${this.settings.inboxDir}/${fileName}`);
         } else {
