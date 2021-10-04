@@ -8,6 +8,13 @@ export interface ReadItLaterSettings {
     articleDefaultTag: string;
     textsnippetDefaultTag: string;
     preventTags: boolean;
+    ytLinkOrEmbed: LinkOrEmbed;
+    tweetLinkOrEmbed: LinkOrEmbed;
+}
+
+export enum LinkOrEmbed {
+    EMBED = 'EMBED',
+    MARKDOWN_LINK = 'MARKDOWN_LINK',
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -17,6 +24,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     articleDefaultTag: 'Article',
     textsnippetDefaultTag: 'Textsnippet',
     preventTags: false,
+    ytLinkOrEmbed: LinkOrEmbed.EMBED,
+    tweetLinkOrEmbed: LinkOrEmbed.EMBED,
 };
 
 export class ReadItLaterSettingsTab extends PluginSettingTab {
@@ -81,6 +90,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
         new Setting(containerEl)
+            .setName('Tweet Link or Embed')
+            .setDesc('Tweet link as a markdown link or embedded')
+            .addDropdown((dropdown) =>
+                dropdown
+                    .addOption(LinkOrEmbed.MARKDOWN_LINK, 'Markdown link')
+                    .addOption(LinkOrEmbed.EMBED, 'Embedded Tweet')
+                    .setValue(this.plugin.settings.tweetLinkOrEmbed || DEFAULT_SETTINGS.tweetLinkOrEmbed)
+                    .onChange(async (value: LinkOrEmbed) => {
+                        this.plugin.settings.tweetLinkOrEmbed = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+        new Setting(containerEl)
             .setName('Youtube default tag')
             .setDesc('This tag will be added to the header of every Youtube video pasted')
             .addText((text) =>
@@ -89,6 +111,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     .setValue(DEFAULT_SETTINGS.youtubeDefaultTag)
                     .onChange(async (value) => {
                         this.plugin.settings.youtubeDefaultTag = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+        new Setting(containerEl)
+            .setName('Youtube Link or Embed')
+            .setDesc('Youtube link as a markdown link or embedded')
+            .addDropdown((dropdown) =>
+                dropdown
+                    .addOption(LinkOrEmbed.MARKDOWN_LINK, 'Markdown link')
+                    .addOption(LinkOrEmbed.EMBED, 'Embedded Video')
+                    .setValue(this.plugin.settings.ytLinkOrEmbed || DEFAULT_SETTINGS.ytLinkOrEmbed)
+                    .onChange(async (value: LinkOrEmbed) => {
+                        this.plugin.settings.ytLinkOrEmbed = value;
                         await this.plugin.saveSettings();
                     }),
             );

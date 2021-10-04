@@ -1,7 +1,7 @@
 import { addIcon, htmlToMarkdown, moment, normalizePath, Notice, Plugin, request } from 'obsidian';
 import { Readability } from '@mozilla/readability';
 import { getBaseUrl, isValidUrl, normalizeFilename } from './helper';
-import { DEFAULT_SETTINGS, ReadItLaterSettings, ReadItLaterSettingsTab } from './settings';
+import { DEFAULT_SETTINGS, LinkOrEmbed, ReadItLaterSettings, ReadItLaterSettingsTab } from './settings';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -134,7 +134,12 @@ export default class ReadItLaterPlugin extends Plugin {
             }
         }
         content += `# [${doc.title}](${url})\n\n`;
-        content += `<iframe width="560" height="315" src="https://www.youtube.com/embed/${ytVideoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+
+        if (this.settings.ytLinkOrEmbed == LinkOrEmbed.EMBED) {
+            content += `<iframe width="560" height="315" src="https://www.youtube.com/embed/${ytVideoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        } else {
+            content += `[${doc.title}](${url})`;
+        }
 
         const fileName = `Youtube - ${doc.title}.md`;
         await this.writeFile(fileName, content);
@@ -161,7 +166,11 @@ export default class ReadItLaterPlugin extends Plugin {
             }
         }
         content = `# [${response.author_name}](${response.url})\n\n`;
-        content += response.html;
+        if (this.settings.tweetLinkOrEmbed == LinkOrEmbed.EMBED) {
+            content += response.html;
+        } else {
+            content += `[${fileName}](${url})`;
+        }
 
         await this.writeFile(fileName, content);
     }
@@ -171,7 +180,7 @@ export default class ReadItLaterPlugin extends Plugin {
         fileName = normalizeFilename(fileName);
 
         if (!(await this.app.vault.adapter.exists(normalizePath(this.settings.inboxDir)))) {
-            new Notice('The configured Inbox directory don\'t exist! Please create it first.');
+            new Notice("The configured Inbox directory don't exist! Please create it first.");
             return;
             //await this.app.vault.adapter.mkdir(normalizePath(this.settings.inboxDir));
         }
