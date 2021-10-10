@@ -49,7 +49,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to root')
-                    .setValue(DEFAULT_SETTINGS.inboxDir)
+                    .setValue(this.plugin.settings.inboxDir || DEFAULT_SETTINGS.inboxDir)
                     .onChange(async (value) => {
                         this.plugin.settings.inboxDir = value;
                         await this.plugin.saveSettings();
@@ -59,8 +59,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Prevent all added tags')
             .setDesc('If this is true, no tags will be added')
-            .addToggle((tg) =>
-                tg.onChange(async (value) => {
+            .addToggle((tg) => tg
+            .setValue(this.plugin.settings.preventTags || DEFAULT_SETTINGS.preventTags)
+            .onChange(async (value) => {
                     this.plugin.settings.preventTags = value;
                     await this.plugin.saveSettings();
                 }),
@@ -71,7 +72,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addText((text) =>
                 text
                     .setPlaceholder('')
-                    .setValue(DEFAULT_SETTINGS.articleDefaultTag)
+                    .setValue(this.plugin.settings.articleDefaultTag || DEFAULT_SETTINGS.articleDefaultTag)
                     .onChange(async (value) => {
                         this.plugin.settings.articleDefaultTag = value;
                         await this.plugin.saveSettings();
@@ -83,7 +84,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addText((text) =>
                 text
                     .setPlaceholder('')
-                    .setValue(DEFAULT_SETTINGS.twitterDefaultTag)
+                    .setValue(this.plugin.settings.twitterDefaultTag || DEFAULT_SETTINGS.twitterDefaultTag)
                     .onChange(async (value) => {
                         this.plugin.settings.twitterDefaultTag = value;
                         await this.plugin.saveSettings();
@@ -108,7 +109,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addText((text) =>
                 text
                     .setPlaceholder('')
-                    .setValue(DEFAULT_SETTINGS.youtubeDefaultTag)
+                    .setValue(this.plugin.settings.youtubeDefaultTag || DEFAULT_SETTINGS.youtubeDefaultTag)
                     .onChange(async (value) => {
                         this.plugin.settings.youtubeDefaultTag = value;
                         await this.plugin.saveSettings();
@@ -133,7 +134,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addText((text) =>
                 text
                     .setPlaceholder('')
-                    .setValue(DEFAULT_SETTINGS.textsnippetDefaultTag)
+                    .setValue(this.plugin.settings.textsnippetDefaultTag || DEFAULT_SETTINGS.textsnippetDefaultTag)
                     .onChange(async (value) => {
                         this.plugin.settings.textsnippetDefaultTag = value;
                         await this.plugin.saveSettings();
