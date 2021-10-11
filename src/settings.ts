@@ -59,12 +59,13 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Prevent all added tags')
             .setDesc('If this is true, no tags will be added')
-            .addToggle((tg) => tg
-            .setValue(this.plugin.settings.preventTags || DEFAULT_SETTINGS.preventTags)
-            .onChange(async (value) => {
-                    this.plugin.settings.preventTags = value;
-                    await this.plugin.saveSettings();
-                }),
+            .addToggle((tg) =>
+                tg
+                    .setValue(this.plugin.settings.preventTags || DEFAULT_SETTINGS.preventTags)
+                    .onChange(async (value) => {
+                        this.plugin.settings.preventTags = value;
+                        await this.plugin.saveSettings();
+                    }),
             );
         new Setting(containerEl)
             .setName('Article default tag')
