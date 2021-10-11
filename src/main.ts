@@ -71,9 +71,9 @@ export default class ReadItLaterPlugin extends Plugin {
 
         let content = '';
         if (!this.settings.preventTags) {
-            content += '[[ReadItLater]]';
+            content += '#ReadItLater';
             if (this.settings.articleDefaultTag) {
-                content += ` [[${this.settings.articleDefaultTag}]]\n\n`;
+                content += ` #${this.settings.articleDefaultTag}\n\n`;
             } else {
                 content += '\n\n';
             }
@@ -103,9 +103,9 @@ export default class ReadItLaterPlugin extends Plugin {
 
         let content = '';
         if (!this.settings.preventTags) {
-            content += '[[ReadItLater]]';
+            content += '#ReadItLater';
             if (this.settings.textsnippetDefaultTag) {
-                content += ` [[${this.settings.textsnippetDefaultTag}]]\n\n`;
+                content += ` #${this.settings.textsnippetDefaultTag}\n\n`;
             } else {
                 content += '\n\n';
             }
@@ -126,9 +126,9 @@ export default class ReadItLaterPlugin extends Plugin {
 
         let content = '';
         if (!this.settings.preventTags) {
-            content += '[[ReadItLater]]';
+            content += '#ReadItLater';
             if (this.settings.youtubeDefaultTag) {
-                content += ` [[${this.settings.youtubeDefaultTag}]]\n\n`;
+                content += ` #${this.settings.youtubeDefaultTag}\n\n`;
             } else {
                 content += '\n\n';
             }
@@ -158,9 +158,9 @@ export default class ReadItLaterPlugin extends Plugin {
 
         let content = '';
         if (!this.settings.preventTags) {
-            content += '[[ReadItLater]]';
+            content += '#ReadItLater';
             if (this.settings.twitterDefaultTag) {
-                content += ` [[${this.settings.twitterDefaultTag}]]\n\n`;
+                content += ` #${this.settings.twitterDefaultTag}\n\n`;
             } else {
                 content += '\n\n';
             }
