@@ -25,7 +25,7 @@ export function getBaseUrl(url?: string, prefix?: string): string {
 }
 
 export function normalizeFilename(fileName: string): string {
-    const illegalSymbols = [':', '#', '/', '\\', '|', '?'];
+    const illegalSymbols = [':', '#', '/', '\\', '|', '?', '*', '<', '>', '"'];
     if (illegalSymbols.some((el) => fileName.contains(el))) {
         illegalSymbols.forEach((ilSymbol) => {
             fileName = fileName.replace(ilSymbol, '');
