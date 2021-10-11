@@ -73,10 +73,9 @@ export default class ReadItLaterPlugin extends Plugin {
         if (!this.settings.preventTags) {
             content += '[[ReadItLater]]';
             if (this.settings.articleDefaultTag) {
-                content += ` [[${this.settings.articleDefaultTag}]]\n\n`;
-            } else {
-                content += '\n\n';
+                content += ` [[${this.settings.articleDefaultTag}]]`;
             }
+	    content += ` [URL](${url})\n\n`;
         }
 
         if (article?.content) {
