@@ -49,9 +49,9 @@ export default class ReadItLaterPlugin extends Plugin {
     async processClipboard(): Promise<void> {
         const clipboardContent = await navigator.clipboard.readText();
 
-        for (const writer of this.parsers) {
-            if (writer.test(clipboardContent)) {
-                const note = await writer.prepareNote(clipboardContent);
+        for (const parser of this.parsers) {
+            if (parser.test(clipboardContent)) {
+                const note = await parser.prepareNote(clipboardContent);
                 await this.writeFile(note.fileName, note.content);
                 break;
             }
