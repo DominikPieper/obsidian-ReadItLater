@@ -3,29 +3,20 @@ import ReadItLaterPlugin from './main';
 
 export interface ReadItLaterSettings {
     inboxDir: string;
-    twitterDefaultTag: string;
-    youtubeDefaultTag: string;
-    articleDefaultTag: string;
-    textsnippetDefaultTag: string;
-    preventTags: boolean;
-    ytLinkOrEmbed: LinkOrEmbed;
-    tweetLinkOrEmbed: LinkOrEmbed;
-}
-
-export enum LinkOrEmbed {
-    EMBED = 'EMBED',
-    MARKDOWN_LINK = 'MARKDOWN_LINK',
+    youtubeNote: string;
+    twitterNote: string;
+    parsableArticleNote: string;
+    notParsableArticleNote: string;
+    textSnippetNote: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     inboxDir: 'ReadItLater Inbox',
-    twitterDefaultTag: 'Tweet',
-    youtubeDefaultTag: 'Youtube',
-    articleDefaultTag: 'Article',
-    textsnippetDefaultTag: 'Textsnippet',
-    preventTags: false,
-    ytLinkOrEmbed: LinkOrEmbed.EMBED,
-    tweetLinkOrEmbed: LinkOrEmbed.EMBED,
+    youtubeNote: `[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
+    twitterNote: `[[ReadItLater]] [[Tweet]]\n\n# [%tweetAuthorName%](%tweetURL%)\n\n%tweetContent%`,
+    parsableArticleNote: `[[ReadItLater]] [[Article]]\n\n# [%articleTitle%](%articleURL%)\n\n%articleContent%`,
+    notParsableArticleNote: `[[ReadItLater]] [[Article]]\n\n[%articleURL%](%articleURL%)`,
+    textSnippetNote: `[[ReadItLater]] [[Textsnippet]]\n\n%content%`,
 };
 
 export class ReadItLaterSettingsTab extends PluginSettingTab {
@@ -57,87 +48,61 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Prevent all added tags')
-            .setDesc('If this is true, no tags will be added')
-            .addToggle((tg) =>
-                tg
-                    .setValue(this.plugin.settings.preventTags || DEFAULT_SETTINGS.preventTags)
+            .setName('Youtube note template')
+            .setDesc('Available variables: %videoTitle%, %videoURL%, %videoId%, %videoPlayer%')
+            .addTextArea((textarea) =>
+                textarea
+                    .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
                     .onChange(async (value) => {
-                        this.plugin.settings.preventTags = value;
+                        this.plugin.settings.youtubeNote = value;
                         await this.plugin.saveSettings();
                     }),
             );
+
         new Setting(containerEl)
-            .setName('Article default tag')
-            .setDesc('This tag will be added to the header of every Article pasted')
-            .addText((text) =>
-                text
-                    .setPlaceholder('')
-                    .setValue(this.plugin.settings.articleDefaultTag || DEFAULT_SETTINGS.articleDefaultTag)
+            .setName('Twitter note template')
+            .setDesc('Available variables: %tweetAuthorName%, %tweetURL%, %tweetContent%')
+            .addTextArea((textarea) =>
+                textarea
+                    .setValue(this.plugin.settings.twitterNote || DEFAULT_SETTINGS.twitterNote)
                     .onChange(async (value) => {
-                        this.plugin.settings.articleDefaultTag = value;
+                        this.plugin.settings.twitterNote = value;
                         await this.plugin.saveSettings();
                     }),
             );
+
         new Setting(containerEl)
-            .setName('Tweet default tag')
-            .setDesc('This tag will be added to the header of every Tweet pasted')
-            .addText((text) =>
-                text
-                    .setPlaceholder('')
-                    .setValue(this.plugin.settings.twitterDefaultTag || DEFAULT_SETTINGS.twitterDefaultTag)
+            .setName('Parsable article note template')
+            .setDesc('Available variables: %articleTitle%, %articleURL%, %articleContent%')
+            .addTextArea((textarea) =>
+                textarea
+                    .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
                     .onChange(async (value) => {
-                        this.plugin.settings.twitterDefaultTag = value;
+                        this.plugin.settings.parsableArticleNote = value;
                         await this.plugin.saveSettings();
                     }),
             );
+
         new Setting(containerEl)
-            .setName('Tweet Link or Embed')
-            .setDesc('Tweet link as a markdown link or embedded')
-            .addDropdown((dropdown) =>
-                dropdown
-                    .addOption(LinkOrEmbed.MARKDOWN_LINK, 'Markdown link')
-                    .addOption(LinkOrEmbed.EMBED, 'Embedded Tweet')
-                    .setValue(this.plugin.settings.tweetLinkOrEmbed || DEFAULT_SETTINGS.tweetLinkOrEmbed)
-                    .onChange(async (value: LinkOrEmbed) => {
-                        this.plugin.settings.tweetLinkOrEmbed = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-        new Setting(containerEl)
-            .setName('Youtube default tag')
-            .setDesc('This tag will be added to the header of every Youtube video pasted')
-            .addText((text) =>
-                text
-                    .setPlaceholder('')
-                    .setValue(this.plugin.settings.youtubeDefaultTag || DEFAULT_SETTINGS.youtubeDefaultTag)
+            .setName('Not parsable article note template')
+            .setDesc('Available variables: %articleURL%')
+            .addTextArea((textarea) =>
+                textarea
+                    .setValue(this.plugin.settings.notParsableArticleNote || DEFAULT_SETTINGS.notParsableArticleNote)
                     .onChange(async (value) => {
-                        this.plugin.settings.youtubeDefaultTag = value;
+                        this.plugin.settings.notParsableArticleNote = value;
                         await this.plugin.saveSettings();
                     }),
             );
+
         new Setting(containerEl)
-            .setName('Youtube Link or Embed')
-            .setDesc('Youtube link as a markdown link or embedded')
-            .addDropdown((dropdown) =>
-                dropdown
-                    .addOption(LinkOrEmbed.MARKDOWN_LINK, 'Markdown link')
-                    .addOption(LinkOrEmbed.EMBED, 'Embedded Video')
-                    .setValue(this.plugin.settings.ytLinkOrEmbed || DEFAULT_SETTINGS.ytLinkOrEmbed)
-                    .onChange(async (value: LinkOrEmbed) => {
-                        this.plugin.settings.ytLinkOrEmbed = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-        new Setting(containerEl)
-            .setName('Textsnippet default tag')
-            .setDesc('This tag will be added to the header of every Textsnippets pasted')
-            .addText((text) =>
-                text
-                    .setPlaceholder('')
-                    .setValue(this.plugin.settings.textsnippetDefaultTag || DEFAULT_SETTINGS.textsnippetDefaultTag)
+            .setName('Text snippet note template')
+            .setDesc('Available variables: %content%')
+            .addTextArea((textarea) =>
+                textarea
+                    .setValue(this.plugin.settings.textSnippetNote || DEFAULT_SETTINGS.textSnippetNote)
                     .onChange(async (value) => {
-                        this.plugin.settings.textsnippetDefaultTag = value;
+                        this.plugin.settings.textSnippetNote = value;
                         await this.plugin.saveSettings();
                     }),
             );
