@@ -3,6 +3,7 @@ import ReadItLaterPlugin from './main';
 
 export interface ReadItLaterSettings {
     inboxDir: string;
+    openNewNote: boolean;
     youtubeNote: string;
     twitterNote: string;
     parsableArticleNote: string;
@@ -12,6 +13,7 @@ export interface ReadItLaterSettings {
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     inboxDir: 'ReadItLater Inbox',
+    openNewNote: false,
     youtubeNote: `[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
     twitterNote: `[[ReadItLater]] [[Tweet]]\n\n# [%tweetAuthorName%](%tweetURL%)\n\n%tweetContent%`,
     parsableArticleNote: `[[ReadItLater]] [[Article]]\n\n# [%articleTitle%](%articleURL%)\n\n%articleContent%`,
@@ -36,13 +38,25 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Inbox dir')
-            .setDesc('By default, the plugin will add the files to the root folder')
+            .setDesc('Enter valid folder name. For nested folders use this format: Folder A/Folder B. If no folder is enetred, new note will be created in vault root.')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to root')
                     .setValue(this.plugin.settings.inboxDir || DEFAULT_SETTINGS.inboxDir)
                     .onChange(async (value) => {
                         this.plugin.settings.inboxDir = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Open new note')
+            .setDesc('If enabled, new note will open in current workspace')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.openNewNote || DEFAULT_SETTINGS.openNewNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.openNewNote = value;
                         await this.plugin.saveSettings();
                     }),
             );
