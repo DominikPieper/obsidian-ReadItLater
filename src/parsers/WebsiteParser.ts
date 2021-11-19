@@ -1,9 +1,11 @@
 import { Parser } from './Parser';
 import { Note } from './Note';
-import { htmlToMarkdown, request } from 'obsidian';
+import { request } from 'obsidian';
 import { getBaseUrl } from '../helper';
 import { Readability } from '@mozilla/readability';
 import { ReadItLaterSettings } from '../settings';
+import TurndownService from 'turndown';
+import * as turndownPluginGfm from '@guyplusplus/turndown-plugin-gfm';
 
 type Article = {
     title: string;
@@ -34,8 +36,11 @@ class WebsiteParser extends Parser {
     }
 
     private parsableArticle(article: Article, url: string) {
+        const gfm = turndownPluginGfm.gfm;
+        const turndownService = new TurndownService();
+        turndownService.use(gfm);
         const articleTitle = article.title || 'No title';
-        const articleContent = htmlToMarkdown(article.content);
+        const articleContent = turndownService.turndown(article.content);
 
         const content = this.settings.parsableArticleNote
             .replace('%articleTitle%', articleTitle)

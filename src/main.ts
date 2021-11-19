@@ -77,7 +77,10 @@ export default class ReadItLaterPlugin extends Plugin {
         if (await this.app.vault.adapter.exists(filePath)) {
             new Notice(`${fileName} already exists!`);
         } else {
-            this.app.vault.create(filePath, content);
+            const newFile = await this.app.vault.create(filePath, content);
+            if (this.settings.openNewNote) {
+                this.app.workspace.getLeaf(false).openFile(newFile);
+            }
             new Notice(`${fileName} created successful`);
         }
     }
