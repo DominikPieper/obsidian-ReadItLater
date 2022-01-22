@@ -43,9 +43,9 @@ class WebsiteParser extends Parser {
         const articleContent = turndownService.turndown(article.content);
 
         const content = this.settings.parsableArticleNote
-            .replace('%articleTitle%', articleTitle)
-            .replace('%articleURL%', url)
-            .replace('%articleContent%', articleContent);
+            .replace(/%articleTitle%/g, articleTitle)
+            .replace(/%articleURL%/g, url)
+            .replace(/%articleContent%/g, articleContent);
 
         const fileName = `${articleTitle}.md`;
         return new Note(fileName, content);
