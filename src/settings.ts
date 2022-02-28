@@ -38,7 +38,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Inbox dir')
-            .setDesc('Enter valid folder name. For nested folders use this format: Folder A/Folder B. If no folder is enetred, new note will be created in vault root.')
+            .setDesc(
+                'Enter valid folder name. For nested folders use this format: Folder A/Folder B. If no folder is enetred, new note will be created in vault root.',
+            )
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to root')
