@@ -26,7 +26,8 @@ class YoutubeParser extends Parser {
             .replace(/%videoId%/g, videoId)
             .replace(/%videoPlayer%/g, videoPlayer);
 
-        const fileName = `Youtube - ${videoTitle}.md`;
+        const fileNameTemplate = this.settings.youtubeNoteTitle.replace(/%title%/g, videoTitle);
+        const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
     }
 }

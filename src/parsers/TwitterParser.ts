@@ -32,7 +32,11 @@ class TwitterParser extends Parser {
             .replace(/%tweetURL%/g, response.url)
             .replace(/%tweetContent%/g, content);
 
-        const fileName = `Tweet from ${tweetAuthorName} (${this.getFormattedDateForFilename()}).md`;
+        const fileNameTemplate = this.settings.twitterNoteTitle
+            .replace(/%tweetAuthorName%/g, tweetAuthorName)
+            .replace(/%date%/g, this.getFormattedDateForFilename());
+
+        const fileName = `${fileNameTemplate}.md`;
 
         return new Note(fileName, processedContent);
     }

@@ -1,11 +1,12 @@
 import { addIcon, normalizePath, Notice, Plugin } from 'obsidian';
 import { checkAndCreateFolder, normalizeFilename } from './helpers';
-import { DEFAULT_SETTINGS, ReadItLaterSettings, ReadItLaterSettingsTab } from './settings';
+import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import YoutubeParser from './parsers/YoutubeParser';
 import TwitterParser from './parsers/TwitterParser';
 import { Parser } from './parsers/Parser';
 import WebsiteParser from './parsers/WebsiteParser';
 import TextSnippetParser from './parsers/TextSnippetParser';
+import { ReadItLaterSettingsTab } from './views/settings-tab';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
