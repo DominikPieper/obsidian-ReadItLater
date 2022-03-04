@@ -1,17 +1,13 @@
-import { App, DataAdapter } from "obsidian";
-import { basename } from "path";
-import { isValidUrl, normalizeFilename, pathJoin } from ".";
-import { checkAndCreateFolder } from "./checkAndCreateFolder";
-import { downloadImage } from "./downloadImage";
-import { linkHashes } from "./linkHash";
+import { App, DataAdapter } from 'obsidian';
+import { basename } from 'path';
+import { isValidUrl, normalizeFilename, pathJoin } from './fileutils';
+import { checkAndCreateFolder } from './checkAndCreateFolder';
+import { downloadImage } from './downloadImage';
+import { linkHashes } from './linkHash';
 
 export const EXTERNAL_MEDIA_LINK_PATTERN = /\!\[(?<anchor>.*?)\]\((?<link>.+?)\)/g;
 export async function replaceImages(app: App, content: string, assetsDir: string) {
-    return await replaceAsync(
-        content,
-        EXTERNAL_MEDIA_LINK_PATTERN,
-        imageTagProcessor(app, assetsDir),
-    );
+    return await replaceAsync(content, EXTERNAL_MEDIA_LINK_PATTERN, imageTagProcessor(app, assetsDir));
 }
 
 export function replaceAsync(string: string, searchValue: string | RegExp, replacer: any) {
@@ -58,7 +54,7 @@ export function imageTagProcessor(app: App, mediaDir: string) {
                         anchor,
                         link,
                         fileContent,
-                        fileExtension
+                        fileExtension,
                     );
 
                     if (needWrite && fileName) {
@@ -87,7 +83,6 @@ export function imageTagProcessor(app: App, mediaDir: string) {
     };
 }
 
-
 export const FORBIDDEN_SYMBOLS_FILENAME_PATTERN = /\s+/g;
 
 export const FILENAME_TEMPLATE = 'media';
@@ -99,7 +94,7 @@ async function chooseFileName(
     baseName: string,
     link: string,
     contentData: ArrayBuffer,
-    fileExtension: string | false
+    fileExtension: string | false,
 ): Promise<{ fileName: string; needWrite: boolean }> {
     if (!fileExtension) {
         return { fileName: '', needWrite: false };
