@@ -1,13 +1,13 @@
 import { ReadItLaterSettings } from '../settings';
-import { request } from 'obsidian';
+import { App, request } from 'obsidian';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
 class YoutubeParser extends Parser {
     private PATTERN = /(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/;
 
-    constructor(settings: ReadItLaterSettings) {
-        super(settings);
+    constructor(app: App, settings: ReadItLaterSettings) {
+        super(app, settings);
     }
 
     test(url: string): boolean {

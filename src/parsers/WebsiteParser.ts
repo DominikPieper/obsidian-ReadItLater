@@ -1,12 +1,11 @@
 import { Parser } from './Parser';
 import { Note } from './Note';
-import { Notice, request } from 'obsidian';
-import { getBaseUrl } from '../helper';
+import { App, Notice, request } from 'obsidian';
+import { getBaseUrl } from '../helpers';
 import { isProbablyReaderable, Readability } from '@mozilla/readability';
 import { ReadItLaterSettings } from '../settings';
-import TurndownService from 'turndown';
 import * as DOMPurify from 'isomorphic-dompurify';
-import * as turndownPluginGfm from '@guyplusplus/turndown-plugin-gfm';
+import { parseHtmlContent } from './parsehtml';
 
 type Article = {
     title: string;
@@ -14,8 +13,8 @@ type Article = {
 };
 
 class WebsiteParser extends Parser {
-    constructor(settings: ReadItLaterSettings) {
-        super(settings);
+    constructor(app: App, settings: ReadItLaterSettings) {
+        super(app, settings);
     }
 
     test(url: string): boolean {
@@ -38,29 +37,22 @@ class WebsiteParser extends Parser {
         }
         const readableDocument = new Readability(document).parse();
 
-        return readableDocument?.content ? this.parsableArticle(readableDocument, url) : this.notParsableArticle(url);
+        return readableDocument?.content
+            ? await this.parsableArticle(this.app, readableDocument, url)
+            : this.notParsableArticle(url);
     }
 
-    private parsableArticle(article: Article, url: string) {
-        const gfm = turndownPluginGfm.gfm;
-        const turndownService = new TurndownService({
-            headingStyle: 'atx',
-            hr: '---',
-            bulletListMarker: '-',
-            codeBlockStyle: 'fenced',
-            emDelimiter: '*',
-        });
-        turndownService.use(gfm);
-        const articleTitle = article.title || 'No title';
-        const articleContent = turndownService.turndown(article.content);
+    private async parsableArticle(app: App, article: Article, url: string) {
+        const title = article.title || 'No title';
+        const content = await parseHtmlContent(app, article.content, this.settings.assetsDir);
 
-        const content = this.settings.parsableArticleNote
-            .replace(/%articleTitle%/g, articleTitle)
+        const processedContent = this.settings.parsableArticleNote
+            .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
-            .replace(/%articleContent%/g, articleContent);
+            .replace(/%articleContent%/g, content);
 
-        const fileName = `${articleTitle}.md`;
-        return new Note(fileName, content);
+        const fileName = `${title}.md`;
+        return new Note(fileName, processedContent);
     }
 
     private notParsableArticle(url: string) {

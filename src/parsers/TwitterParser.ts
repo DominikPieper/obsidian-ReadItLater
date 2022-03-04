@@ -1,13 +1,14 @@
 import { Parser } from './Parser';
 import { ReadItLaterSettings } from '../settings';
-import { request } from 'obsidian';
+import { App, request } from 'obsidian';
 import { Note } from './Note';
+import { parseHtmlContent } from './parsehtml';
 
 class TwitterParser extends Parser {
     private PATTERN = /(https:\/\/twitter.com\/([a-zA-Z0-9_]+\/)([a-zA-Z0-9_]+\/[a-zA-Z0-9_]+))/;
 
-    constructor(settings: ReadItLaterSettings) {
-        super(settings);
+    constructor(app: App, settings: ReadItLaterSettings) {
+        super(app, settings);
     }
 
     test(url: string): boolean {
@@ -24,15 +25,16 @@ class TwitterParser extends Parser {
         );
 
         const tweetAuthorName = response.author_name;
+        const content = await parseHtmlContent(this.app, response.html, this.settings.assetsDir);
 
-        const content = this.settings.twitterNote
+        const processedContent = this.settings.twitterNote
             .replace(/%tweetAuthorName%/g, tweetAuthorName)
             .replace(/%tweetURL%/g, response.url)
-            .replace(/%tweetContent%/g, response.html);
+            .replace(/%tweetContent%/g, content);
 
         const fileName = `Tweet from ${tweetAuthorName} (${this.getFormattedDateForFilename()}).md`;
 
-        return new Note(fileName, content);
+        return new Note(fileName, processedContent);
     }
 }
 

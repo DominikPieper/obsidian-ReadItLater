@@ -1,5 +1,5 @@
 import { addIcon, normalizePath, Notice, Plugin } from 'obsidian';
-import { normalizeFilename } from './helper';
+import { checkAndCreateFolder, normalizeFilename } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings, ReadItLaterSettingsTab } from './settings';
 import YoutubeParser from './parsers/YoutubeParser';
 import TwitterParser from './parsers/TwitterParser';
@@ -15,10 +15,10 @@ export default class ReadItLaterPlugin extends Plugin {
     async onload(): Promise<void> {
         await this.loadSettings();
         this.parsers = [
-            new YoutubeParser(this.settings),
-            new TwitterParser(this.settings),
-            new WebsiteParser(this.settings),
-            new TextSnippetParser(this.settings),
+            new YoutubeParser(this.app, this.settings),
+            new TwitterParser(this.app, this.settings),
+            new WebsiteParser(this.app, this.settings),
+            new TextSnippetParser(this.app, this.settings),
         ];
 
         addIcon('read-it-later', clipboardIcon);
@@ -61,12 +61,7 @@ export default class ReadItLaterPlugin extends Plugin {
     async writeFile(fileName: string, content: string): Promise<void> {
         let filePath;
         fileName = normalizeFilename(fileName);
-
-        if (!(await this.app.vault.adapter.exists(normalizePath(this.settings.inboxDir)))) {
-            new Notice("The configured Inbox directory don't exist! Please create it first.");
-            return;
-            //await this.app.vault.adapter.mkdir(normalizePath(this.settings.inboxDir));
-        }
+        await checkAndCreateFolder(this.app.vault, this.settings.inboxDir);
 
         if (this.settings.inboxDir) {
             filePath = normalizePath(`${this.settings.inboxDir}/${fileName}`);
