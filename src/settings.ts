@@ -99,61 +99,71 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Youtube note template')
             .setDesc('Available variables: %videoTitle%, %videoURL%, %videoId%, %videoPlayer%')
-            .addTextArea((textarea) =>
+            .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
                     .onChange(async (value) => {
                         this.plugin.settings.youtubeNote = value;
                         await this.plugin.saveSettings();
-                    }),
-            );
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Twitter note template')
             .setDesc('Available variables: %tweetAuthorName%, %tweetURL%, %tweetContent%')
-            .addTextArea((textarea) =>
+            .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.twitterNote || DEFAULT_SETTINGS.twitterNote)
                     .onChange(async (value) => {
                         this.plugin.settings.twitterNote = value;
                         await this.plugin.saveSettings();
-                    }),
-            );
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Parsable article note template')
             .setDesc('Available variables: %articleTitle%, %articleURL%, %articleContent%')
-            .addTextArea((textarea) =>
+            .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
                     .onChange(async (value) => {
                         this.plugin.settings.parsableArticleNote = value;
                         await this.plugin.saveSettings();
-                    }),
-            );
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Not parsable article note template')
             .setDesc('Available variables: %articleURL%')
-            .addTextArea((textarea) =>
+            .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.notParsableArticleNote || DEFAULT_SETTINGS.notParsableArticleNote)
                     .onChange(async (value) => {
                         this.plugin.settings.notParsableArticleNote = value;
                         await this.plugin.saveSettings();
-                    }),
-            );
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Text snippet note template')
             .setDesc('Available variables: %content%')
-            .addTextArea((textarea) =>
+            .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.textSnippetNote || DEFAULT_SETTINGS.textSnippetNote)
                     .onChange(async (value) => {
                         this.plugin.settings.textSnippetNote = value;
                         await this.plugin.saveSettings();
-                    }),
-            );
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
     }
 }
