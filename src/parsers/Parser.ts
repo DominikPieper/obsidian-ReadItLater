@@ -1,11 +1,13 @@
 import { Note } from './Note';
-import { moment } from 'obsidian';
+import { App, moment } from 'obsidian';
 import { ReadItLaterSettings } from '../settings';
 
 export abstract class Parser {
     protected settings: ReadItLaterSettings;
+    protected app: App;
 
-    protected constructor(settings: ReadItLaterSettings) {
+    protected constructor(app: App, settings: ReadItLaterSettings) {
+        this.app = app;
         this.settings = settings;
     }
 
