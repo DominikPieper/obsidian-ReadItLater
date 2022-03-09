@@ -1,6 +1,6 @@
 import { Parser } from './Parser';
 import { Note } from './Note';
-import { App, Notice, request } from 'obsidian';
+import { App, Notice, Platform, request } from 'obsidian';
 import { getBaseUrl, replaceImages } from '../helpers';
 import { isProbablyReaderable, Readability } from '@mozilla/readability';
 import { ReadItLaterSettings } from '../settings';
@@ -45,7 +45,8 @@ class WebsiteParser extends Parser {
     private async parsableArticle(app: App, article: Article, url: string) {
         const title = article.title || 'No title';
         let content = await parseHtmlContent(article.content);
-        if (this.settings.downloadImages) {
+
+        if (this.settings.downloadImages && Platform.isDesktop) {
             content = await replaceImages(app, content, this.settings.assetsDir);
         }
 

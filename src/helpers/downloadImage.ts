@@ -1,11 +1,8 @@
-import got from 'got';
-import { extension } from 'mime-types';
-
 export async function downloadImage(url: string): Promise<{ fileContent: ArrayBuffer; fileExtension: string | false }> {
-    const res = await got(url, { responseType: 'buffer' });
+    const res = await fetch(url);
 
     return {
-        fileContent: res.body,
-        fileExtension: extension(res.headers['content-type']),
+        fileContent: await res.arrayBuffer(),
+        fileExtension: url.slice(url.lastIndexOf('.')),
     };
 }

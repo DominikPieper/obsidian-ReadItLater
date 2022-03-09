@@ -46,7 +46,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Download images')
-            .setDesc('If this is true, the used images are downloaded to the defined folder')
+            .setDesc('If this is true, the used images are downloaded to the defined folder (just on Desktop)')
             .addToggle((toggle) =>
                 toggle
                     .setValue(this.plugin.settings.downloadImages || DEFAULT_SETTINGS.downloadImages)
