@@ -16,7 +16,7 @@ export function replaceAsync(string: string, searchValue: string | RegExp, repla
             // 1. Run fake pass of `replace`, collect values from `replacer` calls
             // 2. Resolve them with `Promise.all`
             // 3. Run `replace` with resolved values
-            var values: any[] = [];
+            const values: any[] = [];
             String.prototype.replace.call(string, searchValue, function () {
                 values.push(replacer.apply(undefined, arguments));
                 return '';

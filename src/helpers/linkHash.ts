@@ -1,16 +1,16 @@
-import { XXHash32 } from 'ts-xxhash';
+import { ArrayBuffer as SparkMD5 } from 'spark-md5';
 
 class LinkHashes {
-    private linksInfo: Record<string, number> = {};
+    private linksInfo: Record<string, string> = {};
 
     ensureHashGenerated(link: string, data: ArrayBuffer) {
         if (!this.linksInfo[link]) {
-            this.linksInfo[link] = XXHash32.hash(0, data).toNumber();
+            this.linksInfo[link] = SparkMD5.hash(data);
         }
     }
 
     isSame(link: string, data: ArrayBuffer) {
-        const fileHash = XXHash32.hash(0, data).toNumber();
+        const fileHash = SparkMD5.hash(data);
         return this.linksInfo[link] == fileHash;
     }
 }

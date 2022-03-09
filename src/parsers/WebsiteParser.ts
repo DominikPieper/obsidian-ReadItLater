@@ -53,9 +53,8 @@ class WebsiteParser extends Parser {
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
             .replace(/%articleContent%/g, content);
-        
-        const fileNameTemplate = this.settings.parseableArticleNoteTitle
-            .replace(/%title%/g, title);
+
+        const fileNameTemplate = this.settings.parseableArticleNoteTitle.replace(/%title%/g, title);
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
@@ -66,8 +65,10 @@ class WebsiteParser extends Parser {
 
         const content = this.settings.notParsableArticleNote.replace('%articleURL%', url);
 
-        const fileNameTemplate = this.settings.notParsableArticleNote
-            .replace(/%date%/g, this.getFormattedDateForFilename());
+        const fileNameTemplate = this.settings.notParsableArticleNote.replace(
+            /%date%/g,
+            this.getFormattedDateForFilename(),
+        );
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
     }
