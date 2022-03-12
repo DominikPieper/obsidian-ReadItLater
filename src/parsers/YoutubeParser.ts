@@ -16,7 +16,8 @@ class YoutubeParser extends Parser {
 
     async prepareNote(url: string): Promise<Note> {
         const response = await request({ method: 'GET', url });
-        const videoTitle = new DOMParser().parseFromString(response, 'text/html').title;
+        const videoHTML = new DOMParser().parseFromString(response, 'text/html');
+        const videoTitle = videoHTML.querySelector("[property~='og:title']").getAttribute('content');
         const videoId = this.PATTERN.exec(url)[4];
         const videoPlayer = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 
