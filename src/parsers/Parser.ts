@@ -26,6 +26,6 @@ export abstract class Parser {
 
     protected getFormattedDateForFilename(): string {
         const date = new Date();
-        return moment(date).format('YYYY-MM-DD HH-mm-ss');
+        return moment(date).format(this.settings.dateTitleFmt);
     }
 }
