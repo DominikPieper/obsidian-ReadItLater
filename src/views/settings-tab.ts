@@ -74,6 +74,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
+            .setName('Date format string')
+            .setDesc('Format of the %date% variable. NOTE: do not use symbols forbidden in file names.')
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to YYYY-MM-DD HH-mm-ss')
+                    .setValue(this.plugin.settings.dateTitleFmt || DEFAULT_SETTINGS.dateTitleFmt)
+                    .onChange(async (value) => {
+                        this.plugin.settings.dateTitleFmt = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
             .setName('Youtube note template title')
             .setDesc('Available variables: %title%')
             .addText((text) =>
