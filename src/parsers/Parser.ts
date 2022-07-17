@@ -28,4 +28,9 @@ export abstract class Parser {
         const date = new Date();
         return moment(date).format(this.settings.dateTitleFmt);
     }
+
+    protected getFormattedDateForContent(): string {
+        const date = new Date();
+        return moment(date).format(this.settings.dateContentFmt);
+    }
 }
