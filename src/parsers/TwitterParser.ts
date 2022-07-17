@@ -28,7 +28,7 @@ class TwitterParser extends Parser {
         const content = await parseHtmlContent(response.html);
 
         const processedContent = this.settings.twitterNote
-            .replace(/%date%/g, this.getFormattedDateForFilename())
+            .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%tweetAuthorName%/g, tweetAuthorName)
             .replace(/%tweetURL%/g, response.url)
             .replace(/%tweetContent%/g, content);

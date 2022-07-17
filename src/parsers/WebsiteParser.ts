@@ -51,7 +51,7 @@ class WebsiteParser extends Parser {
         }
 
         const processedContent = this.settings.parsableArticleNote
-            .replace(/%date%/g, this.getFormattedDateForFilename())
+            .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
             .replace(/%articleContent%/g, content);
