@@ -22,6 +22,7 @@ class YoutubeParser extends Parser {
         const videoPlayer = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 
         const content = this.settings.youtubeNote
+            .replace(/%date%/g, this.getFormattedDateForFilename())
             .replace(/%videoTitle%/g, videoTitle)
             .replace(/%videoURL%/g, url)
             .replace(/%videoId%/g, videoId)

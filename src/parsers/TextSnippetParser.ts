@@ -14,7 +14,9 @@ class TextSnippetParser extends Parser {
 
     async prepareNote(text: string): Promise<Note> {
         const fileName = `${this.getFormattedDateForFilename()}.md`;
-        const content = this.settings.textSnippetNote.replace(/%content%/g, text);
+        const content = this.settings.textSnippetNote
+            .replace(/%content%/g, text)
+            .replace(/%date%/g, this.getFormattedDateForFilename());
         return new Note(fileName, content);
     }
 }

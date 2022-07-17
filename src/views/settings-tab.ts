@@ -88,7 +88,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Youtube note template')
-            .setDesc('Available variables: %videoTitle%, %videoURL%, %videoId%, %videoPlayer%')
+            .setDesc('Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
@@ -114,7 +114,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
         new Setting(containerEl)
             .setName('Twitter note template')
-            .setDesc('Available variables: %tweetAuthorName%, %tweetURL%, %tweetContent%')
+            .setDesc('Available variables: %date%, %tweetAuthorName%, %tweetURL%, %tweetContent%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.twitterNote || DEFAULT_SETTINGS.twitterNote)
@@ -143,7 +143,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Parsable article note template')
-            .setDesc('Available variables: %articleTitle%, %articleURL%, %articleContent%')
+            .setDesc('Available variables: %date%, %articleTitle%, %articleURL%, %articleContent%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
@@ -173,7 +173,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Not parseable article note template')
-            .setDesc('Available variables: %articleURL%')
+            .setDesc('Available variables: %date%, %articleURL%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.notParsableArticleNote || DEFAULT_SETTINGS.notParsableArticleNote)
@@ -200,7 +200,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Text snippet note template')
-            .setDesc('Available variables: %content%')
+            .setDesc('Available variables: %date%, %content%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.textSnippetNote || DEFAULT_SETTINGS.textSnippetNote)
