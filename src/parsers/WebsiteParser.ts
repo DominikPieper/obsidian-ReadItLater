@@ -22,12 +22,23 @@ class WebsiteParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
-        const response = await request({ method: 'GET', url });
+        const originUrl = new URL(url);
+        const response = await request({ method: 'GET', url: originUrl.href });
         const document = new DOMParser().parseFromString(response, 'text/html');
+
+        //check for existing base element
+        const originBasElements = document.getElementsByTagName('base');
+        let originBaseUrl = null;
+        if (originBasElements.length > 0) {
+            originBaseUrl = originBasElements.item(0).getAttribute('href');
+            Array.from(originBasElements).forEach((originBasEl) => {
+                originBasEl.remove();
+            });
+        }
 
         // Set base to allow Readability to resolve relative path's
         const baseEl = document.createElement('base');
-        baseEl.setAttribute('href', getBaseUrl(url));
+        baseEl.setAttribute('href', getBaseUrl(originBaseUrl ?? originUrl.href, originUrl.origin));
         document.head.append(baseEl);
         const cleanDocumentBody = DOMPurify.sanitize(document.body.innerHTML);
         document.body.innerHTML = cleanDocumentBody;
@@ -38,8 +49,8 @@ class WebsiteParser extends Parser {
         const readableDocument = new Readability(document).parse();
 
         return readableDocument?.content
-            ? await this.parsableArticle(this.app, readableDocument, url)
-            : this.notParsableArticle(url);
+            ? await this.parsableArticle(this.app, readableDocument, originUrl.href)
+            : this.notParsableArticle(originUrl.href);
     }
 
     private async parsableArticle(app: App, article: Article, url: string) {
