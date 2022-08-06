@@ -35,7 +35,9 @@ class BilibiliParser extends Parser {
             .replace(/%videoId%/g, videoId)
             .replace(/%videoPlayer%/g, videoPlayer);
 
-        const fileNameTemplate = this.settings.bilibiliNoteTitle.replace(/%title%/g, videoTitle);
+        const fileNameTemplate = this.settings.bilibiliNoteTitle
+            .replace(/%title%/g, videoTitle)
+            .replace(/%date%/g, this.getFormattedDateForFilename());
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
     }
