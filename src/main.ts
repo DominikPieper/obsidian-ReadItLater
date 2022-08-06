@@ -1,12 +1,13 @@
 import { addIcon, normalizePath, Notice, Plugin } from 'obsidian';
 import { checkAndCreateFolder, normalizeFilename } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
-import YoutubeParser from './parsers/YoutubeParser';
-import TwitterParser from './parsers/TwitterParser';
+import { ReadItLaterSettingsTab } from './views/settings-tab';
 import { Parser } from './parsers/Parser';
+import YoutubeParser from './parsers/YoutubeParser';
+import BilibiliParser from './parsers/BilibiliParser';
+import TwitterParser from './parsers/TwitterParser';
 import WebsiteParser from './parsers/WebsiteParser';
 import TextSnippetParser from './parsers/TextSnippetParser';
-import { ReadItLaterSettingsTab } from './views/settings-tab';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -17,6 +18,7 @@ export default class ReadItLaterPlugin extends Plugin {
         await this.loadSettings();
         this.parsers = [
             new YoutubeParser(this.app, this.settings),
+            new BilibiliParser(this.app, this.settings),
             new TwitterParser(this.app, this.settings),
             new WebsiteParser(this.app, this.settings),
             new TextSnippetParser(this.app, this.settings),
