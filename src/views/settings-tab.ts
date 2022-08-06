@@ -86,7 +86,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-    new Setting(containerEl)
+        new Setting(containerEl)
             .setName('Date format string in contents')
             .setDesc('Format of the %date% variable for contents')
             .addText((text) =>
@@ -120,6 +120,33 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
                     .onChange(async (value) => {
                         this.plugin.settings.youtubeNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
+            .setName('Bilibili note template title')
+            .setDesc('Available variables: %title%')
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(this.plugin.settings.bilibiliNoteTitle || DEFAULT_SETTINGS.bilibiliNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.bilibiliNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Bilibili note template')
+            .setDesc('Available variables: %videoTitle%, %videoURL%, %videoId%, %videoPlayer%')
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.bilibiliNote || DEFAULT_SETTINGS.bilibiliNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.bilibiliNote = value;
                         await this.plugin.saveSettings();
                     });
                 textarea.inputEl.rows = 10;
