@@ -101,7 +101,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Youtube note template title')
-            .setDesc('Available variables: %title%')
+            .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %title%')
@@ -181,7 +181,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Parsable article note template title')
-            .setDesc('Available variables: %title%')
+            .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %title%')
