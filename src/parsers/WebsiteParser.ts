@@ -67,7 +67,9 @@ class WebsiteParser extends Parser {
             .replace(/%articleURL%/g, url)
             .replace(/%articleContent%/g, content);
 
-        const fileNameTemplate = this.settings.parseableArticleNoteTitle.replace(/%title%/g, title);
+        const fileNameTemplate = this.settings.parseableArticleNoteTitle
+            .replace(/%title%/g, title)
+            .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
