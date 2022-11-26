@@ -57,8 +57,14 @@ class WebsiteParser extends Parser {
         const title = article.title || 'No title';
         let content = await parseHtmlContent(article.content);
 
+        const fileNameTemplate = this.settings.parseableArticleNoteTitle
+            .replace(/%title%/g, title)
+            .replace(/%date%/g, this.getFormattedDateForFilename());
+
+        const assetsDir = `${this.settings.assetsDir}/${fileNameTemplate}/`;
+
         if (this.settings.downloadImages && Platform.isDesktop) {
-            content = await replaceImages(app, content, this.settings.assetsDir);
+            content = await replaceImages(app, content, assetsDir);
         }
 
         const processedContent = this.settings.parsableArticleNote
@@ -66,10 +72,6 @@ class WebsiteParser extends Parser {
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
             .replace(/%articleContent%/g, content);
-
-        const fileNameTemplate = this.settings.parseableArticleNoteTitle
-            .replace(/%title%/g, title)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
