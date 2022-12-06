@@ -53,6 +53,21 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     .onChange(async (value) => {
                         this.plugin.settings.downloadImages = value;
                         assetDirSetting.setDisabled(!value);
+                        imagesInArticleDirSettings.setDisabled(!value);
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        const imagesInArticleDirSettings = new Setting(containerEl)
+            .setName('Download imagesPer Article dir insied assets')
+            .setDesc(
+                'If this is true, the images of an article are stored in their own folder.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.downloadImagesInArticleDir || DEFAULT_SETTINGS.downloadImagesInArticleDir)
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadImagesInArticleDir = value;
                         await this.plugin.saveSettings();
                     }),
             );
@@ -216,7 +231,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     .setPlaceholder(`Defaults to 'Article %date%'`)
                     .setValue(
                         this.plugin.settings.notParseableArticleNoteTitle ||
-                            DEFAULT_SETTINGS.notParseableArticleNoteTitle,
+                        DEFAULT_SETTINGS.notParseableArticleNoteTitle,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.notParseableArticleNoteTitle = value;

@@ -61,7 +61,9 @@ class WebsiteParser extends Parser {
             .replace(/%title%/g, title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
-        const assetsDir = `${this.settings.assetsDir}/${fileNameTemplate}/`;
+        const assetsDir = this.settings.downloadImagesInArticleDir
+            ? `${this.settings.assetsDir}/${fileNameTemplate}/`
+            : this.settings.assetsDir;
 
         if (this.settings.downloadImages && Platform.isDesktop) {
             content = await replaceImages(app, content, assetsDir);

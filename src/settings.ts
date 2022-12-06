@@ -15,6 +15,7 @@ export interface ReadItLaterSettings {
     textSnippetNoteTitle: string;
     textSnippetNote: string;
     downloadImages: boolean;
+    downloadImagesInArticleDir: boolean;
     dateTitleFmt: string;
     dateContentFmt: string;
 }
@@ -36,6 +37,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     textSnippetNoteTitle: 'Notice %date%',
     textSnippetNote: `[[ReadItLater]] [[Textsnippet]]\n\n%content%`,
     downloadImages: true,
+    downloadImagesInArticleDir: false,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',
     dateContentFmt: 'YYYY-MM-DD',
 };
