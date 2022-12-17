@@ -14,6 +14,8 @@ export interface ReadItLaterSettings {
     notParsableArticleNote: string;
     textSnippetNoteTitle: string;
     textSnippetNote: string;
+    mastodonNoteTitle: string;
+    mastodonNote: string;
     downloadImages: boolean;
     downloadImagesInArticleDir: boolean;
     dateTitleFmt: string;
@@ -36,6 +38,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     notParsableArticleNote: `[[ReadItLater]] [[Article]]\n\n[%articleURL%](%articleURL%)`,
     textSnippetNoteTitle: 'Note %date%',
     textSnippetNote: `[[ReadItLater]] [[Textsnippet]]\n\n%content%`,
+    mastodonNoteTitle: 'Toot from %tootAuthorName% (%date%)',
+    mastodonNote: `[[ReadItLater]] [[Toot]]\n\n# [%tootAuthorName%](%tootURL%)\n\n> %tootContent%\n\n%tootMedia%`,
     downloadImages: true,
     downloadImagesInArticleDir: false,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',

@@ -11,7 +11,7 @@ export abstract class Parser {
         this.settings = settings;
     }
 
-    abstract test(clipboardContent: string): boolean;
+    abstract test(clipboardContent: string): boolean | Promise<boolean>;
 
     abstract prepareNote(clipboardContent: string): Promise<Note>;
 
