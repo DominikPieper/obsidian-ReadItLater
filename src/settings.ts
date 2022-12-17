@@ -34,7 +34,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     parsableArticleNote: `[[ReadItLater]] [[Article]]\n\n# [%articleTitle%](%articleURL%)\n\n%articleContent%`,
     notParseableArticleNoteTitle: 'Article %date%',
     notParsableArticleNote: `[[ReadItLater]] [[Article]]\n\n[%articleURL%](%articleURL%)`,
-    textSnippetNoteTitle: 'Notice %date%',
+    textSnippetNoteTitle: 'Note %date%',
     textSnippetNote: `[[ReadItLater]] [[Textsnippet]]\n\n%content%`,
     downloadImages: true,
     downloadImagesInArticleDir: false,
