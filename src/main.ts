@@ -8,6 +8,7 @@ import BilibiliParser from './parsers/BilibiliParser';
 import TwitterParser from './parsers/TwitterParser';
 import WebsiteParser from './parsers/WebsiteParser';
 import TextSnippetParser from './parsers/TextSnippetParser';
+import MastodonParser from './parsers/MastodonParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -20,6 +21,7 @@ export default class ReadItLaterPlugin extends Plugin {
             new YoutubeParser(this.app, this.settings),
             new BilibiliParser(this.app, this.settings),
             new TwitterParser(this.app, this.settings),
+            new MastodonParser(this.app, this.settings),
             new WebsiteParser(this.app, this.settings),
             new TextSnippetParser(this.app, this.settings),
         ];
@@ -53,7 +55,7 @@ export default class ReadItLaterPlugin extends Plugin {
         const clipboardContent = await navigator.clipboard.readText();
 
         for (const parser of this.parsers) {
-            if (parser.test(clipboardContent)) {
+            if (await parser.test(clipboardContent)) {
                 const note = await parser.prepareNote(clipboardContent);
                 await this.writeFile(note.fileName, note.content);
                 break;
