@@ -67,15 +67,20 @@ class MastodonParser extends Parser {
         if (!url) return false;
 
         const urlDomain = new URL(url).hostname;
-        const response = JSON.parse(
-            await request({
-                method: 'GET',
-                contentType: 'application/json',
-                url: `https://${urlDomain}${MASTODON_API.INSTANCE}`,
-            }),
-        );
 
-        return response?.domain === urlDomain;
+        try {
+            const response = JSON.parse(
+                await request({
+                    method: 'GET',
+                    contentType: 'application/json',
+                    url: `https://${urlDomain}${MASTODON_API.INSTANCE}`,
+                }),
+            );
+
+            return response?.domain === urlDomain;
+        } catch (e) {
+            return false;
+        }
     }
 }
 
