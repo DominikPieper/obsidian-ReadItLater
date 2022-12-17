@@ -46,7 +46,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Download images')
-            .setDesc('If this is true, the used images are downloaded to the defined folder (just on Desktop)')
+            .setDesc('If enabled, the used images are downloaded to the defined folder (just on Desktop)')
             .addToggle((toggle) =>
                 toggle
                     .setValue(this.plugin.settings.downloadImages || DEFAULT_SETTINGS.downloadImages)
@@ -59,9 +59,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         const imagesInArticleDirSettings = new Setting(containerEl)
-            .setName('Download imagesPer Article dir insied assets')
+            .setName('Download images to article folder')
             .setDesc(
-                'If this is true, the images of an article are stored in their own folder.',
+                'If enabled, the images of an article are stored in their own folder.',
             )
             .addToggle((toggle) =>
                 toggle
@@ -258,7 +258,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc('Available variables: %date%')
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to 'Notice %date%'`)
+                    .setPlaceholder(`Defaults to 'Note %date%'`)
                     .setValue(this.plugin.settings.textSnippetNoteTitle || DEFAULT_SETTINGS.textSnippetNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.textSnippetNoteTitle = value;
