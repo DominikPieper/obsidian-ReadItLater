@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-sample-plugin",
-  "version": "0.0.16",
-  "description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+  "name": "obsidian-ReadItLater",
+  "version": "0.0.17",
+  "description": "Plugin for Obsidian to collect interesting information from your clipboard into your vault",
   "main": "main.js",
   "scripts": {
     "dev": "rollup --config rollup.config.js -w",
