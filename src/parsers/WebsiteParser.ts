@@ -84,10 +84,11 @@ class WebsiteParser extends Parser {
 
         const content = this.settings.notParsableArticleNote.replace('%articleURL%', url);
 
-        const fileNameTemplate = this.settings.notParsableArticleNote.replace(
+        const fileNameTemplate = this.settings.notParseableArticleNoteTitle.replace(
             /%date%/g,
             this.getFormattedDateForFilename(),
         );
+
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
     }
