@@ -1,5 +1,4 @@
 import TurndownService from 'turndown';
-import * as DOMPurify from 'isomorphic-dompurify';
 import * as turndownPluginGfm from '@guyplusplus/turndown-plugin-gfm';
 
 export async function parseHtmlContent(content: string) {

@@ -60,12 +60,12 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         const imagesInArticleDirSettings = new Setting(containerEl)
             .setName('Download images to article folder')
-            .setDesc(
-                'If enabled, the images of an article are stored in their own folder.',
-            )
+            .setDesc('If enabled, the images of an article are stored in their own folder.')
             .addToggle((toggle) =>
                 toggle
-                    .setValue(this.plugin.settings.downloadImagesInArticleDir || DEFAULT_SETTINGS.downloadImagesInArticleDir)
+                    .setValue(
+                        this.plugin.settings.downloadImagesInArticleDir || DEFAULT_SETTINGS.downloadImagesInArticleDir,
+                    )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadImagesInArticleDir = value;
                         await this.plugin.saveSettings();
@@ -231,7 +231,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     .setPlaceholder(`Defaults to 'Article %date%'`)
                     .setValue(
                         this.plugin.settings.notParseableArticleNoteTitle ||
-                        DEFAULT_SETTINGS.notParseableArticleNoteTitle,
+                            DEFAULT_SETTINGS.notParseableArticleNoteTitle,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.notParseableArticleNoteTitle = value;

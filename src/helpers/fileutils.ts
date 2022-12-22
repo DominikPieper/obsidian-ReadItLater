@@ -16,7 +16,7 @@ export function getBaseUrl(url: string, origin: string): string {
 }
 
 export function normalizeFilename(fileName: string): string {
-    return fileName.replace(/[\:\#\/\\\|\?\*\<\>\"]/g, '');
+    return fileName.replace(/[:#/\\|?*<>"]/g, '');
 }
 
 export function pathJoin(dir: string, subpath: string): string {
