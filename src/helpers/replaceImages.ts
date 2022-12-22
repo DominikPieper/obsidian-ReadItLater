@@ -5,20 +5,24 @@ import { checkAndCreateFolder } from './checkAndCreateFolder';
 import { downloadImage } from './downloadImage';
 import { linkHashes } from './linkHash';
 
-export const EXTERNAL_MEDIA_LINK_PATTERN = /\!\[(?<anchor>.*?)\]\((?<link>.+?)\)/g;
+type Replacer = {
+    (match: string, anchor: string, link: string): Promise<string>;
+};
+
+export const EXTERNAL_MEDIA_LINK_PATTERN = /!\[(?<anchor>.*?)\]\((?<link>.+?)\)/g;
 export async function replaceImages(app: App, content: string, assetsDir: string) {
     return await replaceAsync(content, EXTERNAL_MEDIA_LINK_PATTERN, imageTagProcessor(app, assetsDir));
 }
 
-export function replaceAsync(string: string, searchValue: string | RegExp, replacer: any) {
+export function replaceAsync(string: string, searchValue: string | RegExp, replacer: Replacer) {
     try {
         if (typeof replacer === 'function') {
             // 1. Run fake pass of `replace`, collect values from `replacer` calls
             // 2. Resolve them with `Promise.all`
             // 3. Run `replace` with resolved values
-            const values: any[] = [];
-            String.prototype.replace.call(string, searchValue, function () {
-                values.push(replacer.apply(undefined, arguments));
+            const values: string[] = [];
+            String.prototype.replace.call(string, searchValue, function (match: string, anchor: string, link: string) {
+                values.push(replacer(match, anchor, link));
                 return '';
             });
             return Promise.all(values).then(function (resolvedValues) {
@@ -36,14 +40,15 @@ export function replaceAsync(string: string, searchValue: string | RegExp, repla
 
 export const FILENAME_ATTEMPTS = 5;
 export function imageTagProcessor(app: App, mediaDir: string) {
-    return async function processImageTag(match: string, anchor: string, link: string) {
+    return async function processImageTag(match: string, anchor: string, link: string): Promise<string> {
         if (!isValidUrl(link)) {
             return match;
         }
+        const url = new URL(link);
         await checkAndCreateFolder(app.vault, mediaDir);
 
         try {
-            const { fileContent, fileExtension } = await downloadImage(link);
+            const { fileContent, fileExtension } = await downloadImage(url);
 
             let attempt = 0;
             while (attempt < FILENAME_ATTEMPTS) {
@@ -52,7 +57,7 @@ export function imageTagProcessor(app: App, mediaDir: string) {
                         app.vault.adapter,
                         mediaDir,
                         anchor,
-                        link,
+                        url,
                         fileContent,
                         fileExtension,
                     );
@@ -92,7 +97,7 @@ async function chooseFileName(
     adapter: DataAdapter,
     dir: string,
     baseName: string,
-    link: string,
+    url: URL,
     contentData: ArrayBuffer,
     fileExtension: string | false,
 ): Promise<{ fileName: string; needWrite: boolean }> {
@@ -101,9 +106,7 @@ async function chooseFileName(
     }
     // if there is no anchor try get file name from url
     if (!baseName) {
-        const parsedUrl = new URL(link);
-
-        baseName = basename(parsedUrl.pathname);
+        baseName = basename(url.pathname);
     }
     // if there is no part for file name from url use name template
     if (!baseName) {
@@ -126,11 +129,11 @@ async function chooseFileName(
             : pathJoin(dir, `${baseName}.${fileExtension}`);
 
         if (await adapter.exists(suggestedName, false)) {
-            linkHashes.ensureHashGenerated(link, contentData);
+            linkHashes.ensureHashGenerated(url, contentData);
 
             const fileData = await adapter.readBinary(suggestedName);
 
-            if (linkHashes.isSame(link, fileData)) {
+            if (linkHashes.isSame(url, fileData)) {
                 fileName = suggestedName;
                 needWrite = false;
             }
@@ -144,7 +147,7 @@ async function chooseFileName(
         throw new Error('Failed to generate file name for media file.');
     }
 
-    linkHashes.ensureHashGenerated(link, contentData);
+    linkHashes.ensureHashGenerated(url, contentData);
 
     return { fileName, needWrite };
 }
