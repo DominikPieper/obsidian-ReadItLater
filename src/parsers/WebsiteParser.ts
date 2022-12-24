@@ -1,7 +1,7 @@
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { App, Notice, Platform, request } from 'obsidian';
-import { getBaseUrl, replaceImages } from '../helpers';
+import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
 import { isProbablyReaderable, Readability } from '@mozilla/readability';
 import { ReadItLaterSettings } from '../settings';
 import * as DOMPurify from 'isomorphic-dompurify';
@@ -62,7 +62,7 @@ class WebsiteParser extends Parser {
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const assetsDir = this.settings.downloadImagesInArticleDir
-            ? `${this.settings.assetsDir}/${fileNameTemplate}/`
+            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
             : this.settings.assetsDir;
 
         if (this.settings.downloadImages && Platform.isDesktop) {
