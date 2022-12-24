@@ -10,6 +10,13 @@ import { parseHtmlContent } from './parsehtml';
 type Article = {
     title: string;
     content: string;
+    textContent: string;
+    length: number;
+    excerpt: string;
+    byline: string;
+    dir: string;
+    siteName: string;
+    lang: string;
 };
 
 class WebsiteParser extends Parser {
@@ -49,7 +56,8 @@ class WebsiteParser extends Parser {
         const readableDocument = new Readability(document).parse();
 
         return readableDocument?.content
-            ? await this.parsableArticle(this.app, readableDocument, originUrl.href)
+            ? // @ts-ignore Until Readability release fix with correct types
+              await this.parsableArticle(this.app, readableDocument, originUrl.href)
             : this.notParsableArticle(originUrl.href);
     }
 
@@ -73,6 +81,7 @@ class WebsiteParser extends Parser {
             .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
+            .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
             .replace(/%articleContent%/g, content);
 
         const fileName = `${fileNameTemplate}.md`;
@@ -91,6 +100,45 @@ class WebsiteParser extends Parser {
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
+    }
+
+    /**
+     * Returns estimated reading time of article in minutes
+     */
+    private getEstimatedReadingTime(article: Article): number {
+        const lang = article.lang || 'en';
+        const readingSpeed = this.getReadingSpeed(lang);
+        const words = article.textContent.trim().split(/\s+/).length;
+
+        return Math.ceil(words / readingSpeed);
+    }
+
+    /**
+     * Reading speed in words per minute. Data are gathered from this study https://irisreading.com/average-reading-speed-in-various-languages/
+     */
+    private getReadingSpeed(lang: string): number {
+        const readingSpeed = new Map([
+            ['en', 228],
+            ['ar', 138],
+            ['de', 179],
+            ['es', 218],
+            ['fi', 161],
+            ['fr', 195],
+            ['he', 187],
+            ['it', 188],
+            ['ja', 193],
+            ['nl', 202],
+            ['pl', 166],
+            ['pt', 181],
+            ['ru', 184],
+            ['sk', 190],
+            ['sl', 180],
+            ['sv', 199],
+            ['tr', 166],
+            ['zh', 158],
+        ]);
+
+        return readingSpeed.get(lang) || readingSpeed.get('en');
     }
 }
 
