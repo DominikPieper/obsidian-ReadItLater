@@ -195,6 +195,32 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
+            .setName('Mastodon note template title')
+            .setDesc('Available variables: %tootAuthorName%, %date%')
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %tootAuthorName%')
+                    .setValue(this.plugin.settings.mastodonNoteTitle || DEFAULT_SETTINGS.mastodonNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.mastodonNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+        new Setting(containerEl)
+            .setName('Mastodon note template')
+            .setDesc('Available variables: %date%, %tootAuthorName%, %tootURL%, %tootContent%, %tootMedia%')
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.mastodonNote || DEFAULT_SETTINGS.mastodonNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.mastodonNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
             .setName('Parsable article note template title')
             .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
