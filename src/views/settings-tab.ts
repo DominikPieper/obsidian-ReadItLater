@@ -232,7 +232,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        containerEl.createEl('h2', { text: 'Readble Article' });
+        containerEl.createEl('h2', { text: 'Readable Article' });
 
         new Setting(containerEl)
             .setName('Readable article note template title')
@@ -265,7 +265,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Download images')
-            .setDesc('If enabled, images in note are downloaded to the defined folder (only Desktop App feature)')
+            .setDesc('If enabled, images in article are downloaded to the assets folder (only Desktop App feature)')
             .addToggle((toggle) =>
                 toggle
                     .setValue(
@@ -282,7 +282,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         const imagesInArticleDirSettings = new Setting(containerEl)
             .setName('Download images to note folder')
-            .setDesc('If enabled, the images of an note are stored in their own folder.')
+            .setDesc('If enabled, the images in article are stored in their own folder.')
             .addToggle((toggle) =>
                 toggle
                     .setValue(
