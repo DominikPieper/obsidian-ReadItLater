@@ -15,7 +15,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'Settings for the ReadItLater plugin.' });
+        containerEl.createEl('h2', { text: 'General' });
 
         new Setting(containerEl)
             .setName('Inbox dir')
@@ -33,46 +33,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Open new note')
-            .setDesc('If enabled, new note will open in current workspace')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(this.plugin.settings.openNewNote || DEFAULT_SETTINGS.openNewNote)
-                    .onChange(async (value) => {
-                        this.plugin.settings.openNewNote = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Download images')
-            .setDesc('If enabled, the used images are downloaded to the defined folder (just on Desktop)')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(this.plugin.settings.downloadImages || DEFAULT_SETTINGS.downloadImages)
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadImages = value;
-                        assetDirSetting.setDisabled(!value);
-                        imagesInArticleDirSettings.setDisabled(!value);
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        const imagesInArticleDirSettings = new Setting(containerEl)
-            .setName('Download images to article folder')
-            .setDesc('If enabled, the images of an article are stored in their own folder.')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        this.plugin.settings.downloadImagesInArticleDir || DEFAULT_SETTINGS.downloadImagesInArticleDir,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadImagesInArticleDir = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        const assetDirSetting = new Setting(containerEl)
             .setName('Assets dir')
             .setDesc(
                 'Enter valid folder name. For nested folders use this format: Folder A/Folder B. If no folder is enetred, new note will be created in vault root.',
@@ -81,9 +41,20 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 text
                     .setPlaceholder('Defaults to root')
                     .setValue(this.plugin.settings.assetsDir || DEFAULT_SETTINGS.inboxDir + '/assets')
-                    .setDisabled(!this.plugin.settings.downloadImages)
                     .onChange(async (value) => {
                         this.plugin.settings.assetsDir = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Open new note')
+            .setDesc('If enabled, new note will open in current workspace')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.openNewNote || DEFAULT_SETTINGS.openNewNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.openNewNote = value;
                         await this.plugin.saveSettings();
                     }),
             );
@@ -114,6 +85,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
+        containerEl.createEl('h2', { text: 'YouTube' });
+
         new Setting(containerEl)
             .setName('Youtube note template title')
             .setDesc('Available variables: %title%, %date%')
@@ -140,6 +113,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.rows = 10;
                 textarea.inputEl.cols = 25;
             });
+
+        containerEl.createEl('h2', { text: 'Bilibili' });
 
         new Setting(containerEl)
             .setName('Bilibili note template title')
@@ -168,6 +143,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
+        containerEl.createEl('h2', { text: 'Twitter' });
+
         new Setting(containerEl)
             .setName('Twitter note template title')
             .setDesc('Available variables: %tweetAuthorName%, %date%')
@@ -193,6 +170,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.rows = 10;
                 textarea.inputEl.cols = 25;
             });
+
+        containerEl.createEl('h2', { text: 'Mastodon' });
 
         new Setting(containerEl)
             .setName('Mastodon note template title')
@@ -221,7 +200,42 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('Parsable article note template title')
+            .setName('Download media attachments')
+            .setDesc('If enabled, media attachments of toot are downloaded to the assets folder (only Desktop App feature)')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        this.plugin.settings.hasOwnProperty('downloadMastodonMediaAttachments')
+                        ? this.plugin.settings.downloadMastodonMediaAttachments
+                        : DEFAULT_SETTINGS.downloadMastodonMediaAttachments
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadMastodonMediaAttachments = value;
+                        mastodonMediaAttachmentsInDirSetting.setDisabled(!value);
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        const mastodonMediaAttachmentsInDirSetting = new Setting(containerEl)
+            .setName('Download media attachments to folder')
+            .setDesc('If enabled, the media attachments of toot are stored in their own folder.')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        this.plugin.settings.hasOwnProperty('downloadMastodonMediaAttachmentsInDir')
+                        ? this.plugin.settings.downloadMastodonMediaAttachmentsInDir
+                        : DEFAULT_SETTINGS.downloadMastodonMediaAttachmentsInDir
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadMastodonMediaAttachmentsInDir = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        containerEl.createEl('h2', { text: 'Readble Article' });
+
+        new Setting(containerEl)
+            .setName('Readable article note template title')
             .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
                 text
@@ -236,7 +250,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Parsable article note template')
+            .setName('Readable article note template')
             .setDesc('Available variables: %date%, %articleTitle%, %articleURL%, %articleContent%')
             .addTextArea((textarea) => {
                 textarea
@@ -250,7 +264,42 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('Not paresable article note template title')
+            .setName('Download images')
+            .setDesc('If enabled, images in note are downloaded to the defined folder (only Desktop App feature)')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        this.plugin.settings.hasOwnProperty('downloadImages')
+                        ? this.plugin.settings.downloadImages
+                        : DEFAULT_SETTINGS.downloadImages
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadImages = value;
+                        imagesInArticleDirSettings.setDisabled(!value);
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        const imagesInArticleDirSettings = new Setting(containerEl)
+            .setName('Download images to note folder')
+            .setDesc('If enabled, the images of an note are stored in their own folder.')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        this.plugin.settings.hasOwnProperty('downloadImagesInArticleDir')
+                        ? this.plugin.settings.downloadImagesInArticleDir
+                        : DEFAULT_SETTINGS.downloadImagesInArticleDir
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadImagesInArticleDir = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        containerEl.createEl('h2', { text: 'Nonreadable Article' });
+
+        new Setting(containerEl)
+            .setName('Nonreadable article note template title')
             .setDesc('Available variables: %date%')
             .addText((text) =>
                 text
@@ -266,7 +315,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Not parseable article note template')
+            .setName('Nonreadable article note template')
             .setDesc('Available variables: %date%, %articleURL%')
             .addTextArea((textarea) => {
                 textarea
@@ -278,6 +327,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.rows = 10;
                 textarea.inputEl.cols = 25;
             });
+
+        containerEl.createEl('h2', { text: 'Text Snippet' });
 
         new Setting(containerEl)
             .setName('Text snippet note template title')
