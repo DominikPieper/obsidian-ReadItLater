@@ -1,8 +1,8 @@
 import { Parser } from './Parser';
 import { ReadItLaterSettings } from '../settings';
-import { App, request } from 'obsidian';
+import { App, Platform, request } from 'obsidian';
 import { Note } from './Note';
-import { isValidUrl } from '../helpers';
+import { isValidUrl, normalizeFilename, replaceImages } from '../helpers';
 import { parseHtmlContent } from './parsehtml';
 
 const MASTODON_API = {
@@ -34,16 +34,24 @@ class MastodonParser extends Parser {
 
         const { url: tootURL, content, account, media_attachments } = response;
 
+        const fileNameTemplate = this.settings.mastodonNoteTitle
+            .replace(/%tootAuthorName%/g, account.display_name)
+            .replace(/%date%/g, this.getFormattedDateForFilename());
+
+        const assetsDir = this.settings.downloadMastodonMediaAttachmentsInDir
+            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
+            : this.settings.assetsDir;
+
+        const mediaAttachments = (this.settings.downloadMastodonMediaAttachments && Platform.isDesktop)
+            ? await replaceImages(app, this.prepareMedia(media_attachments), assetsDir)
+            : this.prepareMedia(media_attachments);
+
         const processedContent = this.settings.mastodonNote
             .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%tootAuthorName%/g, account.display_name)
             .replace(/%tootURL%/g, tootURL)
             .replace(/%tootContent%/g, await parseHtmlContent(content))
-            .replace(/%tootMedia%/g, this.prepareMedia(media_attachments));
-
-        const fileNameTemplate = this.settings.mastodonNoteTitle
-            .replace(/%tootAuthorName%/g, account.display_name)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
+            .replace(/%tootMedia%/g, mediaAttachments);
 
         const fileName = `${fileNameTemplate}.md`;
 
@@ -53,9 +61,7 @@ class MastodonParser extends Parser {
     private prepareMedia(media: any[]): string {
         return media.reduce(
             (prev: string, { type, url, description }: { type: string; url: string; description: string }): string => {
-                if (type !== 'image') return prev;
-
-                const processedDescription = description ? `> <em>${description}</em>` : '';
+                const processedDescription = description ? `> *${description}*` : '';
 
                 return `${prev}\n![](${url})\n ${processedDescription}\n`;
             },

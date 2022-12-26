@@ -20,6 +20,8 @@ export interface ReadItLaterSettings {
     downloadImagesInArticleDir: boolean;
     dateTitleFmt: string;
     dateContentFmt: string;
+    downloadMastodonMediaAttachments: boolean;
+    downloadMastodonMediaAttachmentsInDir: boolean;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -44,4 +46,6 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     downloadImagesInArticleDir: false,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',
     dateContentFmt: 'YYYY-MM-DD',
+    downloadMastodonMediaAttachments: true,
+    downloadMastodonMediaAttachmentsInDir: false,
 };
