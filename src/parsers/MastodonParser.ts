@@ -11,6 +11,17 @@ const MASTODON_API = {
     STATUS: '/api/v1/statuses',
 };
 
+type MediaAttachment = {
+    id: string;
+    type: string;
+    url: string;
+    preview_url: string;
+    remote_url: string | null;
+    meta: object;
+    description: string | null;
+    blurhash: string | null;
+};
+
 class MastodonParser extends Parser {
     constructor(app: App, settings: ReadItLaterSettings) {
         super(app, settings);
@@ -42,9 +53,10 @@ class MastodonParser extends Parser {
             ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
             : this.settings.assetsDir;
 
-        const mediaAttachments = (this.settings.downloadMastodonMediaAttachments && Platform.isDesktop)
-            ? await replaceImages(app, this.prepareMedia(media_attachments), assetsDir)
-            : this.prepareMedia(media_attachments);
+        const mediaAttachments =
+            this.settings.downloadMastodonMediaAttachments && Platform.isDesktop
+                ? await replaceImages(app, this.prepareMedia(media_attachments), assetsDir)
+                : this.prepareMedia(media_attachments);
 
         const processedContent = this.settings.mastodonNote
             .replace(/%date%/g, this.getFormattedDateForContent())
@@ -58,15 +70,12 @@ class MastodonParser extends Parser {
         return new Note(fileName, processedContent);
     }
 
-    private prepareMedia(media: any[]): string {
-        return media.reduce(
-            (prev: string, { type, url, description }: { type: string; url: string; description: string }): string => {
-                const processedDescription = description ? `> *${description}*` : '';
+    private prepareMedia(media: MediaAttachment[]): string {
+        return media.reduce((prev: string, { url, description }: { url: string; description: string }): string => {
+            const processedDescription = description ? `> *${description}*` : '';
 
-                return `${prev}\n![](${url})\n ${processedDescription}\n`;
-            },
-            '',
-        );
+            return `${prev}\n![](${url})\n ${processedDescription}\n`;
+        }, '');
     }
 
     private async testIsMastodon(url: string): Promise<boolean> {

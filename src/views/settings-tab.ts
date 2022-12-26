@@ -201,13 +201,15 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Download media attachments')
-            .setDesc('If enabled, media attachments of toot are downloaded to the assets folder (only Desktop App feature)')
+            .setDesc(
+                'If enabled, media attachments of toot are downloaded to the assets folder (only Desktop App feature)',
+            )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        this.plugin.settings.hasOwnProperty('downloadMastodonMediaAttachments')
-                        ? this.plugin.settings.downloadMastodonMediaAttachments
-                        : DEFAULT_SETTINGS.downloadMastodonMediaAttachments
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadMastodonMediaAttachments')
+                            ? this.plugin.settings.downloadMastodonMediaAttachments
+                            : DEFAULT_SETTINGS.downloadMastodonMediaAttachments,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadMastodonMediaAttachments = value;
@@ -222,9 +224,12 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        this.plugin.settings.hasOwnProperty('downloadMastodonMediaAttachmentsInDir')
-                        ? this.plugin.settings.downloadMastodonMediaAttachmentsInDir
-                        : DEFAULT_SETTINGS.downloadMastodonMediaAttachmentsInDir
+                        Object.prototype.hasOwnProperty.call(
+                            this.plugin.settings,
+                            'downloadMastodonMediaAttachmentsInDir',
+                        )
+                            ? this.plugin.settings.downloadMastodonMediaAttachmentsInDir
+                            : DEFAULT_SETTINGS.downloadMastodonMediaAttachmentsInDir,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadMastodonMediaAttachmentsInDir = value;
@@ -269,9 +274,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        this.plugin.settings.hasOwnProperty('downloadImages')
-                        ? this.plugin.settings.downloadImages
-                        : DEFAULT_SETTINGS.downloadImages
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImages')
+                            ? this.plugin.settings.downloadImages
+                            : DEFAULT_SETTINGS.downloadImages,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadImages = value;
@@ -286,9 +291,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        this.plugin.settings.hasOwnProperty('downloadImagesInArticleDir')
-                        ? this.plugin.settings.downloadImagesInArticleDir
-                        : DEFAULT_SETTINGS.downloadImagesInArticleDir
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImagesInArticleDir')
+                            ? this.plugin.settings.downloadImagesInArticleDir
+                            : DEFAULT_SETTINGS.downloadImagesInArticleDir,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadImagesInArticleDir = value;
