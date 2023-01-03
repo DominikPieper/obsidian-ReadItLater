@@ -185,9 +185,10 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
+
         new Setting(containerEl)
             .setName('Mastodon note template')
-            .setDesc('Available variables: %date%, %tootAuthorName%, %tootURL%, %tootContent%, %tootMedia%')
+            .setDesc('Available variables: %date%, %tootAuthorName%, %tootURL%, %tootContent%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.mastodonNote || DEFAULT_SETTINGS.mastodonNote)
@@ -236,6 +237,38 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
+
+        new Setting(containerEl)
+            .setName('Save replies')
+            .setDesc(
+                'If enabled, replies of toot will be saved.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'saveMastodonReplies')
+                            ? this.plugin.settings.saveMastodonReplies
+                            : DEFAULT_SETTINGS.saveMastodonReplies,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.saveMastodonReplies = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Mastodon reply template')
+            .setDesc('Available variables: %tootAuthorName%, %tootURL%, %tootContent%')
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.mastodonReply || DEFAULT_SETTINGS.mastodonReply)
+                    .onChange(async (value) => {
+                        this.plugin.settings.mastodonReply = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         containerEl.createEl('h2', { text: 'Readable Article' });
 
