@@ -240,9 +240,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Save replies')
-            .setDesc(
-                'If enabled, replies of toot will be saved.',
-            )
+            .setDesc('If enabled, replies of toot will be saved.')
             .addToggle((toggle) =>
                 toggle
                     .setValue(
