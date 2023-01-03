@@ -22,6 +22,8 @@ export interface ReadItLaterSettings {
     dateContentFmt: string;
     downloadMastodonMediaAttachments: boolean;
     downloadMastodonMediaAttachmentsInDir: boolean;
+    saveMastodonReplies: boolean;
+    mastodonReply: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -41,11 +43,13 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     textSnippetNoteTitle: 'Note %date%',
     textSnippetNote: `[[ReadItLater]] [[Textsnippet]]\n\n%content%`,
     mastodonNoteTitle: 'Toot from %tootAuthorName% (%date%)',
-    mastodonNote: `[[ReadItLater]] [[Toot]]\n\n# [%tootAuthorName%](%tootURL%)\n\n> %tootContent%\n\n%tootMedia%`,
+    mastodonNote: `[[ReadItLater]] [[Toot]]\n\n# [%tootAuthorName%](%tootURL%)\n\n> %tootContent%`,
     downloadImages: true,
     downloadImagesInArticleDir: false,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',
     dateContentFmt: 'YYYY-MM-DD',
     downloadMastodonMediaAttachments: true,
     downloadMastodonMediaAttachmentsInDir: false,
+    saveMastodonReplies: false,
+    mastodonReply: `[%tootAuthorName%](%tootURL%)\n\n> %tootContent%`,
 };
