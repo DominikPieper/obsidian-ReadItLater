@@ -102,7 +102,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Youtube note template')
-            .setDesc('Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%')
+            .setDesc(
+                'Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%, %channelId%, %channelName%, %channelURL%',
+            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
