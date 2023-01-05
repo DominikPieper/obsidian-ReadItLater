@@ -63,6 +63,8 @@ class WebsiteParser extends Parser {
 
     private async parsableArticle(app: App, article: Article, url: string) {
         const title = article.title || 'No title';
+        const siteName = article.siteName || '';
+        const author = article.byline || '';
         let content = await parseHtmlContent(article.content);
 
         const fileNameTemplate = this.settings.parseableArticleNoteTitle
@@ -82,8 +84,9 @@ class WebsiteParser extends Parser {
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
             .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
-            .replace(/%articleContent%/g, content);
-
+            .replace(/%articleContent%/g, content)
+            .replace(/%siteName%/g, siteName)
+            .replace(/%author%/g, author);
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
     }
