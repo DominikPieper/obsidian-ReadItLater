@@ -61,19 +61,19 @@ class YoutubeParser extends Parser {
 
         const videoHTML = new DOMParser().parseFromString(response, 'text/html');
         const videoSchemaElement = videoHTML.querySelector('[itemtype="http://schema.org/VideoObject"]');
-        const videoId = videoSchemaElement.querySelector('[itemprop="videoId"]').getAttribute('content');
+        const videoId = videoSchemaElement?.querySelector('[itemprop="videoId"]')?.getAttribute('content') ?? '';
         const personSchemaElement = videoSchemaElement.querySelector('[itemtype="http://schema.org/Person"]');
         const videoPlayer = `<iframe width="560" height="315" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 
         return {
             id: videoId,
             url: url,
-            title: videoSchemaElement.querySelector('[itemprop="name"]').getAttribute('content'),
+            title: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
             player: videoPlayer,
             channel: {
-                id: videoSchemaElement.querySelector('[itemprop="channelId"').getAttribute('content'),
-                url: personSchemaElement.querySelector('[itemprop="url"]').getAttribute('href'),
-                name: personSchemaElement.querySelector('[itemprop="name"]').getAttribute('content'),
+                id: videoSchemaElement?.querySelector('[itemprop="channelId"')?.getAttribute('content') ?? '',
+                url: personSchemaElement?.querySelector('[itemprop="url"]')?.getAttribute('href') ?? '',
+                name: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
             },
         };
     }
