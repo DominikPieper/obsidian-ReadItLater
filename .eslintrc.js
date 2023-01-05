@@ -2,7 +2,7 @@ module.exports = {
     root: true,
     parser: "@typescript-eslint/parser",
     plugins: ["@typescript-eslint"],
-    ignorePatterns: [".eslintrc.js", "rollup.config.js"],
+    ignorePatterns: [".eslintrc.js", "esbuild.config.mjs"],
     extends: [
         "eslint:recommended",
         "plugin:@typescript-eslint/recommended",
