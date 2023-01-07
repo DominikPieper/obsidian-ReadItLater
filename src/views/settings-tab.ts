@@ -134,7 +134,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Vimeo note template')
             .setDesc(
-                'Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%, %channelId%, %channelName%, %channelURL%',
+                'Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%, %channelName%, %channelURL%',
             )
             .addTextArea((textarea) => {
                 textarea

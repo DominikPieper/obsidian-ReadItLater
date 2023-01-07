@@ -75,7 +75,6 @@ export default class ReadItLaterPlugin extends Plugin {
         } else {
             filePath = normalizePath(`/${fileName}`);
         }
-        console.log(filePath);
 
         if (await this.app.vault.adapter.exists(filePath)) {
             new Notice(`${fileName} already exists!`);
