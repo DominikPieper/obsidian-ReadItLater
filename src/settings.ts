@@ -4,6 +4,8 @@ export interface ReadItLaterSettings {
     openNewNote: boolean;
     youtubeNoteTitle: string;
     youtubeNote: string;
+    vimeoNoteTitle: string;
+    vimeoNote: string;
     bilibiliNoteTitle: string;
     bilibiliNote: string;
     twitterNoteTitle: string;
@@ -32,6 +34,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     openNewNote: false,
     youtubeNoteTitle: 'Youtube - %title%',
     youtubeNote: `[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
+    vimeoNoteTitle: 'Vimeo - %title%',
+    vimeoNote: `[[ReadItLater]] [[Vimeo]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
     bilibiliNoteTitle: 'Bilibili - %title%',
     bilibiliNote: `[[ReadItLater]] [[Bilibili]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
     twitterNoteTitle: 'Tweet from %tweetAuthorName% (%date%)',

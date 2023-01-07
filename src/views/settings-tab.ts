@@ -116,6 +116,37 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
+        containerEl.createEl('h2', { text: 'Vimeo' });
+
+        new Setting(containerEl)
+            .setName('Vimeo note title template')
+            .setDesc('Available variables: %title%, %date%')
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(this.plugin.settings.vimeoNoteTitle || DEFAULT_SETTINGS.vimeoNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Vimeo note template')
+            .setDesc(
+                'Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%, %channelId%, %channelName%, %channelURL%',
+            )
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.vimeoNote || DEFAULT_SETTINGS.vimeoNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
         containerEl.createEl('h2', { text: 'Bilibili' });
 
         new Setting(containerEl)
@@ -289,7 +320,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Readable article note template')
-            .setDesc('Available variables: %date%, %articleTitle%, %articleURL%, %articleContent%, %author%, %siteName%, %articleReadingTime%')
+            .setDesc(
+                'Available variables: %date%, %articleTitle%, %articleURL%, %articleContent%, %author%, %siteName%, %articleReadingTime%',
+            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)

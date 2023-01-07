@@ -4,6 +4,7 @@ import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
 import { Parser } from './parsers/Parser';
 import YoutubeParser from './parsers/YoutubeParser';
+import VimeoParser from './parsers/VimeoParser';
 import BilibiliParser from './parsers/BilibiliParser';
 import TwitterParser from './parsers/TwitterParser';
 import WebsiteParser from './parsers/WebsiteParser';
@@ -19,6 +20,7 @@ export default class ReadItLaterPlugin extends Plugin {
         await this.loadSettings();
         this.parsers = [
             new YoutubeParser(this.app, this.settings),
+            new VimeoParser(this.app, this.settings),
             new BilibiliParser(this.app, this.settings),
             new TwitterParser(this.app, this.settings),
             new MastodonParser(this.app, this.settings),
@@ -73,6 +75,7 @@ export default class ReadItLaterPlugin extends Plugin {
         } else {
             filePath = normalizePath(`/${fileName}`);
         }
+        console.log(filePath);
 
         if (await this.app.vault.adapter.exists(filePath)) {
             new Notice(`${fileName} already exists!`);

@@ -56,7 +56,8 @@ class WebsiteParser extends Parser {
         const readableDocument = new Readability(document).parse();
 
         return readableDocument?.content
-            ? // @ts-ignore Until Readability release fix with correct types
+            ? //eslint-disable-next-line @typescript-eslint/ban-ts-comment
+              // @ts-ignore Until Readability release fix with correct types
               await this.parsableArticle(this.app, readableDocument, originUrl.href)
             : this.notParsableArticle(originUrl.href);
     }
