@@ -26,6 +26,11 @@ export interface ReadItLaterSettings {
     downloadMastodonMediaAttachmentsInDir: boolean;
     saveMastodonReplies: boolean;
     mastodonReply: string;
+    stackExchangeNoteTitle: string;
+    stackExchangeNote: string;
+    stackExchangeAnswer: string;
+    downloadStackExchangeAssets: boolean;
+    downloadStackExchangeAssetsInDir: boolean;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -33,21 +38,21 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     assetsDir: 'ReadItLater Inbox/assets',
     openNewNote: false,
     youtubeNoteTitle: 'Youtube - %title%',
-    youtubeNote: `[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
+    youtubeNote: '[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
     vimeoNoteTitle: 'Vimeo - %title%',
-    vimeoNote: `[[ReadItLater]] [[Vimeo]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
+    vimeoNote: '[[ReadItLater]] [[Vimeo]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
     bilibiliNoteTitle: 'Bilibili - %title%',
-    bilibiliNote: `[[ReadItLater]] [[Bilibili]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%`,
+    bilibiliNote: '[[ReadItLater]] [[Bilibili]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
     twitterNoteTitle: 'Tweet from %tweetAuthorName% (%date%)',
-    twitterNote: `[[ReadItLater]] [[Tweet]]\n\n# [%tweetAuthorName%](%tweetURL%)\n\n%tweetContent%`,
+    twitterNote: '[[ReadItLater]] [[Tweet]]\n\n# [%tweetAuthorName%](%tweetURL%)\n\n%tweetContent%',
     parseableArticleNoteTitle: '%title%',
-    parsableArticleNote: `[[ReadItLater]] [[Article]]\n\n# [%articleTitle%](%articleURL%)\n\n%articleContent%`,
+    parsableArticleNote: '[[ReadItLater]] [[Article]]\n\n# [%articleTitle%](%articleURL%)\n\n%articleContent%',
     notParseableArticleNoteTitle: 'Article %date%',
-    notParsableArticleNote: `[[ReadItLater]] [[Article]]\n\n[%articleURL%](%articleURL%)`,
+    notParsableArticleNote: '[[ReadItLater]] [[Article]]\n\n[%articleURL%](%articleURL%)',
     textSnippetNoteTitle: 'Note %date%',
-    textSnippetNote: `[[ReadItLater]] [[Textsnippet]]\n\n%content%`,
+    textSnippetNote: '[[ReadItLater]] [[Textsnippet]]\n\n%content%',
     mastodonNoteTitle: 'Toot from %tootAuthorName% (%date%)',
-    mastodonNote: `[[ReadItLater]] [[Toot]]\n\n# [%tootAuthorName%](%tootURL%)\n\n> %tootContent%`,
+    mastodonNote: '[[ReadItLater]] [[Toot]]\n\n# [%tootAuthorName%](%tootURL%)\n\n> %tootContent%',
     downloadImages: true,
     downloadImagesInArticleDir: false,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',
@@ -55,5 +60,11 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     downloadMastodonMediaAttachments: true,
     downloadMastodonMediaAttachmentsInDir: false,
     saveMastodonReplies: false,
-    mastodonReply: `[%tootAuthorName%](%tootURL%)\n\n> %tootContent%`,
+    mastodonReply: '[%tootAuthorName%](%tootURL%)\n\n> %tootContent%',
+    stackExchangeNoteTitle: '%title%',
+    stackExchangeNote:
+        '[[ReadItLater]] [[StackExchange]]\n\n# [%questionTitle%](%questionURL%)\n\nAuthor: [%authorName%](%authorProfileURL%)\n\n%questionContent%\n\n***\n\n%topAnswer%\n\n%answers%',
+    stackExchangeAnswer: 'Author: [%authorName%](%authorProfileURL%)\n\n%answerContent%',
+    downloadStackExchangeAssets: true,
+    downloadStackExchangeAssetsInDir: true,
 };

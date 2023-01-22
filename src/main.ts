@@ -1,4 +1,4 @@
-import { addIcon, normalizePath, Notice, Plugin } from 'obsidian';
+import { Notice, Plugin, addIcon, normalizePath } from 'obsidian';
 import { checkAndCreateFolder, normalizeFilename } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
@@ -7,6 +7,7 @@ import YoutubeParser from './parsers/YoutubeParser';
 import VimeoParser from './parsers/VimeoParser';
 import BilibiliParser from './parsers/BilibiliParser';
 import TwitterParser from './parsers/TwitterParser';
+import StackExchangeParser from './parsers/StackExchangeParser';
 import WebsiteParser from './parsers/WebsiteParser';
 import TextSnippetParser from './parsers/TextSnippetParser';
 import MastodonParser from './parsers/MastodonParser';
@@ -23,6 +24,7 @@ export default class ReadItLaterPlugin extends Plugin {
             new VimeoParser(this.app, this.settings),
             new BilibiliParser(this.app, this.settings),
             new TwitterParser(this.app, this.settings),
+            new StackExchangeParser(this.app, this.settings),
             new MastodonParser(this.app, this.settings),
             new WebsiteParser(this.app, this.settings),
             new TextSnippetParser(this.app, this.settings),

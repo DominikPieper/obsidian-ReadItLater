@@ -374,7 +374,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc('Available variables: %date%')
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to 'Article %date%'`)
+                    .setPlaceholder("Defaults to 'Article %date%'")
                     .setValue(
                         this.plugin.settings.notParseableArticleNoteTitle ||
                             DEFAULT_SETTINGS.notParseableArticleNoteTitle,
@@ -406,7 +406,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc('Available variables: %date%')
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to 'Note %date%'`)
+                    .setPlaceholder("Defaults to 'Note %date%'")
                     .setValue(this.plugin.settings.textSnippetNoteTitle || DEFAULT_SETTINGS.textSnippetNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.textSnippetNoteTitle = value;
