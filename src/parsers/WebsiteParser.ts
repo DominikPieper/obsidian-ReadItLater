@@ -1,10 +1,10 @@
-import { Parser } from './Parser';
-import { Note } from './Note';
 import { App, Notice, Platform, request } from 'obsidian';
-import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
-import { ReadItLaterSettings } from '../settings';
 import * as DOMPurify from 'isomorphic-dompurify';
+import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
+import { ReadItLaterSettings } from '../settings';
+import { Note } from './Note';
+import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
 
 type Article = {

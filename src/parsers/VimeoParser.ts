@@ -1,5 +1,5 @@
-import { ReadItLaterSettings } from '../settings';
 import { App, request } from 'obsidian';
+import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
 

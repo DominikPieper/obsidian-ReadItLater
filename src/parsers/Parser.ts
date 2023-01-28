@@ -1,6 +1,6 @@
-import { Note } from './Note';
 import { App, moment } from 'obsidian';
 import { ReadItLaterSettings } from '../settings';
+import { Note } from './Note';
 
 export abstract class Parser {
     protected settings: ReadItLaterSettings;

@@ -1,6 +1,6 @@
-import { Parser } from './Parser';
-import { ReadItLaterSettings } from '../settings';
 import { App, request } from 'obsidian';
+import { ReadItLaterSettings } from '../settings';
+import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
 

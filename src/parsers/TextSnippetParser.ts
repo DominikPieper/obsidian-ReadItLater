@@ -1,7 +1,7 @@
-import { Parser } from './Parser';
-import { ReadItLaterSettings } from '../settings';
-import { Note } from './Note';
 import { App } from 'obsidian';
+import { ReadItLaterSettings } from '../settings';
+import { Parser } from './Parser';
+import { Note } from './Note';
 
 class TextSnippetParser extends Parser {
     constructor(app: App, settings: ReadItLaterSettings) {

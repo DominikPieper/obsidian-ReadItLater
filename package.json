@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs development",
     "build": "node esbuild.config.mjs production",
-    "lint": "eslint . --ext .ts  --fix"
+    "lint": "eslint ./src --fix"
   },
   "keywords": [],
   "author": "Dominik Pieper",
@@ -16,10 +16,12 @@
     "@types/spark-md5": "^3.0.2",
     "@types/turndown": "^5.0.1",
     "@typescript-eslint/eslint-plugin": "^5.30.7",
+    "@typescript-eslint/parser": "^5.49.0",
     "builtin-modules": "^3.3.0",
     "esbuild": "0.16.14",
-    "eslint": "8.20.0",
-    "eslint-config-prettier": "^8.5.0",
+    "eslint": "^8.20.0",
+    "eslint-config-prettier": "^8.6.0",
+    "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-prettier": "^4.2.1",
     "isomorphic-dompurify": "^0.20.0",
     "obsidian": "^0.15.4",

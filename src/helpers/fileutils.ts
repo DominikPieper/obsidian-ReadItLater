@@ -1,5 +1,5 @@
-import { normalizePath } from 'obsidian';
 import path from 'path';
+import { normalizePath } from 'obsidian';
 
 export function isValidUrl(url: string): boolean {
     try {
