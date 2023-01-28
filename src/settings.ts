@@ -64,7 +64,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     stackExchangeNoteTitle: '%title%',
     stackExchangeNote:
         '[[ReadItLater]] [[StackExchange]]\n\n# [%questionTitle%](%questionURL%)\n\nAuthor: [%authorName%](%authorProfileURL%)\n\n%questionContent%\n\n***\n\n%topAnswer%\n\n%answers%',
-    stackExchangeAnswer: 'Author: [%authorName%](%authorProfileURL%)\n\n%answerContent%',
+    stackExchangeAnswer: 'Answered by: [%authorName%](%authorProfileURL%)\n\n%answerContent%',
     downloadStackExchangeAssets: true,
-    downloadStackExchangeAssetsInDir: true,
+    downloadStackExchangeAssetsInDir: false,
 };

@@ -204,6 +204,88 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
+        containerEl.createEl('h2', {text: 'Stack Exchange'});
+
+        new Setting(containerEl)
+            .setName('Stack Exchange note title template')
+            .setDesc('Available variables: %title%, %date%')
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(this.plugin.settings.stackExchangeNoteTitle || DEFAULT_SETTINGS.stackExchangeNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.stackExchangeNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Stack Exchange question note template')
+            .setDesc('Available variables: %date%, %questionTitle%, %questionURL%, %authorName%, %authorProfileURL%, %questionContent%, %topAnswer%, %answers%')
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.stackExchangeNote || DEFAULT_SETTINGS.stackExchangeNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.stackExchangeNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
+            .setName('Stack Exchange answer template')
+            .setDesc('Available variables: %date%, %answerContent%, %authorName%, %authorProfileURL%')
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.stackExchangeAnswer || DEFAULT_SETTINGS.stackExchangeAnswer)
+                    .onChange(async (value) => {
+                        this.plugin.settings.stackExchangeAnswer = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
+            .setName('Download media attachments')
+            .setDesc(
+                'If enabled, media attachments are downloaded to the assets folder (only Desktop App feature)',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadStackExchangeAssets')
+                            ? this.plugin.settings.downloadStackExchangeAssets
+                            : DEFAULT_SETTINGS.downloadStackExchangeAssets,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadStackExchangeAssets = value;
+                        stackExchangeMediaAttachmentsInDirSetting.setDisabled(!value);
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        const stackExchangeMediaAttachmentsInDirSetting = new Setting(containerEl)
+            .setName('Download media attachments to folder')
+            .setDesc('If enabled, the media attachments are stored in their own folder.')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(
+                            this.plugin.settings,
+                            'downloadStackExchangeAssetsInDir',
+                        )
+                            ? this.plugin.settings.downloadStackExchangeAssetsInDir
+                            : DEFAULT_SETTINGS.downloadStackExchangeAssetsInDir,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadStackExchangeAssetsInDir = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+
         containerEl.createEl('h2', { text: 'Mastodon' });
 
         new Setting(containerEl)

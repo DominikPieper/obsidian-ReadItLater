@@ -8,6 +8,7 @@
     - [Vimeo](#vimeo)
     - [Bilibili](#bilibili)
     - [Twitter](#twitter)
+    - [Stack Exchange](#stack-exchange)
     - [Mastodon](#mastodon)
     - [Website URL](#website-url)
     - [Text Snippet](#text-snippet)
@@ -95,6 +96,37 @@ Will be converted to markdown note with data from [Twitter Publish API](https://
 | %date%                    | Current date in format from plugin settings |
 | %tweetURL%                | Twitter Publish API                         |
 | %tweetContent%            | Twitter Publish API                         |
+
+### Stack Exchange
+
+Will be converted to markdown with parsed question and answers from DOM.
+
+| Title template variable | Retrieved from                              |
+| ----------------------- | ------------------------------------------- |
+| %title%                 | HTML element                                |
+| %date%                  | Current date in format from plugin settings |
+
+***Note template variables***
+
+| Content template variable | Retrieved from                              |
+| ------------------------- | ------------------------------------------- |
+| %date%                    | Current date in format from plugin settings |
+| %questionTitle%           | HTML element                                |
+| %questionURL%             | HTML element                                |
+| %questionContent%         | HTML element                                |
+| %authorName%              | HTML element                                |
+| %authorProfileURL         | HTML element                                |
+| %topAnswer%               | HTML element                                |
+| %answers%                 | HTML elements                               |
+
+***Partial answer template variables***
+
+| Content template variable | Retrieved from                              |
+| ------------------------- | ------------------------------------------- |
+| %date%                    | Current date in format from plugin settings |
+| %answerContent%           | HTML element                                |
+| %authorName%              | HTML element                                |
+| %authorProfileURL         | HTML element                                |
 
 ### Mastodon
 
