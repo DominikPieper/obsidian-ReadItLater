@@ -1,9 +1,9 @@
-import { Parser } from './Parser';
-import { Note } from './Note';
 import { App, Platform, request } from 'obsidian';
+import * as DOMPurify from 'isomorphic-dompurify';
 import { normalizeFilename, replaceImages } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
-import * as DOMPurify from 'isomorphic-dompurify';
+import { Parser } from './Parser';
+import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
 
 interface StackExchangeQuestion {

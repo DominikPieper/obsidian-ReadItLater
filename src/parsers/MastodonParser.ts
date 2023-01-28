@@ -1,8 +1,8 @@
-import { Parser } from './Parser';
-import { ReadItLaterSettings } from '../settings';
 import { App, Platform, request } from 'obsidian';
-import { Note } from './Note';
+import { ReadItLaterSettings } from '../settings';
 import { isValidUrl, normalizeFilename, replaceImages } from '../helpers';
+import { Parser } from './Parser';
+import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
 
 const MASTODON_API = {

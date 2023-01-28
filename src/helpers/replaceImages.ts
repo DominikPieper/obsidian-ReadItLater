@@ -1,5 +1,5 @@
-import { App, DataAdapter } from 'obsidian';
 import { basename } from 'path';
+import { App, DataAdapter } from 'obsidian';
 import { isValidUrl, normalizeFilename, pathJoin } from './fileutils';
 import { checkAndCreateFolder } from './checkAndCreateFolder';
 import { downloadImage } from './downloadImage';
