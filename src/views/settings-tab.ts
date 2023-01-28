@@ -204,7 +204,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        containerEl.createEl('h2', {text: 'Stack Exchange'});
+        containerEl.createEl('h2', { text: 'Stack Exchange' });
 
         new Setting(containerEl)
             .setName('Stack Exchange note title template')
@@ -221,7 +221,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Stack Exchange question note template')
-            .setDesc('Available variables: %date%, %questionTitle%, %questionURL%, %authorName%, %authorProfileURL%, %questionContent%, %topAnswer%, %answers%')
+            .setDesc(
+                'Available variables: %date%, %questionTitle%, %questionURL%, %authorName%, %authorProfileURL%, %questionContent%, %topAnswer%, %answers%',
+            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.stackExchangeNote || DEFAULT_SETTINGS.stackExchangeNote)
@@ -249,9 +251,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Download media attachments')
-            .setDesc(
-                'If enabled, media attachments are downloaded to the assets folder (only Desktop App feature)',
-            )
+            .setDesc('If enabled, media attachments are downloaded to the assets folder (only Desktop App feature)')
             .addToggle((toggle) =>
                 toggle
                     .setValue(
@@ -272,10 +272,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        Object.prototype.hasOwnProperty.call(
-                            this.plugin.settings,
-                            'downloadStackExchangeAssetsInDir',
-                        )
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadStackExchangeAssetsInDir')
                             ? this.plugin.settings.downloadStackExchangeAssetsInDir
                             : DEFAULT_SETTINGS.downloadStackExchangeAssetsInDir,
                     )
@@ -284,7 +281,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
-
 
         containerEl.createEl('h2', { text: 'Mastodon' });
 
