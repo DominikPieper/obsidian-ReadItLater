@@ -12,9 +12,11 @@
     "allowSyntheticDefaultImports": true,
     "lib": [
       "dom",
+      "dom.iterable",
       "es5",
-      "scripthost",
-      "es2015"
+      "es6",
+      "es7",
+      "scripthost"
     ]
   },
   "include": [

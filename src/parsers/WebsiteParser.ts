@@ -2,7 +2,7 @@ import { Parser } from './Parser';
 import { Note } from './Note';
 import { App, Notice, Platform, request } from 'obsidian';
 import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
-import { isProbablyReaderable, Readability } from '@mozilla/readability';
+import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import { ReadItLaterSettings } from '../settings';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { parseHtmlContent } from './parsehtml';

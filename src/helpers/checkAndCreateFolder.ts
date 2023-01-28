@@ -1,4 +1,4 @@
-import { normalizePath, TFolder, Vault } from 'obsidian';
+import { TFolder, Vault, normalizePath } from 'obsidian';
 
 /**
  * Open or create a folderpath if it does not exist
