@@ -18,7 +18,7 @@ interface YoutubeChannel {
 }
 
 class YoutubeParser extends Parser {
-    private PATTERN = /(youtube.com|youtu.be)\/(watch)?(\?v=)?(\S+)?/;
+    private PATTERN = /(youtube.com|youtu.be)\/(watch|shorts)?(\?v=|\/)?(\S+)?/;
 
     constructor(app: App, settings: ReadItLaterSettings) {
         super(app, settings);
