@@ -116,6 +116,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
+        new Setting(containerEl)
+            .setName('Youtube Data API v3 key')
+            .setDesc('If entered, additional template variables are available')
+            .addText((text) =>
+                text
+                    .setPlaceholder('')
+                    .setValue(this.plugin.settings.youtubeApiKey || DEFAULT_SETTINGS.youtubeApiKey)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeApiKey = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
         containerEl.createEl('h2', { text: 'Vimeo' });
 
         new Setting(containerEl)
