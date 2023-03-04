@@ -54,6 +54,7 @@ Because of HTML DOM parsing limitations, additional data can be fetched only fro
 | %videoDurationFormatted%  | Google API response |
 | %videoThumbnail%          | Google API response |
 | %videoTags%               | Google API response |
+| %videoViewsCount%         | Google API response |
 
 ### Vimeo
 
