@@ -45,6 +45,16 @@ Will be converted to note with embeded player in `<iframe>`.
 | %channelName%             | Schema.org markup                           |
 | %channelURL%              | Schema.org markup                           |
 
+Because of HTML DOM parsing limitations, additional data can be fetched only from [Google API](https://developers.google.com/youtube/v3/getting-started). If API key is provided, these additional template variables are available.
+
+| Content template variable | Retrieved from      |
+| ------------------------- | ------------------- |
+| %videoDescription%        | Google API response |
+| %videoDuration%           | Google API response |
+| %videoDurationFormatted%  | Google API response |
+| %videoThumbnail%          | Google API response |
+| %videoTags%               | Google API response |
+
 ### Vimeo
 
 Will be converted to note with embeded player in `<iframe>`.

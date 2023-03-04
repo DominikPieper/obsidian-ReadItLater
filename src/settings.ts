@@ -31,6 +31,7 @@ export interface ReadItLaterSettings {
     stackExchangeAnswer: string;
     downloadStackExchangeAssets: boolean;
     downloadStackExchangeAssetsInDir: boolean;
+    youtubeApiKey: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -67,4 +68,5 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     stackExchangeAnswer: 'Answered by: [%authorName%](%authorProfileURL%)\n\n%answerContent%',
     downloadStackExchangeAssets: true,
     downloadStackExchangeAssetsInDir: false,
+    youtubeApiKey: '',
 };
