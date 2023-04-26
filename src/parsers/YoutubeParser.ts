@@ -106,7 +106,9 @@ class YoutubeParser extends Parser {
                 duration: toSeconds(duration),
                 durationFormatted: this.formatDuration(duration),
                 viewsCount: video.statistics.viewCount,
-                tags: video.hasOwnProperty('tags') ? video.snippet.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#')) : [],
+                tags: Object.prototype.hasOwnProperty.call(video, 'tags')
+                    ? video.snippet.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#'))
+                    : [],
                 channel: {
                     id: channel.id,
                     url: `https://www.youtube.com/channel/${channel.id}`,
