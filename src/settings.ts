@@ -32,6 +32,8 @@ export interface ReadItLaterSettings {
     downloadStackExchangeAssets: boolean;
     downloadStackExchangeAssetsInDir: boolean;
     youtubeApiKey: string;
+    tikTokNoteTitle: string;
+    tikTokNote: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -69,4 +71,6 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     downloadStackExchangeAssets: true,
     downloadStackExchangeAssetsInDir: false,
     youtubeApiKey: '',
+    tikTokNoteTitle: 'TikTok from %authorName% (%date%)',
+    tikTokNote: '[[ReadItLater]] [[TikTok]]\n\n%videoDescription%\n\n[%videoURL%](%videoURL%)\n\n%videoPlayer%',
 };

@@ -11,6 +11,7 @@ import StackExchangeParser from './parsers/StackExchangeParser';
 import WebsiteParser from './parsers/WebsiteParser';
 import TextSnippetParser from './parsers/TextSnippetParser';
 import MastodonParser from './parsers/MastodonParser';
+import TikTokParser from './parsers/TikTokParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -26,6 +27,7 @@ export default class ReadItLaterPlugin extends Plugin {
             new TwitterParser(this.app, this.settings),
             new StackExchangeParser(this.app, this.settings),
             new MastodonParser(this.app, this.settings),
+            new TikTokParser(this.app, this.settings),
             new WebsiteParser(this.app, this.settings),
             new TextSnippetParser(this.app, this.settings),
         ];
