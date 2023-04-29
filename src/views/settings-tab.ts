@@ -392,6 +392,37 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
+        containerEl.createEl('h2', { text: 'TikTok' });
+
+        new Setting(containerEl)
+            .setName('TikTok note title template')
+            .setDesc('Available variables: %authorName%, %date%')
+            .addText((text) =>
+                text
+                    .setPlaceholder('TikTok from %authorName% (%date%)')
+                    .setValue(this.plugin.settings.tikTokNoteTitle || DEFAULT_SETTINGS.tikTokNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.tikTokNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('TikTok note template')
+            .setDesc(
+                'Available variables: %date%, %videoDescription%, %videoURL%, %videoId%, %videoPlayer%, %authorName%, %authorURL%',
+            )
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.tikTokNote || DEFAULT_SETTINGS.tikTokNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.tikTokNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
         containerEl.createEl('h2', { text: 'Readable Article' });
 
         new Setting(containerEl)
