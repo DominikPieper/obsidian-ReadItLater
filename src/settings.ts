@@ -88,5 +88,5 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     tikTokNoteTitle: 'TikTok from %authorName% (%date%)',
     tikTokNote: '[[ReadItLater]] [[TikTok]]\n\n%videoDescription%\n\n[%videoURL%](%videoURL%)\n\n%videoPlayer%',
     tikTokEmbedWidth: '325',
-    tikTokEmbedHeight: '760'
+    tikTokEmbedHeight: '760',
 };

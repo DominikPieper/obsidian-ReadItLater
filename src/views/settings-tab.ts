@@ -129,29 +129,25 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
-            .setName('Youtube embed player width')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedWidth)
-                    .setValue(this.plugin.settings.youtubeEmbedWidth || DEFAULT_SETTINGS.youtubeEmbedWidth)
-                    .onChange(async (value) => {
-                        this.plugin.settings.youtubeEmbedWidth = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('Youtube embed player width').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedWidth)
+                .setValue(this.plugin.settings.youtubeEmbedWidth || DEFAULT_SETTINGS.youtubeEmbedWidth)
+                .onChange(async (value) => {
+                    this.plugin.settings.youtubeEmbedWidth = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
-        new Setting(containerEl)
-            .setName('Youtube embed player height')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedHeight)
-                    .setValue(this.plugin.settings.youtubeEmbedHeight || DEFAULT_SETTINGS.youtubeEmbedHeight)
-                    .onChange(async (value) => {
-                        this.plugin.settings.youtubeEmbedHeight = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('Youtube embed player height').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedHeight)
+                .setValue(this.plugin.settings.youtubeEmbedHeight || DEFAULT_SETTINGS.youtubeEmbedHeight)
+                .onChange(async (value) => {
+                    this.plugin.settings.youtubeEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
         containerEl.createEl('h2', { text: 'Vimeo' });
 
@@ -184,29 +180,25 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
-            .setName('Vimeo embed player width')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedWidth)
-                    .setValue(this.plugin.settings.vimeoEmbedWidth || DEFAULT_SETTINGS.vimeoEmbedWidth)
-                    .onChange(async (value) => {
-                        this.plugin.settings.vimeoEmbedWidth = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('Vimeo embed player width').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedWidth)
+                .setValue(this.plugin.settings.vimeoEmbedWidth || DEFAULT_SETTINGS.vimeoEmbedWidth)
+                .onChange(async (value) => {
+                    this.plugin.settings.vimeoEmbedWidth = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
-        new Setting(containerEl)
-            .setName('Vimeo embed player height')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedHeight)
-                    .setValue(this.plugin.settings.vimeoEmbedHeight || DEFAULT_SETTINGS.vimeoEmbedHeight)
-                    .onChange(async (value) => {
-                        this.plugin.settings.vimeoEmbedHeight = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('Vimeo embed player height').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedHeight)
+                .setValue(this.plugin.settings.vimeoEmbedHeight || DEFAULT_SETTINGS.vimeoEmbedHeight)
+                .onChange(async (value) => {
+                    this.plugin.settings.vimeoEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
         containerEl.createEl('h2', { text: 'Bilibili' });
 
@@ -237,29 +229,25 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
-            .setName('Bilibili embed player width')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedWidth)
-                    .setValue(this.plugin.settings.bilibiliEmbedWidth || DEFAULT_SETTINGS.bilibiliEmbedWidth)
-                    .onChange(async (value) => {
-                        this.plugin.settings.bilibiliEmbedWidth = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('Bilibili embed player width').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedWidth)
+                .setValue(this.plugin.settings.bilibiliEmbedWidth || DEFAULT_SETTINGS.bilibiliEmbedWidth)
+                .onChange(async (value) => {
+                    this.plugin.settings.bilibiliEmbedWidth = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
-        new Setting(containerEl)
-            .setName('Bilibili embed player height')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedHeight)
-                    .setValue(this.plugin.settings.bilibiliEmbedHeight || DEFAULT_SETTINGS.bilibiliEmbedHeight)
-                    .onChange(async (value) => {
-                        this.plugin.settings.bilibiliEmbedHeight = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('Bilibili embed player height').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedHeight)
+                .setValue(this.plugin.settings.bilibiliEmbedHeight || DEFAULT_SETTINGS.bilibiliEmbedHeight)
+                .onChange(async (value) => {
+                    this.plugin.settings.bilibiliEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
         containerEl.createEl('h2', { text: 'Twitter' });
 
@@ -495,29 +483,25 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
-            .setName('TikTok embed player width')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.tikTokEmbedWidth)
-                    .setValue(this.plugin.settings.tikTokEmbedWidth || DEFAULT_SETTINGS.tikTokEmbedWidth)
-                    .onChange(async (value) => {
-                        this.plugin.settings.tikTokEmbedWidth = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('TikTok embed player width').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.tikTokEmbedWidth)
+                .setValue(this.plugin.settings.tikTokEmbedWidth || DEFAULT_SETTINGS.tikTokEmbedWidth)
+                .onChange(async (value) => {
+                    this.plugin.settings.tikTokEmbedWidth = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
-        new Setting(containerEl)
-            .setName('TikTok embed player height')
-            .addText((text) =>
-                text
-                    .setPlaceholder(DEFAULT_SETTINGS.tikTokEmbedHeight)
-                    .setValue(this.plugin.settings.tikTokEmbedHeight || DEFAULT_SETTINGS.tikTokEmbedHeight)
-                    .onChange(async (value) => {
-                        this.plugin.settings.tikTokEmbedHeight = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+        new Setting(containerEl).setName('TikTok embed player height').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.tikTokEmbedHeight)
+                .setValue(this.plugin.settings.tikTokEmbedHeight || DEFAULT_SETTINGS.tikTokEmbedHeight)
+                .onChange(async (value) => {
+                    this.plugin.settings.tikTokEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
 
         containerEl.createEl('h2', { text: 'Readable Article' });
 
