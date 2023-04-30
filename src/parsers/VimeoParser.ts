@@ -83,7 +83,7 @@ class VimeoParser extends Parser {
             id: videoIdRegexExec.length === 3 ? videoIdRegexExec[2] : '',
             url: videoSchema?.url ?? '',
             title: videoSchema?.name ?? '',
-            player: `<iframe width="560" height="315" src="${videoSchema?.embedUrl}" title="Vimeo video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
+            player: `<iframe width="${this.settings.vimeoEmbedWidth}" height="${this.settings.vimeoEmbedHeight}" src="${videoSchema?.embedUrl}" title="Vimeo video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
             channel: {
                 name: videoSchema?.author?.name ?? '',
                 url: videoSchema?.author?.url ?? '',
