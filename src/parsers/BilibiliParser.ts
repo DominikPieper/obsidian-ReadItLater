@@ -26,7 +26,7 @@ class BilibiliParser extends Parser {
         const videoHTML = new DOMParser().parseFromString(response, 'text/html');
         const videoTitle = videoHTML.querySelector("[property~='og:title']").getAttribute('content');
         const videoId = this.PATTERN.exec(url)[3];
-        const videoPlayer = `<iframe width="560" height="315" src="https://player.bilibili.com/player.html?bvid=${videoId}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`;
+        const videoPlayer = `<iframe width="${this.settings.bilibiliEmbedWidth}" height="${this.settings.bilibiliEmbedHeight}" src="https://player.bilibili.com/player.html?bvid=${videoId}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`;
 
         const content = this.settings.bilibiliNote
             .replace(/%date%/g, this.getFormattedDateForContent())

@@ -64,7 +64,7 @@ class TikTokParser extends Parser {
             id: videoRegexExec[4],
             url: videoHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') ?? url,
             description: videoHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') ?? '',
-            player: `<iframe width="325" height="760" src="https://www.tiktok.com/embed/v2/${videoRegexExec[4]}"></iframe>`,
+            player: `<iframe width="${this.settings.tikTokEmbedWidth}" height="${this.settings.tikTokEmbedHeight}" src="https://www.tiktok.com/embed/v2/${videoRegexExec[4]}"></iframe>`,
             author: {
                 name: videoRegexExec[2],
                 url: `https://www.tiktok.com/${videoRegexExec[2]}`,

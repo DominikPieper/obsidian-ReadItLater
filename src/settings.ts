@@ -4,10 +4,16 @@ export interface ReadItLaterSettings {
     openNewNote: boolean;
     youtubeNoteTitle: string;
     youtubeNote: string;
+    youtubeEmbedWidth: string;
+    youtubeEmbedHeight: string;
     vimeoNoteTitle: string;
     vimeoNote: string;
+    vimeoEmbedWidth: string;
+    vimeoEmbedHeight: string;
     bilibiliNoteTitle: string;
     bilibiliNote: string;
+    bilibiliEmbedWidth: string;
+    bilibiliEmbedHeight: string;
     twitterNoteTitle: string;
     twitterNote: string;
     parseableArticleNoteTitle: string;
@@ -34,6 +40,8 @@ export interface ReadItLaterSettings {
     youtubeApiKey: string;
     tikTokNoteTitle: string;
     tikTokNote: string;
+    tikTokEmbedWidth: string;
+    tikTokEmbedHeight: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -42,10 +50,16 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     openNewNote: false,
     youtubeNoteTitle: 'Youtube - %title%',
     youtubeNote: '[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
+    youtubeEmbedWidth: '560',
+    youtubeEmbedHeight: '315',
     vimeoNoteTitle: 'Vimeo - %title%',
     vimeoNote: '[[ReadItLater]] [[Vimeo]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
+    vimeoEmbedWidth: '560',
+    vimeoEmbedHeight: '315',
     bilibiliNoteTitle: 'Bilibili - %title%',
     bilibiliNote: '[[ReadItLater]] [[Bilibili]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
+    bilibiliEmbedWidth: '560',
+    bilibiliEmbedHeight: '315',
     twitterNoteTitle: 'Tweet from %tweetAuthorName% (%date%)',
     twitterNote: '[[ReadItLater]] [[Tweet]]\n\n# [%tweetAuthorName%](%tweetURL%)\n\n%tweetContent%',
     parseableArticleNoteTitle: '%title%',
@@ -73,4 +87,6 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeApiKey: '',
     tikTokNoteTitle: 'TikTok from %authorName% (%date%)',
     tikTokNote: '[[ReadItLater]] [[TikTok]]\n\n%videoDescription%\n\n[%videoURL%](%videoURL%)\n\n%videoPlayer%',
+    tikTokEmbedWidth: '325',
+    tikTokEmbedHeight: '760'
 };
