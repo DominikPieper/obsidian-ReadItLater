@@ -85,6 +85,24 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
+        new Setting(containerEl)
+            .setName('Extend share menu')
+            .setDesc(
+                'If enabled, share menu will be extended with shortcut to create note directly from it. Requires plugin reload or Obsidian restart to apply change.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'extendShareMenu')
+                            ? this.plugin.settings.extendShareMenu
+                            : DEFAULT_SETTINGS.extendShareMenu,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.extendShareMenu = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
         containerEl.createEl('h2', { text: 'YouTube' });
 
         new Setting(containerEl)

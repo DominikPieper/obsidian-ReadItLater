@@ -1,8 +1,7 @@
-import { Notice, Plugin, addIcon, normalizePath } from 'obsidian';
+import { Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
 import { checkAndCreateFolder, normalizeFilename } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
-import { Parser } from './parsers/Parser';
 import YoutubeParser from './parsers/YoutubeParser';
 import VimeoParser from './parsers/VimeoParser';
 import BilibiliParser from './parsers/BilibiliParser';
@@ -12,15 +11,16 @@ import WebsiteParser from './parsers/WebsiteParser';
 import TextSnippetParser from './parsers/TextSnippetParser';
 import MastodonParser from './parsers/MastodonParser';
 import TikTokParser from './parsers/TikTokParser';
+import ParserCreator from './parsers/ParserCreator';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
 
-    private parsers: Parser[];
+    private parserCreator: ParserCreator;
 
     async onload(): Promise<void> {
         await this.loadSettings();
-        this.parsers = [
+        this.parserCreator = new ParserCreator([
             new YoutubeParser(this.app, this.settings),
             new VimeoParser(this.app, this.settings),
             new BilibiliParser(this.app, this.settings),
@@ -30,7 +30,7 @@ export default class ReadItLaterPlugin extends Plugin {
             new TikTokParser(this.app, this.settings),
             new WebsiteParser(this.app, this.settings),
             new TextSnippetParser(this.app, this.settings),
-        ];
+        ]);
 
         addIcon('read-it-later', clipboardIcon);
 
@@ -47,6 +47,20 @@ export default class ReadItLaterPlugin extends Plugin {
         });
 
         this.addSettingTab(new ReadItLaterSettingsTab(this.app, this));
+
+        if (this.settings.extendShareMenu) {
+            this.registerEvent(
+                //eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                //@ts-ignore
+                this.app.workspace.on('receive-text-menu', (menu: Menu, shareText: string) => {
+                    menu.addItem((item: MenuItem) => {
+                        item.setTitle('ReadItLater');
+                        item.setIcon('read-it-later');
+                        item.onClick(() => this.processContent(shareText));
+                    });
+                }),
+            );
+        }
     }
 
     async loadSettings(): Promise<void> {
@@ -59,14 +73,17 @@ export default class ReadItLaterPlugin extends Plugin {
 
     async processClipboard(): Promise<void> {
         const clipboardContent = await navigator.clipboard.readText();
+        const parser = await this.parserCreator.createParser(clipboardContent);
 
-        for (const parser of this.parsers) {
-            if (await parser.test(clipboardContent)) {
-                const note = await parser.prepareNote(clipboardContent);
-                await this.writeFile(note.fileName, note.content);
-                break;
-            }
-        }
+        const note = await parser.prepareNote(clipboardContent);
+        await this.writeFile(note.fileName, note.content);
+    }
+
+    async processContent(content: string): Promise<void> {
+        const parser = await this.parserCreator.createParser(content);
+
+        const note = await parser.prepareNote(content);
+        await this.writeFile(note.fileName, note.content);
     }
 
     async writeFile(fileName: string, content: string): Promise<void> {
