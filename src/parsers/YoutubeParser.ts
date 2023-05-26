@@ -149,7 +149,7 @@ class YoutubeParser extends Parser {
                 player: videoPlayer,
                 duration: 0,
                 durationFormatted: '',
-                pubDate: null,
+                pubDate: '',
                 viewsCount: 0,
                 tags: [],
                 channel: {
