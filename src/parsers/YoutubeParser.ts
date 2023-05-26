@@ -13,7 +13,7 @@ interface YoutubeVideo {
     thumbnail: string;
     duration: Number;
     durationFormatted: string;
-    pubDate: Date;
+    pubDate: string;
     player: string;
     viewsCount: Number;
     tags: string[];
