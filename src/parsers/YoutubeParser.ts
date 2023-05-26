@@ -1,4 +1,4 @@
-import { App, request } from 'obsidian';
+import { App, request, moment } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
 import { ReadItLaterSettings } from '../settings';
 import { handleError } from '../helpers';
@@ -13,6 +13,7 @@ interface YoutubeVideo {
     thumbnail: string;
     duration: Number;
     durationFormatted: string;
+    pubDate: Date;
     player: string;
     viewsCount: Number;
     tags: string[];
@@ -48,6 +49,7 @@ class YoutubeParser extends Parser {
             .replace(/%videoThumbnail%/g, video.thumbnail)
             .replace(/%videoDuration%/g, video.duration.toString())
             .replace(/%videoDurationFormatted%/g, video.durationFormatted)
+            .replace(/%videoPublishDate%/g, video.pubDate.toString())
             .replace(/%videoViewsCount%/g, video.viewsCount.toString())
             .replace(/%videoURL%/g, video.url)
             .replace(/%channelId%/g, video.channel.id)
@@ -105,6 +107,7 @@ class YoutubeParser extends Parser {
                 player: videoPlayer,
                 duration: toSeconds(duration),
                 durationFormatted: this.formatDuration(duration),
+                pubDate: moment(video.snippet.publishedAt).format(this.settings.dateContentFmt),
                 viewsCount: video.statistics.viewCount,
                 tags: Object.prototype.hasOwnProperty.call(video, 'tags')
                     ? video.snippet.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#'))
@@ -146,6 +149,7 @@ class YoutubeParser extends Parser {
                 player: videoPlayer,
                 duration: 0,
                 durationFormatted: '',
+                pubDate: null,
                 viewsCount: 0,
                 tags: [],
                 channel: {
