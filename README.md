@@ -53,6 +53,7 @@ Because of HTML DOM parsing limitations, additional data can be fetched only fro
 | %videoDescription%        | Google API response |
 | %videoDuration%           | Google API response |
 | %videoDurationFormatted%  | Google API response |
+| %videoPublishDate%        | Google API response |
 | %videoThumbnail%          | Google API response |
 | %videoTags%               | Google API response |
 | %videoViewsCount%         | Google API response |
