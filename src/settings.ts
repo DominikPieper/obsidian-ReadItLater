@@ -6,6 +6,7 @@ export interface ReadItLaterSettings {
     youtubeNote: string;
     youtubeEmbedWidth: string;
     youtubeEmbedHeight: string;
+    youtubeDescTagEscape: boolean;
     vimeoNoteTitle: string;
     vimeoNote: string;
     vimeoEmbedWidth: string;
@@ -53,6 +54,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeNote: '[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
     youtubeEmbedWidth: '560',
     youtubeEmbedHeight: '315',
+    youtubeDescTagEscape: false,
     vimeoNoteTitle: 'Vimeo - %title%',
     vimeoNote: '[[ReadItLater]] [[Vimeo]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
     vimeoEmbedWidth: '560',

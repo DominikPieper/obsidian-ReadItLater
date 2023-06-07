@@ -136,7 +136,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Youtube Data API v3 key')
-            .setDesc('If entered, additional template variables are available')
+            .setDesc('If entered, these additional template variables are available: %videoDescription%, %videoDuration%, %videoDurationFormatted%, %videoPublishDate%, %videoThumbnail%, %videoTags%, %videoViewsCount%.')
             .addText((text) =>
                 text
                     .setPlaceholder('')
@@ -163,6 +163,24 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.youtubeEmbedHeight || DEFAULT_SETTINGS.youtubeEmbedHeight)
                 .onChange(async (value) => {
                     this.plugin.settings.youtubeEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
+
+        new Setting(containerEl)
+        .setName('Escape Tags in YouTube Description')
+        .setDesc(
+            'If enabled, any tags within the YouTube description will be escaped so they don\'t contribute to tags within your vault.',
+        )
+        .addToggle((toggle) =>
+            toggle
+                .setValue(
+                    Object.prototype.hasOwnProperty.call(this.plugin.settings, 'youtubeDescTagEscape')
+                        ? this.plugin.settings.youtubeDescTagEscape
+                        : DEFAULT_SETTINGS.youtubeDescTagEscape,
+                )
+                .onChange(async (value) => {
+                    this.plugin.settings.youtubeDescTagEscape = value;
                     await this.plugin.saveSettings();
                 }),
         );
