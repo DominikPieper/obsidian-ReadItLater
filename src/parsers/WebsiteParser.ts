@@ -60,11 +60,11 @@ class WebsiteParser extends Parser {
         return readableDocument?.content
             ? //eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore Until Readability release fix with correct types
-              await this.parsableArticle(this.app, readableDocument, originUrl.href, previewUrl)
+              this.parsableArticle(readableDocument, originUrl.href, previewUrl)
             : this.notParsableArticle(originUrl.href, previewUrl);
     }
 
-    private async parsableArticle(app: App, article: Article, url: string, previewUrl: string | null) {
+    private async parsableArticle(article: Article, url: string, previewUrl: string | null) {
         const title = article.title || 'No title';
         const siteName = article.siteName || '';
         const author = article.byline || '';
@@ -73,10 +73,6 @@ class WebsiteParser extends Parser {
         const fileNameTemplate = this.settings.parseableArticleNoteTitle
             .replace(/%title%/g, title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
-
-        const assetsDir = this.settings.downloadImagesInArticleDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
-            : this.settings.assetsDir;
 
         let processedContent = this.settings.parsableArticleNote
             .replace(/%date%/g, this.getFormattedDateForContent())
@@ -89,17 +85,17 @@ class WebsiteParser extends Parser {
             .replace(/%previewURL%/g, previewUrl || '');
 
         if (this.settings.downloadImages && Platform.isDesktop) {
-            processedContent = await replaceImages(app, processedContent, assetsDir);
+            processedContent = await this.replaceImages(fileNameTemplate, processedContent);
         }
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
     }
 
-    private notParsableArticle(url: string, previewUrl: string | null) {
+    private async notParsableArticle(url: string, previewUrl: string | null) {
         console.error('Website not parseable');
 
-        const content = this.settings.notParsableArticleNote
+        let content = this.settings.notParsableArticleNote
             .replace(/%articleURL%/g, url)
             .replace(/%previewURL%/g, previewUrl || '');
 
@@ -107,6 +103,10 @@ class WebsiteParser extends Parser {
             /%date%/g,
             this.getFormattedDateForFilename(),
         );
+
+        if (this.settings.downloadImages && Platform.isDesktop) {
+            content = await this.replaceImages(fileNameTemplate, content);
+        }
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
@@ -162,6 +162,18 @@ class WebsiteParser extends Parser {
             previewMetaElement = document.querySelector('meta[name="twitter:image"]');
         }
         return previewMetaElement?.getAttribute('content');
+    }
+
+    /**
+     * Replaces distant images by their locally downloaded counterparts.
+     * @param noteName The note name
+     * @param content The note content
+     */
+    private replaceImages(noteName: string, content: string) {
+        const assetsDir = this.settings.downloadImagesInArticleDir
+            ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
+            : this.settings.assetsDir;
+        return replaceImages(this.app, content, assetsDir);
     }
 }
 
