@@ -195,13 +195,14 @@ If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/a
 | %title%                 | `<title>` HTML element                      |
 | %date%                  | Current date in format from plugin settings |
 
-| Content template variable | Retrieved from                              |
-| ------------------------- | ------------------------------------------- |
-| %articleTitle%            | `<title>` HTML element                      |
-| %articleURL%              | URL from clipboard                          |
-| %articleReadingTime%      | Estimated reading time                      |
-| %articleContent%          | Parsed `<body>` HTML element                |
-| %date%                    | Current date in format from plugin settings |
+| Content template variable | Retrieved from                                                                                                                                                     |
+|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| %articleTitle%            | `<title>` HTML element                                                                                                                                             |
+| %articleURL%              | URL from clipboard                                                                                                                                                 |
+| %articleReadingTime%      | Estimated reading time                                                                                                                                             |
+| %articleContent%          | Parsed `<body>` HTML element                                                                                                                                       |
+| %date%                    | Current date in format from plugin settings                                                                                                                        |
+| %previewURL%              | Extracted from [OpenGraph](https://ogp.me/) or [Twitter](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup) image `<meta>` property |
 
 ### Text Snippet
 
