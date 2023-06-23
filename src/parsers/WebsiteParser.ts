@@ -68,7 +68,7 @@ class WebsiteParser extends Parser {
         const title = article.title || 'No title';
         const siteName = article.siteName || '';
         const author = article.byline || '';
-        let content = await parseHtmlContent(article.content);
+        const content = await parseHtmlContent(article.content);
 
         const fileNameTemplate = this.settings.parseableArticleNoteTitle
             .replace(/%title%/g, title)
@@ -78,11 +78,7 @@ class WebsiteParser extends Parser {
             ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
             : this.settings.assetsDir;
 
-        if (this.settings.downloadImages && Platform.isDesktop) {
-            content = await replaceImages(app, content, assetsDir);
-        }
-
-        const processedContent = this.settings.parsableArticleNote
+        let processedContent = this.settings.parsableArticleNote
             .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
@@ -91,6 +87,10 @@ class WebsiteParser extends Parser {
             .replace(/%siteName%/g, siteName)
             .replace(/%author%/g, author)
             .replace(/%previewURL%/g, previewUrl || '');
+
+        if (this.settings.downloadImages && Platform.isDesktop) {
+            processedContent = await replaceImages(app, processedContent, assetsDir);
+        }
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
