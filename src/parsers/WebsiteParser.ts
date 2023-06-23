@@ -53,16 +53,18 @@ class WebsiteParser extends Parser {
         if (!isProbablyReaderable(document)) {
             new Notice('@mozilla/readability considers this document to unlikely be readerable.');
         }
+
+        const previewUrl = this.extractPreviewUrl(document);
         const readableDocument = new Readability(document).parse();
 
         return readableDocument?.content
             ? //eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore Until Readability release fix with correct types
-              await this.parsableArticle(this.app, readableDocument, originUrl.href)
-            : this.notParsableArticle(originUrl.href);
+              await this.parsableArticle(this.app, readableDocument, originUrl.href, previewUrl)
+            : this.notParsableArticle(originUrl.href, previewUrl);
     }
 
-    private async parsableArticle(app: App, article: Article, url: string) {
+    private async parsableArticle(app: App, article: Article, url: string, previewUrl: string | null) {
         const title = article.title || 'No title';
         const siteName = article.siteName || '';
         const author = article.byline || '';
@@ -87,15 +89,19 @@ class WebsiteParser extends Parser {
             .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
             .replace(/%articleContent%/g, content)
             .replace(/%siteName%/g, siteName)
-            .replace(/%author%/g, author);
+            .replace(/%author%/g, author)
+            .replace(/%previewURL%/g, previewUrl || '');
+
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
     }
 
-    private notParsableArticle(url: string) {
+    private notParsableArticle(url: string, previewUrl: string | null) {
         console.error('Website not parseable');
 
-        const content = this.settings.notParsableArticleNote.replace('%articleURL%', url);
+        const content = this.settings.notParsableArticleNote
+            .replace(/%articleURL%/g, url)
+            .replace(/%previewURL%/g, previewUrl || '');
 
         const fileNameTemplate = this.settings.notParseableArticleNoteTitle.replace(
             /%date%/g,
@@ -143,6 +149,19 @@ class WebsiteParser extends Parser {
         ]);
 
         return readingSpeed.get(lang) || readingSpeed.get('en');
+    }
+
+    /**
+     * Extracts a preview URL from the document.
+     * Searches for OpenGraph `og:image` and Twitter `twitter:image` meta tags.
+     * @param document The document to extract preview URL from
+     */
+    private extractPreviewUrl(document: Document) {
+        let previewMetaElement = document.querySelector('meta[property="og:image"]');
+        if (previewMetaElement == null) {
+            previewMetaElement = document.querySelector('meta[name="twitter:image"]');
+        }
+        return previewMetaElement?.getAttribute('content');
     }
 }
 
