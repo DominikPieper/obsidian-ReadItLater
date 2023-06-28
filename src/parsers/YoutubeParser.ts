@@ -1,4 +1,4 @@
-import { App, request, moment } from 'obsidian';
+import { App, moment, request } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
 import { ReadItLaterSettings } from '../settings';
 import { handleError } from '../helpers';
@@ -130,13 +130,13 @@ class YoutubeParser extends Parser {
                 url,
                 headers: {
                     'user-agent':
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
                 },
             });
 
             const videoHTML = new DOMParser().parseFromString(response, 'text/html');
             const videoSchemaElement = videoHTML.querySelector('[itemtype="http://schema.org/VideoObject"]');
-            const videoId = videoSchemaElement?.querySelector('[itemprop="videoId"]')?.getAttribute('content') ?? '';
+            const videoId = videoSchemaElement?.querySelector('[itemprop="identifier"]')?.getAttribute('content') ?? '';
             const personSchemaElement = videoSchemaElement.querySelector('[itemtype="http://schema.org/Person"]');
             const videoPlayer = `<iframe width="${this.settings.youtubeEmbedWidth}" height="${this.settings.youtubeEmbedHeight}" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 
