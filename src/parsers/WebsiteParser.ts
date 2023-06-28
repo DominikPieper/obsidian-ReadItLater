@@ -53,54 +53,60 @@ class WebsiteParser extends Parser {
         if (!isProbablyReaderable(document)) {
             new Notice('@mozilla/readability considers this document to unlikely be readerable.');
         }
+
+        const previewUrl = this.extractPreviewUrl(document);
         const readableDocument = new Readability(document).parse();
 
         return readableDocument?.content
             ? //eslint-disable-next-line @typescript-eslint/ban-ts-comment
               // @ts-ignore Until Readability release fix with correct types
-              await this.parsableArticle(this.app, readableDocument, originUrl.href)
-            : this.notParsableArticle(originUrl.href);
+              this.parsableArticle(readableDocument, originUrl.href, previewUrl)
+            : this.notParsableArticle(originUrl.href, previewUrl);
     }
 
-    private async parsableArticle(app: App, article: Article, url: string) {
+    private async parsableArticle(article: Article, url: string, previewUrl: string | null) {
         const title = article.title || 'No title';
         const siteName = article.siteName || '';
         const author = article.byline || '';
-        let content = await parseHtmlContent(article.content);
+        const content = await parseHtmlContent(article.content);
 
         const fileNameTemplate = this.settings.parseableArticleNoteTitle
             .replace(/%title%/g, title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
-        const assetsDir = this.settings.downloadImagesInArticleDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
-            : this.settings.assetsDir;
-
-        if (this.settings.downloadImages && Platform.isDesktop) {
-            content = await replaceImages(app, content, assetsDir);
-        }
-
-        const processedContent = this.settings.parsableArticleNote
+        let processedContent = this.settings.parsableArticleNote
             .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, url)
             .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
             .replace(/%articleContent%/g, content)
             .replace(/%siteName%/g, siteName)
-            .replace(/%author%/g, author);
+            .replace(/%author%/g, author)
+            .replace(/%previewURL%/g, previewUrl || '');
+
+        if (this.settings.downloadImages && Platform.isDesktop) {
+            processedContent = await this.replaceImages(fileNameTemplate, processedContent);
+        }
+
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
     }
 
-    private notParsableArticle(url: string) {
+    private async notParsableArticle(url: string, previewUrl: string | null) {
         console.error('Website not parseable');
 
-        const content = this.settings.notParsableArticleNote.replace('%articleURL%', url);
+        let content = this.settings.notParsableArticleNote
+            .replace(/%articleURL%/g, url)
+            .replace(/%previewURL%/g, previewUrl || '');
 
         const fileNameTemplate = this.settings.notParseableArticleNoteTitle.replace(
             /%date%/g,
             this.getFormattedDateForFilename(),
         );
+
+        if (this.settings.downloadImages && Platform.isDesktop) {
+            content = await this.replaceImages(fileNameTemplate, content);
+        }
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
@@ -143,6 +149,31 @@ class WebsiteParser extends Parser {
         ]);
 
         return readingSpeed.get(lang) || readingSpeed.get('en');
+    }
+
+    /**
+     * Extracts a preview URL from the document.
+     * Searches for OpenGraph `og:image` and Twitter `twitter:image` meta tags.
+     * @param document The document to extract preview URL from
+     */
+    private extractPreviewUrl(document: Document) {
+        let previewMetaElement = document.querySelector('meta[property="og:image"]');
+        if (previewMetaElement == null) {
+            previewMetaElement = document.querySelector('meta[name="twitter:image"]');
+        }
+        return previewMetaElement?.getAttribute('content');
+    }
+
+    /**
+     * Replaces distant images by their locally downloaded counterparts.
+     * @param noteName The note name
+     * @param content The note content
+     */
+    private replaceImages(noteName: string, content: string) {
+        const assetsDir = this.settings.downloadImagesInArticleDir
+            ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
+            : this.settings.assetsDir;
+        return replaceImages(this.app, content, assetsDir);
     }
 }
 
