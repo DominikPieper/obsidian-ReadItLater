@@ -102,7 +102,7 @@ class YoutubeParser extends Parser {
                 id: video.id,
                 url: url,
                 title: video.snippet.title,
-                description: video.snippet.description,
+                description: this.escapeTagsInYouTubeDescription(video.snippet.description, this.settings.youtubeDescTagEscape),
                 thumbnail: video.snippet.thumbnails.default.url,
                 player: videoPlayer,
                 duration: toSeconds(duration),
@@ -195,6 +195,15 @@ class YoutubeParser extends Parser {
         }
 
         return formatted.trim();
+    }
+
+    private escapeTagsInYouTubeDescription(ytDesc: string, tagSetting: boolean): string {
+
+        if(tagSetting == true) {
+            return ytDesc.replaceAll('#','\\#')
+        } else {
+            return ytDesc;
+        }
     }
 }
 

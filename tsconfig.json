@@ -16,7 +16,8 @@
       "es5",
       "es6",
       "es7",
-      "scripthost"
+      "scripthost",
+      "ES2021.String"
     ]
   },
   "include": [
