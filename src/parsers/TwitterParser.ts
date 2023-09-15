@@ -5,7 +5,7 @@ import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
 
 class TwitterParser extends Parser {
-    private PATTERN = /(https:\/\/twitter.com\/([a-zA-Z0-9_]+\/)([a-zA-Z0-9_]+\/[a-zA-Z0-9_]+))/;
+    private PATTERN = /(https:\/\/(twitter|x).com\/([a-zA-Z0-9_]+\/)([a-zA-Z0-9_]+\/[a-zA-Z0-9_]+))/;
 
     constructor(app: App, settings: ReadItLaterSettings) {
         super(app, settings);
@@ -16,11 +16,17 @@ class TwitterParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
+        const twitterUrl = new URL(url);
+
+        if (twitterUrl.hostname === 'x.com') {
+            twitterUrl.hostname = 'twitter.com';
+        }
+
         const response = JSON.parse(
             await request({
                 method: 'GET',
                 contentType: 'application/json',
-                url: `https://publish.twitter.com/oembed?url=${url}`,
+                url: `https://publish.twitter.com/oembed?url=${twitterUrl.href}`,
             }),
         );
 
