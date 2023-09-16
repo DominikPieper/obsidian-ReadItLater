@@ -96,7 +96,6 @@ class YoutubeParser extends Parser {
             }
             const channel: GoogleApiYouTubeChannelResource = channelJsonResponse.items[0];
 
-            const videoPlayer = `<iframe width="${this.settings.youtubeEmbedWidth}" height="${this.settings.youtubeEmbedHeight}" src="https://www.youtube.com/embed/${video.id}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
             const duration = parse(video.contentDetails.duration);
             return {
                 id: video.id,
@@ -104,7 +103,7 @@ class YoutubeParser extends Parser {
                 title: video.snippet.title,
                 description: video.snippet.description,
                 thumbnail: video.snippet.thumbnails.default.url,
-                player: videoPlayer,
+                player: this.getEmbedPlayer(video.id),
                 duration: toSeconds(duration),
                 durationFormatted: this.formatDuration(duration),
                 pubDate: moment(video.snippet.publishedAt).format(this.settings.dateContentFmt),
@@ -138,7 +137,6 @@ class YoutubeParser extends Parser {
             const videoSchemaElement = videoHTML.querySelector('[itemtype="http://schema.org/VideoObject"]');
             const videoId = videoSchemaElement?.querySelector('[itemprop="identifier"]')?.getAttribute('content') ?? '';
             const personSchemaElement = videoSchemaElement.querySelector('[itemtype="http://schema.org/Person"]');
-            const videoPlayer = `<iframe width="${this.settings.youtubeEmbedWidth}" height="${this.settings.youtubeEmbedHeight}" src="https://www.youtube.com/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
 
             return {
                 id: videoId,
@@ -146,7 +144,7 @@ class YoutubeParser extends Parser {
                 title: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
                 description: '',
                 thumbnail: '',
-                player: videoPlayer,
+                player: this.getEmbedPlayer(videoId),
                 duration: 0,
                 durationFormatted: '',
                 pubDate: '',
@@ -195,6 +193,11 @@ class YoutubeParser extends Parser {
         }
 
         return formatted.trim();
+    }
+
+    private getEmbedPlayer(videoId: string): string {
+        const domain = this.settings.youtubeUsePrivacyEnhancedEmbed ? 'youtube-nocookie.com' : 'youtube.com';
+        return `<iframe width="${this.settings.youtubeEmbedWidth}" height="${this.settings.youtubeEmbedHeight}" src="https://www.${domain}/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     }
 }
 
