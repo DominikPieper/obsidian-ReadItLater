@@ -167,6 +167,24 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
+        new Setting(containerEl)
+            .setName('Embed in privacy enhanced mode')
+            .setDesc(
+                'If enabled, content will be embeded in privacy enhanced mode, which prevents the use of views of it from influencing the viewer’s browsing experience on YouTube.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'youtubeUsePrivacyEnhancedEmbed')
+                            ? this.plugin.settings.youtubeUsePrivacyEnhancedEmbed
+                            : DEFAULT_SETTINGS.youtubeUsePrivacyEnhancedEmbed,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeUsePrivacyEnhancedEmbed = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
         containerEl.createEl('h2', { text: 'Vimeo' });
 
         new Setting(containerEl)
