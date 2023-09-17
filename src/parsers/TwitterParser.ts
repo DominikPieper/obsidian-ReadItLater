@@ -49,8 +49,7 @@ class TwitterParser extends Parser {
         return new Note(fileName, processedContent);
     }
 
-    private getPublishedDateFromDOM(html: string): string
-    {
+    private getPublishedDateFromDOM(html: string): string {
         const dom = new DOMParser().parseFromString(html, 'text/html');
         const dateElement = dom.querySelector('blockquote > a');
         const date = moment(dateElement.textContent);
