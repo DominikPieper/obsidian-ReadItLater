@@ -109,6 +109,7 @@ Will be converted to markdown note with data from [Twitter Publish API](https://
 | %date%                    | Current date in format from plugin settings |
 | %tweetURL%                | Twitter Publish API                         |
 | %tweetContent%            | Twitter Publish API                         |
+| %tweetPublishDate%        | Twitter Publish API                         |
 
 ### Stack Exchange
 

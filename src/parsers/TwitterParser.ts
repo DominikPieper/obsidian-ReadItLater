@@ -1,4 +1,4 @@
-import { App, request } from 'obsidian';
+import { App, moment, request } from 'obsidian';
 import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
@@ -37,7 +37,8 @@ class TwitterParser extends Parser {
             .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%tweetAuthorName%/g, tweetAuthorName)
             .replace(/%tweetURL%/g, response.url)
-            .replace(/%tweetContent%/g, content);
+            .replace(/%tweetContent%/g, content)
+            .replace(/%tweetPublishDate%/g, this.getPublishedDateFromDOM(response.html));
 
         const fileNameTemplate = this.settings.twitterNoteTitle
             .replace(/%tweetAuthorName%/g, tweetAuthorName)
@@ -46,6 +47,14 @@ class TwitterParser extends Parser {
         const fileName = `${fileNameTemplate}.md`;
 
         return new Note(fileName, processedContent);
+    }
+
+    private getPublishedDateFromDOM(html: string): string {
+        const dom = new DOMParser().parseFromString(html, 'text/html');
+        const dateElement = dom.querySelector('blockquote > a');
+        const date = moment(dateElement.textContent);
+
+        return date.isValid() ? date.format(this.settings.dateContentFmt) : '';
     }
 }
 
