@@ -187,9 +187,15 @@ Will be converted to note with embeded player in `<iframe>`.
 
 ### Website URL
 
-Will be parsed to readable form using [Mozilla Readability](https://github.com/mozilla/readability) and then converted to markdown. In case website content is marked by [Readbility](https://github.com/mozilla/readability) as not readable, empty note with URL will be created. 
+The website will be parsed to readable form using [Mozilla Readability](https://github.com/mozilla/readability) and then converted to markdown. If [Readbility](https://github.com/mozilla/readability) cannot parse the website content, an empty note with the URL will be created.
 
-If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/assets`) configured in plugin settings. (Supported only on desktop for now)
+Images can be optionally downloaded and either:
+- Saved to the the assets directory configured in the plugin settings (default: `ReadItLater Inbox/assets`),
+- Saved to a note-specific folder within the assets directory, or
+- Embedded in the note as a base64 encoded string
+
+Saving images to a directory is currently only supported on the Obsidian desktop app.
+
 
 | Title template variable | Retrieved from                              |
 | ------------------------| ------------------------------------------- |

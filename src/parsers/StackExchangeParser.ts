@@ -1,7 +1,7 @@
 import { App, Platform, request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { normalizeFilename, replaceImages } from '../helpers';
-import { ReadItLaterSettings } from '../settings';
+import { ReadItLaterSettings, ImageBehavior } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
@@ -42,15 +42,15 @@ class StackExchangeParser extends Parser {
         const document = new DOMParser().parseFromString(response, 'text/html');
         const question = await this.parseDocument(document);
 
-        const fileNameTemplate = this.settings.stackExchangeNoteTitle
+        const noteName = this.settings.stackExchangeNoteTitle
             .replace(/%title%/g, question.title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const topAnswer = question.topAnswer
             ? this.settings.stackExchangeAnswer
-                  .replace(/%answerContent%/g, question.topAnswer.content)
-                  .replace(/%authorName%/g, question.topAnswer.author.name)
-                  .replace(/%authorProfileURL%/g, question.topAnswer.author.profile)
+                .replace(/%answerContent%/g, question.topAnswer.content)
+                .replace(/%authorName%/g, question.topAnswer.author.name)
+                .replace(/%authorProfileURL%/g, question.topAnswer.author.profile)
             : '';
 
         let answers = '';
@@ -72,15 +72,18 @@ class StackExchangeParser extends Parser {
             .replace(/%topAnswer%/g, topAnswer)
             .replace(/%answers%/g, answers.trim());
 
-        const assetsDir = this.settings.downloadStackExchangeAssetsInDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
-            : this.settings.assetsDir;
+        const action = this.settings.stackExchangeImageBehavior;
+        const assetsDir = this.settings.assetsDir;
 
-        if (this.settings.downloadStackExchangeAssets && Platform.isDesktop) {
+        if (action === ImageBehavior.SaveToAssetDir) {
             content = await replaceImages(app, content, assetsDir);
+        } else if (action === ImageBehavior.SaveToNoteDir) {
+            content = await replaceImages(app, content, `${assetsDir}/${normalizeFilename(noteName)}/`);
+        } else if (action === ImageBehavior.EmbedBase64) {
+            content = await replaceImages(app, content, null);
         }
 
-        const fileName = `${fileNameTemplate}.md`;
+        const fileName = `${noteName}.md`;
         return new Note(fileName, content);
     }
 
@@ -89,7 +92,7 @@ class StackExchangeParser extends Parser {
         try {
             questionURL = new URL(
                 document.querySelector('link[rel="canonical"]')?.getAttribute('href') ??
-                    document.querySelector('meta[property="og:url"]')?.getAttribute('content'),
+                document.querySelector('meta[property="og:url"]')?.getAttribute('content'),
             );
         } catch (e) {
             questionURL = null;
@@ -108,9 +111,9 @@ class StackExchangeParser extends Parser {
                     profile:
                         answerAuthor instanceof Element && questionURL instanceof URL
                             ? String.prototype.concat(
-                                  questionURL.origin,
-                                  answerAuthor.querySelector('a')?.getAttribute('href') ?? '',
-                              )
+                                questionURL.origin,
+                                answerAuthor.querySelector('a')?.getAttribute('href') ?? '',
+                            )
                             : '',
                 },
             });
@@ -129,9 +132,9 @@ class StackExchangeParser extends Parser {
                 profile:
                     author instanceof Element && questionURL instanceof URL
                         ? String.prototype.concat(
-                              questionURL.origin,
-                              author.querySelector('a')?.getAttribute('href') ?? '',
-                          )
+                            questionURL.origin,
+                            author.querySelector('a')?.getAttribute('href') ?? '',
+                        )
                         : '',
             },
         };

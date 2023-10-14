@@ -2,7 +2,7 @@ import { App, Notice, Platform, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
-import { ReadItLaterSettings } from '../settings';
+import { ReadItLaterSettings, ImageBehavior } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
@@ -59,8 +59,8 @@ class WebsiteParser extends Parser {
 
         return readableDocument?.content
             ? //eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore Until Readability release fix with correct types
-              this.parsableArticle(readableDocument, originUrl.href, previewUrl)
+            // @ts-ignore Until Readability release fix with correct types
+            this.parsableArticle(readableDocument, originUrl.href, previewUrl)
             : this.notParsableArticle(originUrl.href, previewUrl);
     }
 
@@ -84,9 +84,7 @@ class WebsiteParser extends Parser {
             .replace(/%author%/g, author)
             .replace(/%previewURL%/g, previewUrl || '');
 
-        if (this.settings.downloadImages && Platform.isDesktop) {
-            processedContent = await this.replaceImages(fileNameTemplate, processedContent);
-        }
+        processedContent = await this.replaceImages(fileNameTemplate, processedContent);
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, processedContent);
@@ -104,9 +102,7 @@ class WebsiteParser extends Parser {
             this.getFormattedDateForFilename(),
         );
 
-        if (this.settings.downloadImages && Platform.isDesktop) {
-            content = await this.replaceImages(fileNameTemplate, content);
-        }
+        content = await this.replaceImages(fileNameTemplate, content);
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
@@ -170,9 +166,20 @@ class WebsiteParser extends Parser {
      * @param content The note content
      */
     private replaceImages(noteName: string, content: string) {
-        const assetsDir = this.settings.downloadImagesInArticleDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
-            : this.settings.assetsDir;
+        const action = this.settings.articleImageBehavior;
+
+        if (action === ImageBehavior.DoNotSave) {
+            return content;
+        }
+
+        let assetsDir = this.settings.assetsDir;
+
+        if (action === ImageBehavior.SaveToNoteDir) {
+            assetsDir += `/${normalizeFilename(noteName)}/`;
+        } else if (action === ImageBehavior.EmbedBase64) {
+            assetsDir = null;
+        }
+
         return replaceImages(this.app, content, assetsDir);
     }
 }

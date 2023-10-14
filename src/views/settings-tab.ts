@@ -1,6 +1,6 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import ReadItLaterPlugin from 'src/main';
-import { DEFAULT_SETTINGS } from 'src/settings';
+import { DEFAULT_SETTINGS, ImageBehavior } from 'src/settings';
 
 export class ReadItLaterSettingsTab extends PluginSettingTab {
     plugin: ReadItLaterPlugin;
@@ -358,37 +358,22 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
-            .setName('Download media attachments')
-            .setDesc('If enabled, media attachments are downloaded to the assets folder (only Desktop App feature)')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadStackExchangeAssets')
-                            ? this.plugin.settings.downloadStackExchangeAssets
-                            : DEFAULT_SETTINGS.downloadStackExchangeAssets,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadStackExchangeAssets = value;
-                        stackExchangeMediaAttachmentsInDirSetting.setDisabled(!value);
-                        await this.plugin.saveSettings();
-                    }),
-            );
 
-        const stackExchangeMediaAttachmentsInDirSetting = new Setting(containerEl)
-            .setName('Download media attachments to folder')
-            .setDesc('If enabled, the media attachments are stored in their own folder.')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadStackExchangeAssetsInDir')
-                            ? this.plugin.settings.downloadStackExchangeAssetsInDir
-                            : DEFAULT_SETTINGS.downloadStackExchangeAssetsInDir,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadStackExchangeAssetsInDir = value;
-                        await this.plugin.saveSettings();
-                    }),
+        new Setting(containerEl)
+            .setName('Image Behavior')
+            .setDesc(
+                'Specify how images should be handled. Note: Images can only be downloaded to the asset directory or a note-specific sub-directory using the Obsidian Desktop app.',
+            )
+            .addDropdown(level => level
+                .addOption("save_to_asset_directory", "Save Images to Asset Directory")
+                .addOption("save_to_note_directory", "Save Images to Note-specific Directory")
+                .addOption("embed_images_using_base64", "Embed Images in Note (base64 encoded)")
+                .addOption("do_not_save_images", "Do Not Save Images")
+                .setValue(this.plugin.settings.stackExchangeImageBehavior)
+                .onChange(async (value: ImageBehavior) => {
+                    this.plugin.settings.stackExchangeImageBehavior = value;
+                    await this.plugin.saveSettings();
+                })
             );
 
         containerEl.createEl('h2', { text: 'Mastodon' });
@@ -420,42 +405,22 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
-            .setName('Download media attachments')
-            .setDesc(
-                'If enabled, media attachments of toot are downloaded to the assets folder (only Desktop App feature)',
-            )
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadMastodonMediaAttachments')
-                            ? this.plugin.settings.downloadMastodonMediaAttachments
-                            : DEFAULT_SETTINGS.downloadMastodonMediaAttachments,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadMastodonMediaAttachments = value;
-                        mastodonMediaAttachmentsInDirSetting.setDisabled(!value);
-                        await this.plugin.saveSettings();
-                    }),
-            );
 
-        const mastodonMediaAttachmentsInDirSetting = new Setting(containerEl)
-            .setName('Download media attachments to folder')
-            .setDesc('If enabled, the media attachments of toot are stored in their own folder.')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(
-                            this.plugin.settings,
-                            'downloadMastodonMediaAttachmentsInDir',
-                        )
-                            ? this.plugin.settings.downloadMastodonMediaAttachmentsInDir
-                            : DEFAULT_SETTINGS.downloadMastodonMediaAttachmentsInDir,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadMastodonMediaAttachmentsInDir = value;
-                        await this.plugin.saveSettings();
-                    }),
+        new Setting(containerEl)
+            .setName('Image Behavior')
+            .setDesc(
+                'Specify how images should be handled. Note: Images can only be downloaded to the asset directory or a note-specific sub-directory using the Obsidian Desktop app.',
+            )
+            .addDropdown(level => level
+                .addOption("save_to_asset_directory", "Save Images to Asset Directory")
+                .addOption("save_to_note_directory", "Save Images to Note-specific Directory")
+                .addOption("embed_images_using_base64", "Embed Images in Note (base64 encoded)")
+                .addOption("do_not_save_images", "Do Not Save Images")
+                .setValue(this.plugin.settings.mastodonImageBehavior)
+                .onChange(async (value: ImageBehavior) => {
+                    this.plugin.settings.mastodonImageBehavior = value;
+                    await this.plugin.saveSettings();
+                })
             );
 
         new Setting(containerEl)
@@ -573,36 +538,20 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('Download images')
-            .setDesc('If enabled, images in article are downloaded to the assets folder (only Desktop App feature)')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImages')
-                            ? this.plugin.settings.downloadImages
-                            : DEFAULT_SETTINGS.downloadImages,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadImages = value;
-                        imagesInArticleDirSettings.setDisabled(!value);
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        const imagesInArticleDirSettings = new Setting(containerEl)
-            .setName('Download images to note folder')
-            .setDesc('If enabled, the images in article are stored in their own folder.')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImagesInArticleDir')
-                            ? this.plugin.settings.downloadImagesInArticleDir
-                            : DEFAULT_SETTINGS.downloadImagesInArticleDir,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadImagesInArticleDir = value;
-                        await this.plugin.saveSettings();
-                    }),
+            .setName('Image Behavior')
+            .setDesc(
+                'Specify how images should be handled. Note: Images can only be downloaded to the asset directory or a note-specific sub-directory using the Obsidian Desktop app.',
+            )
+            .addDropdown(level => level
+                .addOption("save_to_asset_directory", "Save Images to Asset Directory")
+                .addOption("save_to_note_directory", "Save Images to Note-specific Directory")
+                .addOption("embed_images_using_base64", "Embed Images in Note (base64 encoded)")
+                .addOption("do_not_save_images", "Do Not Save Images")
+                .setValue(this.plugin.settings.articleImageBehavior)
+                .onChange(async (value: ImageBehavior) => {
+                    this.plugin.settings.articleImageBehavior = value;
+                    await this.plugin.saveSettings();
+                })
             );
 
         containerEl.createEl('h2', { text: 'Nonreadable Article' });
@@ -615,7 +564,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     .setPlaceholder("Defaults to 'Article %date%'")
                     .setValue(
                         this.plugin.settings.notParseableArticleNoteTitle ||
-                            DEFAULT_SETTINGS.notParseableArticleNoteTitle,
+                        DEFAULT_SETTINGS.notParseableArticleNoteTitle,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.notParseableArticleNoteTitle = value;

@@ -1,3 +1,12 @@
+
+export enum ImageBehavior {
+    SaveToAssetDir = "save_to_asset_directory",
+    SaveToNoteDir = "save_to_note_directory",
+    EmbedBase64 = "embed_images_using_base64",
+    DoNotSave = "do_not_save_images"
+}
+
+
 export interface ReadItLaterSettings {
     inboxDir: string;
     assetsDir: string;
@@ -25,19 +34,16 @@ export interface ReadItLaterSettings {
     textSnippetNote: string;
     mastodonNoteTitle: string;
     mastodonNote: string;
-    downloadImages: boolean;
-    downloadImagesInArticleDir: boolean;
+    articleImageBehavior: ImageBehavior;
     dateTitleFmt: string;
     dateContentFmt: string;
-    downloadMastodonMediaAttachments: boolean;
-    downloadMastodonMediaAttachmentsInDir: boolean;
+    mastodonImageBehavior: ImageBehavior;
     saveMastodonReplies: boolean;
     mastodonReply: string;
     stackExchangeNoteTitle: string;
     stackExchangeNote: string;
     stackExchangeAnswer: string;
-    downloadStackExchangeAssets: boolean;
-    downloadStackExchangeAssetsInDir: boolean;
+    stackExchangeImageBehavior: ImageBehavior;
     youtubeApiKey: string;
     tikTokNoteTitle: string;
     tikTokNote: string;
@@ -73,20 +79,17 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     textSnippetNote: '[[ReadItLater]] [[Textsnippet]]\n\n%content%',
     mastodonNoteTitle: 'Toot from %tootAuthorName% (%date%)',
     mastodonNote: '[[ReadItLater]] [[Toot]]\n\n# [%tootAuthorName%](%tootURL%)\n\n> %tootContent%',
-    downloadImages: true,
-    downloadImagesInArticleDir: false,
+    articleImageBehavior: ImageBehavior.SaveToAssetDir,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',
     dateContentFmt: 'YYYY-MM-DD',
-    downloadMastodonMediaAttachments: true,
-    downloadMastodonMediaAttachmentsInDir: false,
+    mastodonImageBehavior: ImageBehavior.SaveToAssetDir,
     saveMastodonReplies: false,
     mastodonReply: '[%tootAuthorName%](%tootURL%)\n\n> %tootContent%',
     stackExchangeNoteTitle: '%title%',
     stackExchangeNote:
         '[[ReadItLater]] [[StackExchange]]\n\n# [%questionTitle%](%questionURL%)\n\nAuthor: [%authorName%](%authorProfileURL%)\n\n%questionContent%\n\n***\n\n%topAnswer%\n\n%answers%',
     stackExchangeAnswer: 'Answered by: [%authorName%](%authorProfileURL%)\n\n%answerContent%',
-    downloadStackExchangeAssets: true,
-    downloadStackExchangeAssetsInDir: false,
+    stackExchangeImageBehavior: ImageBehavior.SaveToAssetDir,
     youtubeApiKey: '',
     tikTokNoteTitle: 'TikTok from %authorName% (%date%)',
     tikTokNote: '[[ReadItLater]] [[TikTok]]\n\n%videoDescription%\n\n[%videoURL%](%videoURL%)\n\n%videoPlayer%',
