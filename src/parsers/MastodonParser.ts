@@ -1,5 +1,5 @@
 import { App, Platform, request } from 'obsidian';
-import { ReadItLaterSettings } from '../settings';
+import { ReadItLaterSettings, ImageBehavior } from '../settings';
 import { isValidUrl, normalizeFilename, replaceImages } from '../helpers';
 import { Parser } from './Parser';
 import { Note } from './Note';
@@ -50,12 +50,14 @@ class MastodonParser extends Parser {
 
         const status = await this.loadStatus(mastodonUrl.hostname, statusId);
 
-        const fileNameTemplate = this.settings.mastodonNoteTitle
+        const noteName = this.settings.mastodonNoteTitle
             .replace(/%tootAuthorName%/g, status.account.display_name)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
-        const assetsDir = this.settings.downloadMastodonMediaAttachmentsInDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
+        this.settings.mastodonImageBehavior;
+
+        const assetsDir = this.settings.mastodonImageBehavior === ImageBehavior.SaveToNoteDir
+            ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
             : this.settings.assetsDir;
 
         let parsedStatusContent = await this.parseStatus(status, assetsDir);
@@ -78,7 +80,7 @@ class MastodonParser extends Parser {
             .replace(/%tootURL%/g, status.url)
             .replace(/%tootContent%/g, parsedStatusContent);
 
-        const fileName = `${fileNameTemplate}.md`;
+        const fileName = `${noteName}.md`;
 
         return new Note(fileName, processedContent);
     }
@@ -116,10 +118,15 @@ class MastodonParser extends Parser {
     private async parseStatus(status: Status, assetsDir: string): Promise<string> {
         const parsedStatusContent = await parseHtmlContent(status.content);
 
-        const mediaAttachments =
-            this.settings.downloadMastodonMediaAttachments && Platform.isDesktop
-                ? await replaceImages(app, this.prepareMedia(status.media_attachments), assetsDir)
-                : this.prepareMedia(status.media_attachments);
+        let mediaAttachments = this.prepareMedia(status.media_attachments);
+
+        const action = this.settings.mastodonImageBehavior;
+
+        if (action === ImageBehavior.SaveToAssetDir || action === ImageBehavior.SaveToNoteDir) {
+            mediaAttachments = await replaceImages(app, mediaAttachments, assetsDir);
+        } else if (action === ImageBehavior.EmbedBase64) {
+            mediaAttachments = await replaceImages(app, mediaAttachments, null);
+        }
 
         return parsedStatusContent.concat(mediaAttachments);
     }

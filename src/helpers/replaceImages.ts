@@ -1,5 +1,7 @@
+import { Buffer } from "buffer";
+import { lookup } from 'mime-types';
 import { basename } from 'path';
-import { App, DataAdapter } from 'obsidian';
+import { App, DataAdapter, Platform } from 'obsidian';
 import { isValidUrl, normalizeFilename, pathJoin } from './fileutils';
 import { checkAndCreateFolder } from './checkAndCreateFolder';
 import { downloadImage } from './downloadImage';
@@ -10,7 +12,11 @@ type Replacer = {
 };
 
 export const EXTERNAL_MEDIA_LINK_PATTERN = /!\[(?<anchor>.*?)\]\((?<link>.+?)\)/g;
-export async function replaceImages(app: App, content: string, assetsDir: string) {
+export async function replaceImages(app: App, content: string, assetsDir: string | null) {
+    if (Platform.isMobileApp && assetsDir !== null) {
+        return content;
+    }
+
     return await replaceAsync(content, EXTERNAL_MEDIA_LINK_PATTERN, imageTagProcessor(app, assetsDir));
 }
 
@@ -45,10 +51,20 @@ export function imageTagProcessor(app: App, mediaDir: string) {
             return match;
         }
         const url = new URL(link);
-        await checkAndCreateFolder(app.vault, mediaDir);
 
         try {
             const { fileContent, fileExtension } = await downloadImage(url);
+
+            // If mediaDir is null, return the image embedded as a base64 string
+            if (mediaDir === null) {
+                const mimeType = lookup(link);
+
+                const encodedImage = Buffer.from(new Uint8Array(fileContent)).toString('base64');
+
+                return `![${anchor}](data:${mimeType};base64,${encodedImage})`;
+            }
+
+            await checkAndCreateFolder(app.vault, mediaDir);
 
             let attempt = 0;
             while (attempt < FILENAME_ATTEMPTS) {
