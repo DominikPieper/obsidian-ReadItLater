@@ -48,6 +48,7 @@ class StackExchangeParser extends Parser {
 
         const topAnswer = question.topAnswer
             ? this.settings.stackExchangeAnswer
+                  .replace(/%date%/g, this.getFormattedDateForContent())
                   .replace(/%answerContent%/g, question.topAnswer.content)
                   .replace(/%authorName%/g, question.topAnswer.author.name)
                   .replace(/%authorProfileURL%/g, question.topAnswer.author.profile)
@@ -56,6 +57,7 @@ class StackExchangeParser extends Parser {
         let answers = '';
         for (let i = 0; i < question.answers.length; i++) {
             const answer = this.settings.stackExchangeAnswer
+                .replace(/%date%/g, this.getFormattedDateForContent())
                 .replace(/%answerContent%/g, question.answers[i].content)
                 .replace(/%authorName%/g, question.answers[i].author.name)
                 .replace(/%authorProfileURL%/g, question.answers[i].author.profile);
