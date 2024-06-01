@@ -102,7 +102,11 @@ class YoutubeParser extends Parser {
                 url: url,
                 title: video.snippet.title,
                 description: video.snippet.description,
-                thumbnail: video.snippet.thumbnails.default.url,
+                thumbnail:
+                    video.snippet.thumbnails?.maxres?.url ??
+                    video.snippet.thumbnails?.medium?.url ??
+                    video.snippet.thumbnails?.default?.url ??
+                    '',
                 player: this.getEmbedPlayer(video.id),
                 duration: toSeconds(duration),
                 durationFormatted: this.formatDuration(duration),
@@ -143,7 +147,7 @@ class YoutubeParser extends Parser {
                 url: url,
                 title: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
                 description: '',
-                thumbnail: '',
+                thumbnail: videoHTML.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '',
                 player: this.getEmbedPlayer(videoId),
                 duration: 0,
                 durationFormatted: '',

@@ -45,6 +45,7 @@ Will be converted to note with embeded player in `<iframe>`.
 | %channelId%               | Schema.org markup                           |
 | %channelName%             | Schema.org markup                           |
 | %channelURL%              | Schema.org markup                           |
+| %videoThumbnail%          | OpenGraph markup                            |
 
 Because of HTML DOM parsing limitations, additional data can be fetched only from [Google API](https://developers.google.com/youtube/v3/getting-started). If API key is provided, these additional template variables are available.
 
@@ -54,7 +55,6 @@ Because of HTML DOM parsing limitations, additional data can be fetched only fro
 | %videoDuration%           | Google API response |
 | %videoDurationFormatted%  | Google API response |
 | %videoPublishDate%        | Google API response |
-| %videoThumbnail%          | Google API response |
 | %videoTags%               | Google API response |
 | %videoViewsCount%         | Google API response |
 
