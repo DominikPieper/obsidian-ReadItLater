@@ -71,21 +71,18 @@ export default class ReadItLaterPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
-    check_batch(c: string): Array<string> {
-        const sanitizedData = c.trim().split('\n').filter(x => x.trim().length > 0);
-        const everyLineIsURL = sanitizedData.reduce(
+    batchJobUrls(clipboardContent: string): Array<string> {
+        const cleanData = clipboardContent.trim().split('\n').filter(line => line.trim().length > 0);
+        const everyLineIsURL = cleanData.reduce(
             (status: boolean, url: string): boolean => {
                 return status && (url.substring(0, 4) == "http")
             }, true)
-        if (!everyLineIsURL) {
-            return [c]
-        }
-        return sanitizedData
+        return everyLineIsURL ? cleanData : [clipboardContent] ;
     }
 
     async processClipboard(): Promise<void> {
         const clipboardContent = await navigator.clipboard.readText();
-        const batchJobs = this.check_batch(clipboardContent);
+        const batchJobs = this.batchJobUrls(clipboardContent);
 
         for (let i = 0; i < batchJobs.length; i++) {
             const jobData = batchJobs[i];
