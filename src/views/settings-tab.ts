@@ -559,7 +559,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Readable article note template')
             .setDesc(
-                'Available variables: %date%, %articleTitle%, %articleURL%, %articleContent%, %author%, %siteName%, %articleReadingTime%, %previewURL%',
+                'Available variables: %date%, %articleTitle%, %articleURL%, %articleContent%, %author%, %siteName%, %articleReadingTime%, %previewURL%, %publishedTime%'
             )
             .addTextArea((textarea) => {
                 textarea

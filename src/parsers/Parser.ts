@@ -1,6 +1,7 @@
 import { App, moment } from 'obsidian';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
+import { formatCurrentDate } from 'src/helpers';
 
 export abstract class Parser {
     protected settings: ReadItLaterSettings;
@@ -25,12 +26,10 @@ export abstract class Parser {
     }
 
     protected getFormattedDateForFilename(): string {
-        const date = new Date();
-        return moment(date).format(this.settings.dateTitleFmt);
+        return formatCurrentDate(this.settings.dateTitleFmt);
     }
 
     protected getFormattedDateForContent(): string {
-        const date = new Date();
-        return moment(date).format(this.settings.dateContentFmt);
+        return formatCurrentDate(this.settings.dateContentFmt);
     }
 }
