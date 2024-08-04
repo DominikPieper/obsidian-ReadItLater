@@ -43,6 +43,10 @@ export interface ReadItLaterSettings {
     tikTokNote: string;
     tikTokEmbedWidth: string;
     tikTokEmbedHeight: string;
+    pinterestNoteTitle: string;
+    pinterestNote: string;
+    pinterestEmbedWidth: string;
+    pinterestEmbedHeight: string;
     extendShareMenu: boolean;
 }
 
@@ -92,5 +96,9 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     tikTokNote: '[[ReadItLater]] [[TikTok]]\n\n%videoDescription%\n\n[%videoURL%](%videoURL%)\n\n%videoPlayer%',
     tikTokEmbedWidth: '325',
     tikTokEmbedHeight: '760',
+    pinterestNoteTitle: 'Pin from %authorName% (%date%)',
+    pinterestNote: '[[ReadItLater]] [[Pinterest]]\n\n![](%img%)',
+    pinterestEmbedWidth: '325',
+    pinterestEmbedHeight: '760',
     extendShareMenu: true,
 };

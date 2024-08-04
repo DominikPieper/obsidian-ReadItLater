@@ -539,6 +539,57 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
+        containerEl.createEl('h2', { text: 'Pinterest' });
+
+        new Setting(containerEl)
+            .setName('Pinterest note title template')
+            .setDesc('Available variables: %authorName%, %date%')
+            .addText((text) =>
+                text
+                    .setPlaceholder('Pinterest from %authorName% (%date%)')
+                    .setValue(this.plugin.settings.pinterestNoteTitle || DEFAULT_SETTINGS.pinterestNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.pinterestNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Pinterest note template')
+            .setDesc(
+                'Available variables: %date%, %videoDescription%, %videoURL%, %videoId%, %videoPlayer%, %authorName%, %authorURL%',
+            )
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.pinterestNote || DEFAULT_SETTINGS.pinterestNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.pinterestNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl).setName('Pinterest embed player width').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.pinterestEmbedWidth)
+                .setValue(this.plugin.settings.pinterestEmbedWidth || DEFAULT_SETTINGS.pinterestEmbedWidth)
+                .onChange(async (value) => {
+                    this.plugin.settings.pinterestEmbedWidth = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
+
+        new Setting(containerEl).setName('Pinterest embed player height').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.pinterestEmbedHeight)
+                .setValue(this.plugin.settings.pinterestEmbedHeight || DEFAULT_SETTINGS.pinterestEmbedHeight)
+                .onChange(async (value) => {
+                    this.plugin.settings.pinterestEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
+
         containerEl.createEl('h2', { text: 'Readable Article' });
 
         new Setting(containerEl)
