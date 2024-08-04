@@ -1,13 +1,15 @@
-import { App, Notice, Platform, request } from 'obsidian';
+import { App, Notice, Platform, moment, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
-import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
+import { formatDate, getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
 
 type Article = {
+    url: string;
+    previewImageUrl: string | null;
     title: string;
     content: string;
     textContent: string;
@@ -17,6 +19,7 @@ type Article = {
     dir: string;
     siteName: string;
     lang: string;
+    publishedTime: string | null;
 };
 
 class WebsiteParser extends Parser {
@@ -57,18 +60,22 @@ class WebsiteParser extends Parser {
         const previewUrl = this.extractPreviewUrl(document);
         const readableDocument = new Readability(document).parse();
 
-        return readableDocument?.content
-            ? //eslint-disable-next-line @typescript-eslint/ban-ts-comment
-              // @ts-ignore Until Readability release fix with correct types
-              this.parsableArticle(readableDocument, originUrl.href, previewUrl)
-            : this.notParsableArticle(originUrl.href, previewUrl);
+        if (!Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
+            this.notParsableArticle(originUrl.href, previewUrl);
+        }
+
+        return this.parsableArticle({
+            url: originUrl.href,
+            previewImageUrl: previewUrl,
+            ...readableDocument,
+        });
     }
 
-    private async parsableArticle(article: Article, url: string, previewUrl: string | null) {
+    private async parsableArticle(article: Article) {
         const title = article.title || 'No title';
-        const siteName = article.siteName || '';
-        const author = article.byline || '';
         const content = await parseHtmlContent(article.content);
+        const formattedPublishedTime =
+            article.publishedTime !== null ? formatDate(article.publishedTime, this.settings.dateContentFmt) : '';
 
         const fileNameTemplate = this.settings.parseableArticleNoteTitle
             .replace(/%title%/g, title)
@@ -77,19 +84,19 @@ class WebsiteParser extends Parser {
         let processedContent = this.settings.parsableArticleNote
             .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%articleTitle%/g, title)
-            .replace(/%articleURL%/g, url)
+            .replace(/%articleURL%/g, article.url)
             .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
             .replace(/%articleContent%/g, content)
-            .replace(/%siteName%/g, siteName)
-            .replace(/%author%/g, author)
-            .replace(/%previewURL%/g, previewUrl || '');
+            .replace(/%siteName%/g, article.siteName || '')
+            .replace(/%author%/g, article.byline || '')
+            .replace(/%previewURL%/g, article.previewImageUrl || '')
+            .replace(/%publishedTime%/g, formattedPublishedTime);
 
         if (this.settings.downloadImages && Platform.isDesktop) {
             processedContent = await this.replaceImages(fileNameTemplate, processedContent);
         }
 
-        const fileName = `${fileNameTemplate}.md`;
-        return new Note(fileName, processedContent);
+        return new Note(`${fileNameTemplate}.md`, processedContent);
     }
 
     private async notParsableArticle(url: string, previewUrl: string | null) {
@@ -108,16 +115,14 @@ class WebsiteParser extends Parser {
             content = await this.replaceImages(fileNameTemplate, content);
         }
 
-        const fileName = `${fileNameTemplate}.md`;
-        return new Note(fileName, content);
+        return new Note(`${fileNameTemplate}.md`, content);
     }
 
     /**
      * Returns estimated reading time of article in minutes
      */
     private getEstimatedReadingTime(article: Article): number {
-        const lang = article.lang || 'en';
-        const readingSpeed = this.getReadingSpeed(lang);
+        const readingSpeed = this.getReadingSpeed(article.lang || 'en');
         const words = article.textContent.trim().split(/\s+/).length;
 
         return Math.ceil(words / readingSpeed);
@@ -156,7 +161,7 @@ class WebsiteParser extends Parser {
      * Searches for OpenGraph `og:image` and Twitter `twitter:image` meta tags.
      * @param document The document to extract preview URL from
      */
-    private extractPreviewUrl(document: Document) {
+    private extractPreviewUrl(document: Document): string | null {
         let previewMetaElement = document.querySelector('meta[property="og:image"]');
         if (previewMetaElement == null) {
             previewMetaElement = document.querySelector('meta[name="twitter:image"]');
@@ -169,7 +174,7 @@ class WebsiteParser extends Parser {
      * @param noteName The note name
      * @param content The note content
      */
-    private replaceImages(noteName: string, content: string) {
+    private async replaceImages(noteName: string, content: string): Promise<string> {
         const assetsDir = this.settings.downloadImagesInArticleDir
             ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
             : this.settings.assetsDir;

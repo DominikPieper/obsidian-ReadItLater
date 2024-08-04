@@ -10,7 +10,7 @@ type Replacer = {
 };
 
 export const EXTERNAL_MEDIA_LINK_PATTERN = /!\[(?<anchor>.*?)\]\((?<link>.+?)\)/g;
-export async function replaceImages(app: App, content: string, assetsDir: string) {
+export async function replaceImages(app: App, content: string, assetsDir: string): Promise<string> {
     return await replaceAsync(content, EXTERNAL_MEDIA_LINK_PATTERN, imageTagProcessor(app, assetsDir));
 }
 
