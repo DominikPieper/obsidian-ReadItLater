@@ -84,8 +84,7 @@ export default class ReadItLaterPlugin extends Plugin {
         const clipboardContent = await navigator.clipboard.readText();
         const batchJobs = this.batchJobUrls(clipboardContent);
 
-        for (let i = 0; i < batchJobs.length; i++) {
-            const jobData = batchJobs[i];
+        for (const jobData in batchJobs) {
             const parser = await this.parserCreator.createParser(jobData);
             const note = await parser.prepareNote(jobData);
             await this.writeFile(note.fileName, note.content);
