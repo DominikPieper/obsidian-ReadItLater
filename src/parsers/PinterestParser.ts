@@ -8,54 +8,97 @@ interface PinterestUser {
     url: string;
 }
 
+
+function imageExists(image_url: string): boolean{
+
+    var http = new XMLHttpRequest();
+
+    http.open('HEAD', image_url, false);
+    http.send();
+
+    return http.status != 404;
+
+}
+
 interface PinterestImage {
     // https://gist.github.com/jpsirois/7001965
-    x70: string;
-    x192: string;
-    x236: string;
-    x736: string;
-    x1200: string;
+    large: string;
     originals: string;
+}
+
+interface RelayData {
+    link: string;
+    imageLargeUrl: string;
+    description: string;
+    closeupDescription: string
+    autoAltText: string;
+    board: RelayBoard;
+    imageSpec_orig: ImageSpec;
+    pinJoin: RelayPinJoin
+}
+interface RelayBoard {
+    url: string;
+}
+interface RelayPinJoin {
+    visualAnnotation: Array<string>;
+}
+interface ImageSpec {
+    url: string;
 }
 
 interface PinterestPin {
     id: string;
     url: string;
+    title: string;
     description: string;
+    descriptionLong: string;
     resource: string;
+    altText: string;
+    tags: Array<string>;
 
     author: PinterestUser;
     image: PinterestImage
 }
 
 class PinterestParser extends Parser {
-    private PATTERN = /(pinterest\.com)\/pin\/\d+/;
+    private PATTERN = /pinterest\.com\/pin\/.+/;
 
     constructor(app: App, settings: ReadItLaterSettings) {
         super(app, settings);
     }
 
     test(clipboardContent: string): boolean | Promise<boolean> {
-        return this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
+        const x = this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
+        // debugger;
+        return x;
     }
 
     async prepareNote(clipboardContent: string): Promise<Note> {
+        // debugger;
         const pinPage = await this.parseHtml(clipboardContent);
-        
+
+        const tags = pinPage.tags.reduce((a,i) =>{
+            return this.settings.pinterestParentTag.length > 0 ?
+                `${a}${this.settings.pinterestParentTag}/${i.replace(/ /g,'_')} ` :
+                `${a}#${i.replace(/ /g,'_')} `;
+        }
+        ,'').trim()
 
         const content = this.settings.pinterestNote
             .replace(/%date%/g, this.getFormattedDateForContent())
             .replace(/%videoDescription%/g, pinPage.description)
             .replace(/%videoId%/g, pinPage.id)
+            .replace(/%title%/g, pinPage.title)
             .replace(/%videoURL%/g, pinPage.url)
             .replace(/%authorName%/g, pinPage.author.name)
             .replace(/%authorURL%/g, pinPage.author.url)
             .replace(/%img%/g, pinPage.image.originals)
-            .replace(/%img1200%/g, pinPage.image.x1200)
-            .replace(/%img736%/g, pinPage.image.x736)
-            .replace(/%img236%/g, pinPage.image.x236)
-            .replace(/%img192%/g, pinPage.image.x192)
-            .replace(/%img70%/g, pinPage.image.x70);
+            .replace(/%imgLarge%/g, pinPage.image.large)
+            .replace(/%altText%/g, pinPage.altText)
+            .replace(/%resource%/g, pinPage.resource)
+            .replace(/%descriptionLong%/g, pinPage.descriptionLong)
+            .replace(/%tags%/g, tags)
+
 
         const fileNameTemplate = this.settings.pinterestNoteTitle
             .replace(/%authorName%/g, pinPage.author.name)
@@ -80,27 +123,39 @@ class PinterestParser extends Parser {
         const videoRegexExec = this.PATTERN.exec(url);
         
 
-        const imageUrlRAW = html.querySelector('[data-test-id="pin-closeup-image"] img')?.src;
+        const imageUrlRAW = html.querySelector('[data-test-id="pin-closeup-image"] img')?.getAttribute('src');
         const imageUrl = imageUrlRAW.replace(/(.+\.com\/).+?(\/.+$)/,'$1{number}$2');
+        
+        const authorName = html.querySelector('[data-test-id="creator-profile-name"]')?.textContent;
+        const authorUrl = html.querySelector('[data-test-id="official-user-attribution"] a')?.getAttribute('href');
 
+        const pinTitle = html.querySelector('[data-test-id="pinTitle"] h1')?.textContent;
+
+        const dataRelayResponse: RelayData = JSON.parse(html.querySelector('script[data-relay-response]').textContent)?.response?.data?.v3GetPinQuery?.data;
+
+        const tags = dataRelayResponse.pinJoin.visualAnnotation ?? []
+        const link = dataRelayResponse.link ?? ''
+        const desc = dataRelayResponse.description ?? ''
+        const descLong = dataRelayResponse.closeupDescription ?? ''
+        
         debugger;
 
         return {
             id: videoRegexExec[4],
             url: html.querySelector('meta[property="og:url"]')?.getAttribute('content') ?? url,
-            description: html.querySelector('meta[property="og:description"]')?.getAttribute('content') ?? '',
-            resource: "...",
+            description: desc,
+            descriptionLong: descLong ?? '',
+            resource: link,
+            title: pinTitle,
+            tags: tags,
             author: {
-                name: videoRegexExec[2],
-                url: `https://www.tiktok.com/${videoRegexExec[2]}`,
+                name: authorName,
+                url: `https://www.pinterest.com${authorUrl}`,
             },
+            altText: dataRelayResponse.autoAltText,
             image: {
-                x70: imageUrl.replace("{number}", "70x"),
-                x192: imageUrl.replace("{number}", "192x"),
-                x236: imageUrl.replace("{number}", "236x"),
-                x736: imageUrl.replace("{number}", "736x"),
-                x1200: imageUrl.replace("{number}", "1200x"),
-                originals: imageUrl.replace("{number}", "originals"),
+                large: dataRelayResponse.imageLargeUrl,
+                originals: dataRelayResponse.imageSpec_orig.url,
             }
         };
     }

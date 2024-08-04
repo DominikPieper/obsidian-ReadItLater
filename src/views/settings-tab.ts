@@ -555,6 +555,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
+            .setName('tag parent')
+            .setDesc('')
+            .addText((text) =>
+                text
+                    .setPlaceholder('#Pinterest')
+                    .setValue(this.plugin.settings.pinterestParentTag || DEFAULT_SETTINGS.pinterestParentTag)
+                    .onChange(async (value) => {
+                        this.plugin.settings.pinterestParentTag = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
             .setName('Pinterest note template')
             .setDesc(
                 'Available variables: %date%, %videoDescription%, %videoURL%, %videoId%, %videoPlayer%, %authorName%, %authorURL%',
