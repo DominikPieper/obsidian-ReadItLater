@@ -34,8 +34,18 @@ interface RelayData {
     autoAltText: string;
     board: RelayBoard;
     imageSpec_orig: ImageSpec;
-    pinJoin: RelayPinJoin
+    pinJoin: RelayPinJoin;
+    pinner: RelayDataPinner;
 }
+interface RelayDataPinner {
+    fullName: string;
+    imageSmallUrl: string;
+    imageMediumUrl: string;
+    imageLargeUrl: string;
+    username: string;
+    firstName: string;
+}
+
 interface RelayBoard {
     url: string;
 }
@@ -120,23 +130,25 @@ class PinterestParser extends Parser {
         });
 
         const html = new DOMParser().parseFromString(response, 'text/html');
+        const dataRelayResponse: RelayData = JSON.parse(html.querySelector('script[data-relay-response]').textContent)?.response?.data?.v3GetPinQuery?.data;
+
         const videoRegexExec = this.PATTERN.exec(url);
         
 
         const imageUrlRAW = html.querySelector('[data-test-id="pin-closeup-image"] img')?.getAttribute('src');
         const imageUrl = imageUrlRAW.replace(/(.+\.com\/).+?(\/.+$)/,'$1{number}$2');
         
-        const authorName = html.querySelector('[data-test-id="creator-profile-name"]')?.textContent;
-        const authorUrl = html.querySelector('[data-test-id="official-user-attribution"] a')?.getAttribute('href');
-
+        
         const pinTitle = html.querySelector('[data-test-id="pinTitle"] h1')?.textContent;
-
-        const dataRelayResponse: RelayData = JSON.parse(html.querySelector('script[data-relay-response]').textContent)?.response?.data?.v3GetPinQuery?.data;
-
+        
+        
         const tags = dataRelayResponse.pinJoin.visualAnnotation ?? []
         const link = dataRelayResponse.link ?? ''
         const desc = dataRelayResponse.description ?? ''
         const descLong = dataRelayResponse.closeupDescription ?? ''
+        
+        const authorName = dataRelayResponse.pinner.fullName;
+        const authorUrl = html.querySelector('meta[name="pinterestapp:pinner"]').getAttribute('content');
         
         debugger;
 
@@ -150,7 +162,7 @@ class PinterestParser extends Parser {
             tags: tags,
             author: {
                 name: authorName,
-                url: `https://www.pinterest.com${authorUrl}`,
+                url: authorUrl,
             },
             altText: dataRelayResponse.autoAltText,
             image: {
