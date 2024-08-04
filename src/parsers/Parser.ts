@@ -1,7 +1,7 @@
-import { App, moment } from 'obsidian';
+import { App } from 'obsidian';
+import { formatCurrentDate } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
-import { formatCurrentDate } from 'src/helpers';
 
 export abstract class Parser {
     protected settings: ReadItLaterSettings;

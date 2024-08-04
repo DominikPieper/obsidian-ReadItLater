@@ -27,7 +27,7 @@
     "obsidian": "^1.5.7",
     "prettier": "^2.8.3",
     "tslib": "2.4.0",
-    "typescript": "5.4.5"
+    "typescript": "5.1.6"
   },
   "dependencies": {
     "@guyplusplus/turndown-plugin-gfm": "^1.0.7",
