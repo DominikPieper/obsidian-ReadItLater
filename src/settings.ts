@@ -51,7 +51,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     inboxDir: 'ReadItLater Inbox',
     assetsDir: 'ReadItLater Inbox/assets',
     openNewNote: false,
-    batchProcess: true,
+    batchProcess: false,
     youtubeNoteTitle: 'Youtube - %title%',
     youtubeNote: '[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
     youtubeEmbedWidth: '560',
