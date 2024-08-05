@@ -60,7 +60,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Batch process URLS')
+            .setName('Batch process URLs')
             .setDesc('If enabled, a list of urls (one url per line) will parsed in sequence')
             .addToggle((toggle) =>
                 toggle
