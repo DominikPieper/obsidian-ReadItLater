@@ -1,5 +1,5 @@
 import { App } from 'obsidian';
-import { formatCurrentDate } from '../helpers';
+import { formatCurrentDate, isValidUrl } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 
@@ -17,13 +17,7 @@ export abstract class Parser {
     abstract prepareNote(clipboardContent: string): Promise<Note>;
 
     protected isValidUrl(url: string): boolean {
-        url = url.split('\n')[0];
-        try {
-            new URL(url);
-        } catch (e) {
-            return false;
-        }
-        return true;
+        return isValidUrl(url);
     }
 
     protected getFormattedDateForFilename(): string {
