@@ -72,6 +72,9 @@ export default class ReadItLaterPlugin extends Plugin {
     }
 
     batchJobUrls(clipboardContent: string): Array<string> {
+        if(this.settings.batchProcess == false){
+            return [clipboardContent]
+        }
         const cleanData = clipboardContent.trim().split('\n').filter(line => line.trim().length > 0);
         const everyLineIsURL = cleanData.reduce(
             (status: boolean, url: string): boolean => {
