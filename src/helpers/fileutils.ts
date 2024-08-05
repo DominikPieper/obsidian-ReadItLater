@@ -2,6 +2,10 @@ import path from 'path';
 import { normalizePath } from 'obsidian';
 
 export function isValidUrl(url: string): boolean {
+    url = url.trim()
+    if(url.trim().indexOf('\n') > -1) {
+        return false
+    }
     try {
         new URL(url);
     } catch (e) {
