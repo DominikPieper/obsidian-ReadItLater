@@ -60,6 +60,18 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
+            .setName('Batch process URLS')
+            .setDesc('If enabled, a list of urls (one url per line) will parsed in sequence')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.batchProcess || DEFAULT_SETTINGS.batchProcess)
+                    .onChange(async (value) => {
+                        this.plugin.settings.batchProcess = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
             .setName('Date format string')
             .setDesc('Format of the %date% variable. NOTE: do not use symbols forbidden in file names.')
             .addText((text) =>
