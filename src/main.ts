@@ -71,25 +71,27 @@ export default class ReadItLaterPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
-    batchJobUrls(clipboardContent: string): Array<string> {
-        if(this.settings.batchProcess == false){
-            return [clipboardContent]
+    checkForBatchSegments(clipboardContent: string): Array<string> {
+        if (this.settings.batchProcess == false) {
+            return [clipboardContent];
         }
-        const cleanData = clipboardContent.trim().split('\n').filter(line => line.trim().length > 0);
-        const everyLineIsURL = cleanData.reduce(
-            (status: boolean, url: string): boolean => {
-                return status && (url.substring(0, 4) == "http")
-            }, true)
-        return everyLineIsURL ? cleanData : [clipboardContent] ;
+        const cleanData = clipboardContent
+            .trim()
+            .split('\n')
+            .filter((line) => line.trim().length > 0);
+        const everyLineIsURL = cleanData.reduce((status: boolean, url: string): boolean => {
+            return status && url.substring(0, 4) == 'http';
+        }, true);
+        return everyLineIsURL ? cleanData : [clipboardContent];
     }
 
     async processClipboard(): Promise<void> {
         const clipboardContent = await navigator.clipboard.readText();
-        const batchJobs = this.batchJobUrls(clipboardContent);
+        const clipboardSegmentsList = this.checkForBatchSegments(clipboardContent);
 
-        for (const jobData of batchJobs) {
-            const parser = await this.parserCreator.createParser(jobData);
-            const note = await parser.prepareNote(jobData);
+        for (const clipboardSegment of clipboardSegmentsList) {
+            const parser = await this.parserCreator.createParser(clipboardSegment);
+            const note = await parser.prepareNote(clipboardSegment);
             await this.writeFile(note.fileName, note.content);
         }
     }
