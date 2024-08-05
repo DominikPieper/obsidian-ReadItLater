@@ -64,7 +64,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc('If enabled, a list of urls (one url per line) will parsed in sequence')
             .addToggle((toggle) =>
                 toggle
-                    .setValue(this.plugin.settings.batchProcess || DEFAULT_SETTINGS.batchProcess)
+                    .setValue(this.plugin.settings.batchProcess ?? DEFAULT_SETTINGS.batchProcess)
                     .onChange(async (value) => {
                         this.plugin.settings.batchProcess = value;
                         await this.plugin.saveSettings();
