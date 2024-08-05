@@ -17,6 +17,7 @@ export abstract class Parser {
     abstract prepareNote(clipboardContent: string): Promise<Note>;
 
     protected isValidUrl(url: string): boolean {
+        url = url.split('\n')[0];
         try {
             new URL(url);
         } catch (e) {
