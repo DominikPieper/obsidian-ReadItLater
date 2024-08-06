@@ -69,8 +69,7 @@ class PinterestParser extends Parser {
     }
 
     test(clipboardContent: string): boolean | Promise<boolean> {
-        const x = this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
-        return x;
+        return this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
     }
 
     async prepareNote(clipboardContent: string): Promise<Note> {
