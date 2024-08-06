@@ -12,6 +12,7 @@ import TextSnippetParser from './parsers/TextSnippetParser';
 import MastodonParser from './parsers/MastodonParser';
 import TikTokParser from './parsers/TikTokParser';
 import ParserCreator from './parsers/ParserCreator';
+import PinterestParser from './parsers/PinterestParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -21,6 +22,7 @@ export default class ReadItLaterPlugin extends Plugin {
     async onload(): Promise<void> {
         await this.loadSettings();
         this.parserCreator = new ParserCreator([
+            new PinterestParser(this.app, this.settings),
             new YoutubeParser(this.app, this.settings),
             new VimeoParser(this.app, this.settings),
             new BilibiliParser(this.app, this.settings),
