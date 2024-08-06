@@ -99,7 +99,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     tikTokEmbedHeight: '760',
     pinterestNoteTitle: 'Pin from %authorName% (%date%)',
     pinterestParentTag: '#Pinterest',
-    pinterestNote: '[[ReadItLater]] [[Pinterest]]\n\n# %title%\n\n%resource%\npinned by [%authorName%](%authorURL%)\n![%altText%](%img%)\n\n> %descriptionLong%\n%tags%',
+    pinterestNote:
+        '[[ReadItLater]] [[Pinterest]]\n\n# %title%\n\n%resource%\npinned by [%authorName%](%authorURL%)\n![%altText%](%img%)\n\n> %descriptionLong%\n%tags%',
     pinterestEmbedWidth: '325',
     pinterestEmbedHeight: '760',
     extendShareMenu: true,

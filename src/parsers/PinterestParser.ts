@@ -3,21 +3,10 @@ import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
+//#region Interfaces
 interface PinterestUser {
     name: string;
     url: string;
-}
-
-
-function imageExists(image_url: string): boolean{
-
-    var http = new XMLHttpRequest();
-
-    http.open('HEAD', image_url, false);
-    http.send();
-
-    return http.status != 404;
-
 }
 
 interface PinterestImage {
@@ -30,7 +19,7 @@ interface RelayData {
     link: string;
     imageLargeUrl: string;
     description: string;
-    closeupDescription: string
+    closeupDescription: string;
     autoAltText: string;
     board: RelayBoard;
     imageSpec_orig: ImageSpec;
@@ -66,9 +55,11 @@ interface PinterestPin {
     altText: string;
     tags: Array<string>;
 
-    author: PinterestUser;
-    image: PinterestImage
+    pinner: PinterestUser;
+    image: PinterestImage;
 }
+
+//#endregion
 
 class PinterestParser extends Parser {
     private PATTERN = /pinterest\.com\/pin\/.+/;
@@ -79,47 +70,57 @@ class PinterestParser extends Parser {
 
     test(clipboardContent: string): boolean | Promise<boolean> {
         const x = this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
-        // debugger;
         return x;
     }
 
     async prepareNote(clipboardContent: string): Promise<Note> {
-        // debugger;
-        const pinPage = await this.parseHtml(clipboardContent);
+        const process = async () => {
+            try {
+                const pinPage = await this.parseHtml(clipboardContent);
 
-        const tags = pinPage.tags.reduce((a,i) =>{
-            return this.settings.pinterestParentTag.length > 0 ?
-                `${a}${this.settings.pinterestParentTag}/${i.replace(/ /g,'_')} ` :
-                `${a}#${i.replace(/ /g,'_')} `;
-        }
-        ,'').trim()
+                const tags = () =>
+                    pinPage?.tags
+                        .reduce((a, i) => {
+                            return this.settings.pinterestParentTag.length > 0
+                                ? `${a}${this.settings.pinterestParentTag}/${i.replace(/ /g, '_')} `
+                                : `${a}#${i.replace(/ /g, '_')} `;
+                        }, '')
+                        .trim();
 
-        const content = this.settings.pinterestNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoDescription%/g, pinPage.description)
-            .replace(/%videoId%/g, pinPage.id)
-            .replace(/%title%/g, pinPage.title)
-            .replace(/%videoURL%/g, pinPage.url)
-            .replace(/%authorName%/g, pinPage.author.name)
-            .replace(/%authorURL%/g, pinPage.author.url)
-            .replace(/%img%/g, pinPage.image.originals)
-            .replace(/%imgLarge%/g, pinPage.image.large)
-            .replace(/%altText%/g, pinPage.altText)
-            .replace(/%resource%/g, pinPage.resource)
-            .replace(/%descriptionLong%/g, pinPage.descriptionLong)
-            .replace(/%tags%/g, tags)
+                const content = this.settings.pinterestNote
+                    .replace(/%date%/g, this.getFormattedDateForContent())
+                    .replace(/%videoDescription%/g, pinPage.description)
+                    .replace(/%videoId%/g, pinPage.id)
+                    .replace(/%title%/g, pinPage.title)
+                    .replace(/%videoURL%/g, pinPage.url)
+                    .replace(/%authorName%/g, pinPage.pinner.name)
+                    .replace(/%authorURL%/g, pinPage.pinner.url)
+                    .replace(/%img%/g, pinPage.image.originals)
+                    .replace(/%imgLarge%/g, pinPage.image.large)
+                    .replace(/%altText%/g, pinPage.altText)
+                    .replace(/%resource%/g, pinPage.resource)
+                    .replace(/%descriptionLong%/g, pinPage.descriptionLong)
+                    .replace(/%tags%/g, tags);
 
+                const fileNameTemplate = this.settings.pinterestNoteTitle
+                    .replace(/%authorName%/g, pinPage.pinner.name)
+                    .replace(/%date%/g, this.getFormattedDateForFilename());
 
-        const fileNameTemplate = this.settings.pinterestNoteTitle
-            .replace(/%authorName%/g, pinPage.author.name)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
-
+                return [content, fileNameTemplate];
+            } catch (e) {
+                console.warn(e);
+                return [
+                    `error processing ${clipboardContent}`,
+                    `Pinterest [ERROR] ${this.getFormattedDateForFilename()}`,
+                ];
+            }
+        };
+        const [content, fileNameTemplate] = await process();
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
     }
 
     private async parseHtml(url: string): Promise<PinterestPin> {
-        
         const response = await request({
             method: 'GET',
             url,
@@ -130,45 +131,35 @@ class PinterestParser extends Parser {
         });
 
         const html = new DOMParser().parseFromString(response, 'text/html');
-        const dataRelayResponse: RelayData = JSON.parse(html.querySelector('script[data-relay-response]').textContent)?.response?.data?.v3GetPinQuery?.data;
-
-        const videoRegexExec = this.PATTERN.exec(url);
-        
-
-        const imageUrlRAW = html.querySelector('[data-test-id="pin-closeup-image"] img')?.getAttribute('src');
-        const imageUrl = imageUrlRAW.replace(/(.+\.com\/).+?(\/.+$)/,'$1{number}$2');
-        
-        
-        const pinTitle = html.querySelector('[data-test-id="pinTitle"] h1')?.textContent;
-        
-        
-        const tags = dataRelayResponse.pinJoin.visualAnnotation ?? []
-        const link = dataRelayResponse.link ?? ''
-        const desc = dataRelayResponse.description ?? ''
-        const descLong = dataRelayResponse.closeupDescription ?? ''
-        
-        const authorName = dataRelayResponse.pinner.fullName;
-        const authorUrl = html.querySelector('meta[name="pinterestapp:pinner"]').getAttribute('content');
-        
-        debugger;
+        const dataRelayResponse: RelayData = JSON.parse(html.querySelector('script[data-relay-response]')?.textContent)
+            ?.response?.data?.v3GetPinQuery?.data;
+        const pinTitle = html.querySelector('[data-test-id="pinTitle"] h1')?.textContent ?? '<!-- no title -->';
+        const tags = dataRelayResponse.pinJoin.visualAnnotation ?? [];
+        const link = dataRelayResponse.link ?? '<!-- no link -->';
+        const description = dataRelayResponse.description ?? '<!-- no description//-->';
+        const descriptionLong = dataRelayResponse.closeupDescription ?? '<!-- no long description//-->';
+        const pinnerName = dataRelayResponse.pinner.fullName ?? 'unknown pinner';
+        const pinnerUrl =
+            html.querySelector('meta[name="pinterestapp:pinner"]').getAttribute('content') ??
+            'https://www.pinterest.com';
 
         return {
-            id: videoRegexExec[4],
+            id: 'to be done',
             url: html.querySelector('meta[property="og:url"]')?.getAttribute('content') ?? url,
-            description: desc,
-            descriptionLong: descLong ?? '',
+            description: description ?? '',
+            descriptionLong: descriptionLong ?? '',
             resource: link,
             title: pinTitle,
             tags: tags,
-            author: {
-                name: authorName,
-                url: authorUrl,
+            pinner: {
+                name: pinnerName,
+                url: pinnerUrl,
             },
             altText: dataRelayResponse.autoAltText,
             image: {
                 large: dataRelayResponse.imageLargeUrl,
                 originals: dataRelayResponse.imageSpec_orig.url,
-            }
+            },
         };
     }
 }
