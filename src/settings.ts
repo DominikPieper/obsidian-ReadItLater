@@ -29,6 +29,8 @@ export interface ReadItLaterSettings {
     downloadImagesInArticleDir: boolean;
     dateTitleFmt: string;
     dateContentFmt: string;
+    maxFilePathLength: string;
+    maxFilePathExceededSuffix: string;
     downloadMastodonMediaAttachments: boolean;
     downloadMastodonMediaAttachmentsInDir: boolean;
     saveMastodonReplies: boolean;
@@ -77,6 +79,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     downloadImagesInArticleDir: false,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',
     dateContentFmt: 'YYYY-MM-DD',
+    maxFilePathLength: '247',
+    maxFilePathExceededSuffix: '~',
     downloadMastodonMediaAttachments: true,
     downloadMastodonMediaAttachmentsInDir: false,
     saveMastodonReplies: false,

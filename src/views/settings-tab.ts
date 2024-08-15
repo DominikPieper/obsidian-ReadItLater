@@ -15,7 +15,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'General' });
+        containerEl.createEl('h1', { text: 'General' });
 
         new Setting(containerEl)
             .setName('Inbox dir')
@@ -102,7 +102,34 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
+        
+        new Setting(containerEl)
+            .setName('Maximum file path length')
+            .setDesc('The maximum path length in Windows is 247 by default. Only increase this if you actually extended it.')
+            .addText((text) =>
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.maxFilePathLength)
+                    .setValue(this.plugin.settings.maxFilePathLength || DEFAULT_SETTINGS.maxFilePathLength)
+                    .onChange(async (value) => {
+                        this.plugin.settings.maxFilePathLength = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+        new Setting(containerEl)
+            .setName('Maximum file path exceeded suffix')
+            .setDesc('The text that will be used to cut off titles that exceed the maximum file path.')
+            .addText((text) =>
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.maxFilePathExceededSuffix)
+                    .setValue(this.plugin.settings.maxFilePathExceededSuffix || DEFAULT_SETTINGS.maxFilePathExceededSuffix)
+                    .onChange(async (value) => {
+                        this.plugin.settings.maxFilePathExceededSuffix = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
+        containerEl.createEl('h1', { text: 'Note Templates' });
+        
         containerEl.createEl('h2', { text: 'YouTube' });
 
         new Setting(containerEl)
