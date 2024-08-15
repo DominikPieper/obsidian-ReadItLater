@@ -102,10 +102,12 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
-        
+
         new Setting(containerEl)
             .setName('Maximum file path length')
-            .setDesc('The maximum path length in Windows is 247 by default. Only increase this if you actually extended it.')
+            .setDesc(
+                'The maximum path length in Windows is 247 by default. Only increase this if you actually extended it.',
+            )
             .addText((text) =>
                 text
                     .setPlaceholder(DEFAULT_SETTINGS.maxFilePathLength)
@@ -121,7 +123,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addText((text) =>
                 text
                     .setPlaceholder(DEFAULT_SETTINGS.maxFilePathExceededSuffix)
-                    .setValue(this.plugin.settings.maxFilePathExceededSuffix || DEFAULT_SETTINGS.maxFilePathExceededSuffix)
+                    .setValue(
+                        this.plugin.settings.maxFilePathExceededSuffix || DEFAULT_SETTINGS.maxFilePathExceededSuffix,
+                    )
                     .onChange(async (value) => {
                         this.plugin.settings.maxFilePathExceededSuffix = value;
                         await this.plugin.saveSettings();
@@ -129,7 +133,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         containerEl.createEl('h1', { text: 'Note Templates' });
-        
+
         containerEl.createEl('h2', { text: 'YouTube' });
 
         new Setting(containerEl)
