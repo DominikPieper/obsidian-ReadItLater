@@ -1,6 +1,6 @@
 import { basename } from 'path';
 import { App, DataAdapter } from 'obsidian';
-import { isValidUrl, normalizeFilename, pathJoin } from './fileutils';
+import { isValidImageUrl, isValidUrl, normalizeFilename, pathJoin } from './fileutils';
 import { checkAndCreateFolder } from './checkAndCreateFolder';
 import { downloadImage } from './downloadImage';
 import { linkHashes } from './linkHash';
@@ -34,6 +34,7 @@ export function replaceAsync(string: string, searchValue: string | RegExp, repla
             return Promise.resolve(String.prototype.replace.call(string, searchValue, replacer));
         }
     } catch (error) {
+        console.error();
         return Promise.reject(error);
     }
 }
@@ -41,7 +42,7 @@ export function replaceAsync(string: string, searchValue: string | RegExp, repla
 export const FILENAME_ATTEMPTS = 5;
 export function imageTagProcessor(app: App, mediaDir: string) {
     return async function processImageTag(match: string, anchor: string, link: string): Promise<string> {
-        if (!isValidUrl(link)) {
+        if (!isValidImageUrl(link)) {
             return match;
         }
         const url = new URL(link);

@@ -10,6 +10,11 @@ export function isValidUrl(url: string): boolean {
     return true;
 }
 
+export function isValidImageUrl(url: string): boolean {
+    const imageUrlPattern = /^https?:\/\//; // ensure image URLs start with http(s) to ignore data URIs
+    return isValidUrl(url) && imageUrlPattern.test(url);
+}
+
 export function getBaseUrl(url: string, origin: string): string {
     const baseURL = new URL(url, origin);
     return baseURL.href;
