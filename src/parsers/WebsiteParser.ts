@@ -71,8 +71,8 @@ class WebsiteParser extends Parser {
         const previewUrl = this.extractPreviewUrl(document);
         const readableDocument = new Readability(document).parse();
 
-        if (!Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
-            this.notParsableArticle(originUrl.href, previewUrl);
+        if (readableDocument === null || !Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
+            return this.notParsableArticle(originUrl.href, previewUrl);
         }
 
         return this.parsableArticle({
