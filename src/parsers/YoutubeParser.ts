@@ -138,7 +138,12 @@ class YoutubeParser extends Parser {
             });
 
             const videoHTML = new DOMParser().parseFromString(response, 'text/html');
-            const videoSchemaElement = videoHTML.querySelector('[itemtype="http://schema.org/VideoObject"]');
+            const videoSchemaElement = videoHTML.querySelector('[itemtype*="http://schema.org/VideoObject"]');
+
+            if (videoSchemaElement === null) {
+                throw new Error('Unable to find Schema.org element in HTML.');
+            }
+
             const videoId = videoSchemaElement?.querySelector('[itemprop="identifier"]')?.getAttribute('content') ?? '';
             const personSchemaElement = videoSchemaElement.querySelector('[itemtype="http://schema.org/Person"]');
 
@@ -146,7 +151,7 @@ class YoutubeParser extends Parser {
                 id: videoId,
                 url: url,
                 title: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
-                description: '',
+                description: videoSchemaElement?.querySelector('[itemprop="description"]')?.getAttribute('content') ?? '',
                 thumbnail: videoHTML.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '',
                 player: this.getEmbedPlayer(videoId),
                 duration: 0,
