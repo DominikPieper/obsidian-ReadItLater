@@ -151,7 +151,8 @@ class YoutubeParser extends Parser {
                 id: videoId,
                 url: url,
                 title: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
-                description: videoSchemaElement?.querySelector('[itemprop="description"]')?.getAttribute('content') ?? '',
+                description:
+                    videoSchemaElement?.querySelector('[itemprop="description"]')?.getAttribute('content') ?? '',
                 thumbnail: videoHTML.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '',
                 player: this.getEmbedPlayer(videoId),
                 duration: 0,
