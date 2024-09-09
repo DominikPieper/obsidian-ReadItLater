@@ -48,14 +48,34 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Open new note')
+            .setName('Open new note in current workspace')
             .setDesc('If enabled, new note will open in current workspace')
             .addToggle((toggle) =>
                 toggle
                     .setValue(this.plugin.settings.openNewNote || DEFAULT_SETTINGS.openNewNote)
                     .onChange(async (value) => {
                         this.plugin.settings.openNewNote = value;
+                        if (value === true) {
+                            this.plugin.settings.openNewNoteInNewTab = false;
+                        }
                         await this.plugin.saveSettings();
+                        this.display();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Open new note in new tab')
+            .setDesc('If enabled, new note will open in new tab')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.openNewNoteInNewTab || DEFAULT_SETTINGS.openNewNoteInNewTab)
+                    .onChange(async (value) => {
+                        this.plugin.settings.openNewNoteInNewTab = value;
+                        if (value === true) {
+                            this.plugin.settings.openNewNote = false;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
                     }),
             );
 
