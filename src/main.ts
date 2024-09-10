@@ -1,4 +1,4 @@
-import { Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
+import { FileSystemAdapter, Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
 import { checkAndCreateFolder, normalizeFilename } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
@@ -12,6 +12,7 @@ import TextSnippetParser from './parsers/TextSnippetParser';
 import MastodonParser from './parsers/MastodonParser';
 import TikTokParser from './parsers/TikTokParser';
 import ParserCreator from './parsers/ParserCreator';
+import { clampFilePath } from './helpers/fileutils';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -87,6 +88,7 @@ export default class ReadItLaterPlugin extends Plugin {
     }
 
     async writeFile(fileName: string, content: string): Promise<void> {
+        let noticeSuffix = '';
         let filePath;
         fileName = normalizeFilename(fileName);
         await checkAndCreateFolder(this.app.vault, this.settings.inboxDir);
@@ -97,6 +99,10 @@ export default class ReadItLaterPlugin extends Plugin {
             filePath = normalizePath(`/${fileName}`);
         }
 
+        const oldPath = filePath;
+        filePath = clampFilePath(filePath, this);
+        if (filePath != oldPath) noticeSuffix += '\n\n(Title was cut off to fit max file path)';
+
         if (await this.app.vault.adapter.exists(filePath)) {
             new Notice(`${fileName} already exists!`);
         } else {
@@ -104,7 +110,7 @@ export default class ReadItLaterPlugin extends Plugin {
             if (this.settings.openNewNote || this.settings.openNewNoteInNewTab) {
                 this.app.workspace.getLeaf(this.settings.openNewNoteInNewTab ? 'tab' : false).openFile(newFile);
             }
-            new Notice(`${fileName} created successful`);
+            new Notice(`${fileName} created successful` + noticeSuffix);
         }
     }
 }
