@@ -1,10 +1,10 @@
 import { basename } from 'path';
 import { App, DataAdapter } from 'obsidian';
+import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from 'src/constants/urlProtocols';
 import { isValidUrl, normalizeFilename, pathJoin } from './fileutils';
 import { checkAndCreateFolder } from './checkAndCreateFolder';
 import { downloadImage } from './downloadImage';
 import { linkHashes } from './linkHash';
-import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from 'src/constants/urlProtocols';
 
 type Replacer = {
     (match: string, anchor: string, link: string): Promise<string>;

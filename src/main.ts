@@ -72,7 +72,7 @@ export default class ReadItLaterPlugin extends Plugin {
                         item.onClick(() => this.processContent(url));
                     });
                 }
-            })
+            }),
         );
     }
 
