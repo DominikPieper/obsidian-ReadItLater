@@ -1,18 +1,19 @@
 import path from 'path';
 import { normalizePath } from 'obsidian';
 
-export function isValidUrl(url: string): boolean {
+export function isValidUrl(url: string, allowedProtocols: string[] = []): boolean {
+    let urlObject;
     try {
-        new URL(url);
+        urlObject = new URL(url);
     } catch (e) {
         return false;
     }
-    return true;
-}
 
-export function isValidImageUrl(url: string): boolean {
-    const imageUrlPattern = /^https?:\/\//; // ensure image URLs start with http(s) to ignore data URIs
-    return isValidUrl(url) && imageUrlPattern.test(url);
+    if (allowedProtocols.length === 0) {
+        return true;
+    }
+
+    return allowedProtocols.includes(urlObject.protocol);
 }
 
 export function getBaseUrl(url: string, origin: string): string {
