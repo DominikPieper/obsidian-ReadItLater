@@ -1,5 +1,5 @@
 import { Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
-import { checkAndCreateFolder, normalizeFilename } from './helpers';
+import { checkAndCreateFolder, isValidUrl, normalizeFilename } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
 import YoutubeParser from './parsers/YoutubeParser';
@@ -12,6 +12,7 @@ import TextSnippetParser from './parsers/TextSnippetParser';
 import MastodonParser from './parsers/MastodonParser';
 import TikTokParser from './parsers/TikTokParser';
 import ParserCreator from './parsers/ParserCreator';
+import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -61,6 +62,18 @@ export default class ReadItLaterPlugin extends Plugin {
                 }),
             );
         }
+
+        this.registerEvent(
+            this.app.workspace.on('url-menu', (menu: Menu, url: string) => {
+                if (isValidUrl(url, [HTTP_PROTOCOL, HTTPS_PROTOCOL])) {
+                    menu.addItem((item: MenuItem) => {
+                        item.setTitle('ReadItLater');
+                        item.setIcon('read-it-later');
+                        item.onClick(() => this.processContent(url));
+                    });
+                }
+            })
+        );
     }
 
     async loadSettings(): Promise<void> {

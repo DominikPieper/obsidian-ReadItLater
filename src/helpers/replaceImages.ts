@@ -1,9 +1,10 @@
 import { basename } from 'path';
 import { App, DataAdapter } from 'obsidian';
-import { isValidImageUrl, isValidUrl, normalizeFilename, pathJoin } from './fileutils';
+import { isValidUrl, normalizeFilename, pathJoin } from './fileutils';
 import { checkAndCreateFolder } from './checkAndCreateFolder';
 import { downloadImage } from './downloadImage';
 import { linkHashes } from './linkHash';
+import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from 'src/constants/urlProtocols';
 
 type Replacer = {
     (match: string, anchor: string, link: string): Promise<string>;
@@ -42,7 +43,7 @@ export function replaceAsync(string: string, searchValue: string | RegExp, repla
 export const FILENAME_ATTEMPTS = 5;
 export function imageTagProcessor(app: App, mediaDir: string) {
     return async function processImageTag(match: string, anchor: string, link: string): Promise<string> {
-        if (!isValidImageUrl(link)) {
+        if (!isValidUrl(link, [HTTP_PROTOCOL, HTTPS_PROTOCOL])) {
             return match;
         }
         const url = new URL(link);
