@@ -1,17 +1,19 @@
 import path from 'path';
 import { normalizePath } from 'obsidian';
 
-export function isValidUrl(url: string): boolean {
-    url = url.trim();
-    if (url.trim().indexOf('\n') > -1) {
-        return false;
-    }
+export function isValidUrl(url: string, allowedProtocols: string[] = []): boolean {
+    let urlObject;
     try {
-        new URL(url);
+        urlObject = new URL(url);
     } catch (e) {
         return false;
     }
-    return true;
+
+    if (allowedProtocols.length === 0) {
+        return true;
+    }
+
+    return allowedProtocols.includes(urlObject.protocol);
 }
 
 export function getBaseUrl(url: string, origin: string): string {

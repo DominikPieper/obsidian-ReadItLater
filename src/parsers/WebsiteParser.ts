@@ -1,4 +1,4 @@
-import { App, Notice, Platform, moment, request } from 'obsidian';
+import { App, Notice, Platform, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { formatDate, getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
@@ -53,6 +53,9 @@ class WebsiteParser extends Parser {
         const cleanDocumentBody = DOMPurify.sanitize(document.body.innerHTML);
         document.body.innerHTML = cleanDocumentBody;
 
+        /*
+        DOM optimizations from MarkDownload. Distributed under an Apache License 2.0: https://github.com/deathau/markdownload/blob/main/LICENSE
+        */
         document.body.querySelectorAll('pre br')?.forEach((br) => {
             // we need to keep <br> tags because they are removed by Readability.js
             br.outerHTML = '<br-keep></br-keep>';
@@ -64,6 +67,25 @@ class WebsiteParser extends Parser {
             header.className = '';
         });
 
+        document.body.querySelectorAll('[class*=highlight-text],[class*=highlight-source]')?.forEach((codeSource) => {
+            const language = codeSource.className.match(/highlight-(?:text|source)-([a-z0-9]+)/)?.[1];
+            if (codeSource.firstElementChild.nodeName == 'PRE') {
+                codeSource.removeAttribute('data-snippet-clipboard-copy-content');
+                codeSource.firstElementChild.id = `code-lang-${language}`;
+            }
+        });
+
+        document.body.querySelectorAll('[class*=language-]')?.forEach((codeSource) => {
+            const language = codeSource.className.match(/language-([a-z0-9]+)/)?.[1];
+            codeSource.id = `code-lang-${language}`;
+        });
+
+        document.body.querySelectorAll('.codehilite > pre')?.forEach((codeSource) => {
+            if (codeSource.firstChild.nodeName !== 'CODE' && !codeSource.className.includes('language')) {
+                codeSource.id = 'code-lang-text';
+            }
+        });
+
         if (!isProbablyReaderable(document)) {
             new Notice('@mozilla/readability considers this document to unlikely be readerable.');
         }
@@ -71,8 +93,8 @@ class WebsiteParser extends Parser {
         const previewUrl = this.extractPreviewUrl(document);
         const readableDocument = new Readability(document).parse();
 
-        if (!Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
-            this.notParsableArticle(originUrl.href, previewUrl);
+        if (readableDocument === null || !Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
+            return this.notParsableArticle(originUrl.href, previewUrl);
         }
 
         return this.parsableArticle({
@@ -82,7 +104,7 @@ class WebsiteParser extends Parser {
         });
     }
 
-    private async parsableArticle(article: Article) {
+    private async parsableArticle(article: Article): Promise<Note> {
         const title = article.title || 'No title';
         const content = await parseHtmlContent(article.content);
         const formattedPublishedTime =
@@ -97,11 +119,12 @@ class WebsiteParser extends Parser {
             .replace(/%articleTitle%/g, title)
             .replace(/%articleURL%/g, article.url)
             .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
-            .replace(/%articleContent%/g, content)
             .replace(/%siteName%/g, article.siteName || '')
             .replace(/%author%/g, article.byline || '')
             .replace(/%previewURL%/g, article.previewImageUrl || '')
-            .replace(/%publishedTime%/g, formattedPublishedTime);
+            .replace(/%publishedTime%/g, formattedPublishedTime)
+            // Content must be the last replaced variable in order to prevent replacing website content.
+            .replace(/%articleContent%/g, content);
 
         if (this.settings.downloadImages && Platform.isDesktop) {
             processedContent = await this.replaceImages(fileNameTemplate, processedContent);
@@ -110,7 +133,7 @@ class WebsiteParser extends Parser {
         return new Note(`${fileNameTemplate}.md`, processedContent);
     }
 
-    private async notParsableArticle(url: string, previewUrl: string | null) {
+    private async notParsableArticle(url: string, previewUrl: string | null): Promise<Note> {
         console.error('Website not parseable');
 
         let content = this.settings.notParsableArticleNote
