@@ -51,7 +51,7 @@ class MastodonParser extends Parser {
         const status = await this.loadStatus(mastodonUrl.hostname, statusId);
 
         const fileNameTemplate = this.settings.mastodonNoteTitle
-            .replace(/%tootAuthorName%/g, status.account.display_name)
+            .replace(/%tootAuthorName%/g, () => status.account.display_name)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const assetsDir = this.settings.downloadMastodonMediaAttachmentsInDir
@@ -65,18 +65,18 @@ class MastodonParser extends Parser {
             for (let i = 0; i < replies.length; i++) {
                 const parsedReply = await this.parseStatus(replies[i], assetsDir);
                 const processedReply = this.settings.mastodonReply
-                    .replace(/%tootAuthorName%/g, replies[i].account.display_name)
-                    .replace(/%tootURL%/g, replies[i].url)
-                    .replace(/%tootContent%/g, parsedReply);
+                    .replace(/%tootAuthorName%/g, () => replies[i].account.display_name)
+                    .replace(/%tootURL%/g, () => replies[i].url)
+                    .replace(/%tootContent%/g, () => parsedReply);
                 parsedStatusContent = parsedStatusContent.concat('\n\n***\n\n', processedReply);
             }
         }
 
         const processedContent = this.settings.mastodonNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%tootAuthorName%/g, status.account.display_name)
-            .replace(/%tootURL%/g, status.url)
-            .replace(/%tootContent%/g, parsedStatusContent);
+            .replace(/%tootAuthorName%/g, () => status.account.display_name)
+            .replace(/%tootURL%/g, () => status.url)
+            .replace(/%tootContent%/g, () => parsedStatusContent);
 
         const fileName = `${fileNameTemplate}.md`;
 

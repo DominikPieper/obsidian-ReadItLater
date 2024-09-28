@@ -111,20 +111,20 @@ class WebsiteParser extends Parser {
             article.publishedTime !== null ? formatDate(article.publishedTime, this.settings.dateContentFmt) : '';
 
         const fileNameTemplate = this.settings.parseableArticleNoteTitle
-            .replace(/%title%/g, title)
+            .replace(/%title%/g, () => title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         let processedContent = this.settings.parsableArticleNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%articleTitle%/g, title)
-            .replace(/%articleURL%/g, article.url)
+            .replace(/%articleTitle%/g, () => title)
+            .replace(/%articleURL%/g, () => article.url)
             .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
-            .replace(/%siteName%/g, article.siteName || '')
-            .replace(/%author%/g, article.byline || '')
-            .replace(/%previewURL%/g, article.previewImageUrl || '')
+            .replace(/%siteName%/g, () => article.siteName || '')
+            .replace(/%author%/g, () => article.byline || '')
+            .replace(/%previewURL%/g, () => article.previewImageUrl || '')
             .replace(/%publishedTime%/g, formattedPublishedTime)
             // Content must be the last replaced variable in order to prevent replacing website content.
-            .replace(/%articleContent%/g, content);
+            .replace(/%articleContent%/g, () => content);
 
         if (this.settings.downloadImages && Platform.isDesktop) {
             processedContent = await this.replaceImages(fileNameTemplate, processedContent);
@@ -137,8 +137,8 @@ class WebsiteParser extends Parser {
         console.error('Website not parseable');
 
         let content = this.settings.notParsableArticleNote
-            .replace(/%articleURL%/g, url)
-            .replace(/%previewURL%/g, previewUrl || '');
+            .replace(/%articleURL%/g, () => url)
+            .replace(/%previewURL%/g, () => previewUrl || '');
 
         const fileNameTemplate = this.settings.notParseableArticleNoteTitle.replace(
             /%date%/g,
