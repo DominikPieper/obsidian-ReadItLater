@@ -20,7 +20,7 @@ class TextSnippetParser extends Parser {
         const fileName = `${fileNameTemplate}.md`;
 
         const content = this.settings.textSnippetNote
-            .replace(/%content%/g, text)
+            .replace(/%content%/g, () => text)
             .replace(/%date%/g, this.getFormattedDateForContent());
         return new Note(fileName, content);
     }

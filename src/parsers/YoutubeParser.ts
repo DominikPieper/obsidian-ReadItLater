@@ -43,23 +43,23 @@ class YoutubeParser extends Parser {
 
         const content = this.settings.youtubeNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoTitle%/g, video.title)
-            .replace(/%videoId%/g, video.id)
-            .replace(/%videoDescription%/g, video.description)
-            .replace(/%videoThumbnail%/g, video.thumbnail)
+            .replace(/%videoTitle%/g, () => video.title)
+            .replace(/%videoId%/g, () => video.id)
+            .replace(/%videoDescription%/g, () => video.description)
+            .replace(/%videoThumbnail%/g, () => video.thumbnail)
             .replace(/%videoDuration%/g, video.duration.toString())
             .replace(/%videoDurationFormatted%/g, video.durationFormatted)
             .replace(/%videoPublishDate%/g, video.pubDate.toString())
             .replace(/%videoViewsCount%/g, video.viewsCount.toString())
-            .replace(/%videoURL%/g, video.url)
-            .replace(/%channelId%/g, video.channel.id)
-            .replace(/%channelName%/g, video.channel.name)
-            .replace(/%channelURL%/g, video.channel.url)
-            .replace(/%videoTags%/g, video.tags.join(' '))
-            .replace(/%videoPlayer%/g, video.player);
+            .replace(/%videoURL%/g, () => video.url)
+            .replace(/%channelId%/g, () => video.channel.id)
+            .replace(/%channelName%/g, () => video.channel.name)
+            .replace(/%channelURL%/g, () => video.channel.url)
+            .replace(/%videoTags%/g, () => video.tags.join(' '))
+            .replace(/%videoPlayer%/g, () => video.player);
 
         const fileNameTemplate = this.settings.youtubeNoteTitle
-            .replace(/%title%/g, video.title)
+            .replace(/%title%/g, () => video.title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const fileName = `${fileNameTemplate}.md`;
