@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-read-it-later",
 	"name": "ReadItLater",
-	"version": "0.5.1",
+	"version": "0.6.0",
 	"minAppVersion": "1.6.2",
 	"description": "Saves the clipboard to a new note.",
 	"author": "Dominik Pieper",
