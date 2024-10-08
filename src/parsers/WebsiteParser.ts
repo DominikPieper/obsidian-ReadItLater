@@ -33,7 +33,32 @@ class WebsiteParser extends Parser {
 
     async prepareNote(url: string): Promise<Note> {
         const originUrl = new URL(url);
-        const response = await request({ method: 'GET', url: originUrl.href });
+        const document = await this.getDocument(originUrl);
+
+        return this.makeNote(document, originUrl);
+    }
+
+    protected async makeNote(document: Document, originUrl: URL): Promise<Note> {
+        if (!isProbablyReaderable(document)) {
+            new Notice('@mozilla/readability considers this document to unlikely be readerable.');
+        }
+
+        const previewUrl = this.extractPreviewUrl(document);
+        const readableDocument = new Readability(document).parse();
+
+        if (readableDocument === null || !Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
+            return this.notParsableArticle(originUrl.href, previewUrl);
+        }
+
+        return this.parsableArticle({
+            url: originUrl.href,
+            previewImageUrl: previewUrl,
+            ...readableDocument,
+        });
+    }
+
+    protected async getDocument(url: URL): Promise<Document> {
+        const response = await request({ method: 'GET', url: url.href });
         const document = new DOMParser().parseFromString(response, 'text/html');
 
         //check for existing base element
@@ -48,7 +73,7 @@ class WebsiteParser extends Parser {
 
         // Set base to allow Readability to resolve relative path's
         const baseEl = document.createElement('base');
-        baseEl.setAttribute('href', getBaseUrl(originBaseUrl ?? originUrl.href, originUrl.origin));
+        baseEl.setAttribute('href', getBaseUrl(originBaseUrl ?? url.href, url.origin));
         document.head.append(baseEl);
         const cleanDocumentBody = DOMPurify.sanitize(document.body.innerHTML);
         document.body.innerHTML = cleanDocumentBody;
@@ -86,25 +111,10 @@ class WebsiteParser extends Parser {
             }
         });
 
-        if (!isProbablyReaderable(document)) {
-            new Notice('@mozilla/readability considers this document to unlikely be readerable.');
-        }
-
-        const previewUrl = this.extractPreviewUrl(document);
-        const readableDocument = new Readability(document).parse();
-
-        if (readableDocument === null || !Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
-            return this.notParsableArticle(originUrl.href, previewUrl);
-        }
-
-        return this.parsableArticle({
-            url: originUrl.href,
-            previewImageUrl: previewUrl,
-            ...readableDocument,
-        });
+        return document;
     }
 
-    private async parsableArticle(article: Article): Promise<Note> {
+    protected async parsableArticle(article: Article): Promise<Note> {
         const title = article.title || 'No title';
         const content = await parseHtmlContent(article.content);
         const formattedPublishedTime =
@@ -133,7 +143,7 @@ class WebsiteParser extends Parser {
         return new Note(`${fileNameTemplate}.md`, processedContent);
     }
 
-    private async notParsableArticle(url: string, previewUrl: string | null): Promise<Note> {
+    protected async notParsableArticle(url: string, previewUrl: string | null): Promise<Note> {
         console.error('Website not parseable');
 
         let content = this.settings.notParsableArticleNote
@@ -150,6 +160,31 @@ class WebsiteParser extends Parser {
         }
 
         return new Note(`${fileNameTemplate}.md`, content);
+    }
+
+    /**
+     * Extracts a preview URL from the document.
+     * Searches for OpenGraph `og:image` and Twitter `twitter:image` meta tags.
+     * @param document The document to extract preview URL from
+     */
+    protected extractPreviewUrl(document: Document): string | null {
+        let previewMetaElement = document.querySelector('meta[property="og:image"]');
+        if (previewMetaElement == null) {
+            previewMetaElement = document.querySelector('meta[name="twitter:image"]');
+        }
+        return previewMetaElement?.getAttribute('content');
+    }
+
+    /**
+     * Replaces distant images by their locally downloaded counterparts.
+     * @param noteName The note name
+     * @param content The note content
+     */
+    protected async replaceImages(noteName: string, content: string): Promise<string> {
+        const assetsDir = this.settings.downloadImagesInArticleDir
+            ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
+            : this.settings.assetsDir;
+        return replaceImages(this.app, content, assetsDir);
     }
 
     /**
@@ -188,31 +223,6 @@ class WebsiteParser extends Parser {
         ]);
 
         return readingSpeed.get(lang) || readingSpeed.get('en');
-    }
-
-    /**
-     * Extracts a preview URL from the document.
-     * Searches for OpenGraph `og:image` and Twitter `twitter:image` meta tags.
-     * @param document The document to extract preview URL from
-     */
-    private extractPreviewUrl(document: Document): string | null {
-        let previewMetaElement = document.querySelector('meta[property="og:image"]');
-        if (previewMetaElement == null) {
-            previewMetaElement = document.querySelector('meta[name="twitter:image"]');
-        }
-        return previewMetaElement?.getAttribute('content');
-    }
-
-    /**
-     * Replaces distant images by their locally downloaded counterparts.
-     * @param noteName The note name
-     * @param content The note content
-     */
-    private async replaceImages(noteName: string, content: string): Promise<string> {
-        const assetsDir = this.settings.downloadImagesInArticleDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
-            : this.settings.assetsDir;
-        return replaceImages(this.app, content, assetsDir);
     }
 }
 

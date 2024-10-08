@@ -52,8 +52,7 @@ class StackExchangeParser extends Parser {
                   .replace(/%answerContent%/g, () => question.topAnswer.content)
                   .replace(/%authorName%/g, () => question.topAnswer.author.name)
                   .replace(/%authorProfileURL%/g, () => question.topAnswer.author.profile)
-                  
-                  : '';
+            : '';
         let answers = '';
         for (let i = 0; i < question.answers.length; i++) {
             const answer = this.settings.stackExchangeAnswer
@@ -79,7 +78,7 @@ class StackExchangeParser extends Parser {
             : this.settings.assetsDir;
 
         if (this.settings.downloadStackExchangeAssets && Platform.isDesktop) {
-            content = await replaceImages(app, content, assetsDir);
+            content = await replaceImages(this.app, content, assetsDir);
         }
 
         const fileName = `${fileNameTemplate}.md`;
