@@ -14,6 +14,7 @@ import TikTokParser from './parsers/TikTokParser';
 import ParserCreator from './parsers/ParserCreator';
 import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 import GithubParser from './parsers/GithubParser';
+import WikipediaParser from './parsers/WikipediaParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -31,6 +32,7 @@ export default class ReadItLaterPlugin extends Plugin {
             new MastodonParser(this.app, this.settings),
             new TikTokParser(this.app, this.settings),
             new GithubParser(this.app, this.settings),
+            new WikipediaParser(this.app, this.settings),
             new WebsiteParser(this.app, this.settings),
             new TextSnippetParser(this.app, this.settings),
         ]);
