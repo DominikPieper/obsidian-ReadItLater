@@ -12,6 +12,22 @@ export default class WikipediaParser extends WebsiteParser {
         const originUrl = new URL(url);
         const document = await this.getDocument(originUrl);
 
+        // remove cite square brackets to enhance readability
+        document.querySelectorAll('.reference .cite-bracket').forEach((element) => {
+            element.remove();
+        });
+
+        // add non-breaking whitespace before cite reference
+        document.querySelectorAll('.reference a').forEach((element) => {
+            element.textContent = '\u00A0' + element.textContent;
+        });
+
+        // fix for https://github.com/DominikPieper/obsidian-ReadItLater/issues/176
+        document.querySelectorAll('.mw-cite-backlink').forEach((element) => {
+            element.remove();
+        });
+
+        // fix for https://github.com/DominikPieper/obsidian-ReadItLater/issues/174
         document.querySelectorAll('.infobox caption').forEach((element) => {
             let newParagraph = document.createElement('p');
             newParagraph.innerHTML = element.innerHTML;
