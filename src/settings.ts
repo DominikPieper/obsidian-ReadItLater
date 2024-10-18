@@ -2,6 +2,7 @@ export interface ReadItLaterSettings {
     inboxDir: string;
     assetsDir: string;
     openNewNote: boolean;
+    batchProcess: boolean;
     openNewNoteInNewTab: boolean;
     youtubeNoteTitle: string;
     youtubeNote: string;
@@ -51,6 +52,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     inboxDir: 'ReadItLater Inbox',
     assetsDir: 'ReadItLater Inbox/assets',
     openNewNote: false,
+    batchProcess: false,
     openNewNoteInNewTab: false,
     youtubeNoteTitle: 'Youtube - %title%',
     youtubeNote: '[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
