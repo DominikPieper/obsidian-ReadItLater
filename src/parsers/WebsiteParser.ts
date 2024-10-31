@@ -6,6 +6,7 @@ import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
+import TemplateEngine from 'src/template/TemplateEngine';
 
 type Article = {
     url: string;
@@ -23,8 +24,8 @@ type Article = {
 };
 
 class WebsiteParser extends Parser {
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(url: string): boolean {

@@ -3,12 +3,13 @@ import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
+import TemplateEngine from 'src/template/TemplateEngine';
 
 class TwitterParser extends Parser {
     private PATTERN = /(https:\/\/(twitter|x).com\/([a-zA-Z0-9_]+\/)([a-zA-Z0-9_]+\/[a-zA-Z0-9_]+))/;
 
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(url: string): boolean {

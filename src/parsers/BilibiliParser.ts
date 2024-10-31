@@ -2,12 +2,13 @@ import { App, request } from 'obsidian';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
+import TemplateEngine from 'src/template/TemplateEngine';
 
 class BilibiliParser extends Parser {
     private PATTERN = /(bilibili.com)\/(video)?\/([a-z0-9]+)?/i;
 
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(url: string): boolean {

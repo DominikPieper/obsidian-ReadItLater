@@ -4,6 +4,7 @@ import { isValidUrl, normalizeFilename, replaceImages } from '../helpers';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
+import TemplateEngine from 'src/template/TemplateEngine';
 
 const MASTODON_API = {
     INSTANCE: '/api/v2/instance',
@@ -36,8 +37,8 @@ interface Status {
 }
 
 class MastodonParser extends Parser {
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     async test(url: string): Promise<boolean> {
@@ -118,7 +119,7 @@ class MastodonParser extends Parser {
 
         const mediaAttachments =
             this.settings.downloadMastodonMediaAttachments && Platform.isDesktop
-                ? await replaceImages(app, this.prepareMedia(status.media_attachments), assetsDir)
+                ? await replaceImages(this.app, this.prepareMedia(status.media_attachments), assetsDir)
                 : this.prepareMedia(status.media_attachments);
 
         return parsedStatusContent.concat(mediaAttachments);

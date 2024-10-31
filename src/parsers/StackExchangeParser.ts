@@ -5,6 +5,7 @@ import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
+import TemplateEngine from 'src/template/TemplateEngine';
 
 interface StackExchangeQuestion {
     title: string;
@@ -29,8 +30,8 @@ class StackExchangeParser extends Parser {
     private PATTERN =
         /(https:\/\/|http:\/\/)(stackoverflow\.com|serverfault\.com|superuser\.com|askubuntu\.com|stackapps\.com|.*\.stackexchange\.com)\/(q|a|questions)\/(\d+)/;
 
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(clipboardContent: string): boolean {

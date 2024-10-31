@@ -16,26 +16,30 @@ import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 import GithubParser from './parsers/GithubParser';
 import WikipediaParser from './parsers/WikipediaParser';
 import { Delimiter, getDelimiterValue } from './enums/delimiter';
+import TemplateEngine from './template/TemplateEngine';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
 
     private parserCreator: ParserCreator;
+    private templateEngine: TemplateEngine;
 
     async onload(): Promise<void> {
         await this.loadSettings();
+
+        this.templateEngine = new TemplateEngine();
         this.parserCreator = new ParserCreator([
-            new YoutubeParser(this.app, this.settings),
-            new VimeoParser(this.app, this.settings),
-            new BilibiliParser(this.app, this.settings),
-            new TwitterParser(this.app, this.settings),
-            new StackExchangeParser(this.app, this.settings),
-            new MastodonParser(this.app, this.settings),
-            new TikTokParser(this.app, this.settings),
-            new GithubParser(this.app, this.settings),
-            new WikipediaParser(this.app, this.settings),
-            new WebsiteParser(this.app, this.settings),
-            new TextSnippetParser(this.app, this.settings),
+            new YoutubeParser(this.app, this.settings, this.templateEngine),
+            new VimeoParser(this.app, this.settings, this.templateEngine),
+            new BilibiliParser(this.app, this.settings, this.templateEngine),
+            new TwitterParser(this.app, this.settings, this.templateEngine),
+            new StackExchangeParser(this.app, this.settings, this.templateEngine),
+            new MastodonParser(this.app, this.settings, this.templateEngine),
+            new TikTokParser(this.app, this.settings, this.templateEngine),
+            new GithubParser(this.app, this.settings, this.templateEngine),
+            new WikipediaParser(this.app, this.settings, this.templateEngine),
+            new WebsiteParser(this.app, this.settings, this.templateEngine),
+            new TextSnippetParser(this.app, this.settings, this.templateEngine),
         ]);
 
         addIcon('read-it-later', clipboardIcon);

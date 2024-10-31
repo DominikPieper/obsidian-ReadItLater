@@ -4,6 +4,7 @@ import { ReadItLaterSettings } from '../settings';
 import { handleError } from '../helpers';
 import { Note } from './Note';
 import { Parser } from './Parser';
+import TemplateEngine from 'src/template/TemplateEngine';
 
 interface YoutubeVideo {
     id: string;
@@ -29,8 +30,8 @@ interface YoutubeChannel {
 class YoutubeParser extends Parser {
     private PATTERN = /(youtube.com|youtu.be)\/(watch|shorts)?(\?v=|\/)?([^&#?]*)/;
 
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(url: string): boolean {
