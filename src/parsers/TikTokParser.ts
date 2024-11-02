@@ -32,15 +32,15 @@ class TikTokParser extends Parser {
 
         const content = this.settings.tikTokNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoDescription%/g, video.description)
-            .replace(/%videoId%/g, video.id)
-            .replace(/%videoURL%/g, video.url)
-            .replace(/%authorName%/g, video.author.name)
-            .replace(/%authorURL%/g, video.author.url)
-            .replace(/%videoPlayer%/g, video.player);
+            .replace(/%videoDescription%/g, () => video.description)
+            .replace(/%videoId%/g, () => video.id)
+            .replace(/%videoURL%/g, () => video.url)
+            .replace(/%authorName%/g, () => video.author.name)
+            .replace(/%authorURL%/g, () => video.author.url)
+            .replace(/%videoPlayer%/g, () => video.player);
 
         const fileNameTemplate = this.settings.tikTokNoteTitle
-            .replace(/%authorName%/g, video.author.name)
+            .replace(/%authorName%/g, () => video.author.name)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const fileName = `${fileNameTemplate}.md`;

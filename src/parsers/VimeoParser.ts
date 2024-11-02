@@ -48,15 +48,15 @@ class VimeoParser extends Parser {
 
         const content = this.settings.vimeoNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoTitle%/g, video.title)
-            .replace(/%videoId%/g, video.id)
-            .replace(/%videoURL%/g, video.url)
-            .replace(/%channelName%/g, video.channel.name)
-            .replace(/%channelURL%/g, video.channel.url)
-            .replace(/%videoPlayer%/g, video.player);
+            .replace(/%videoTitle%/g, () => video.title)
+            .replace(/%videoId%/g, () => video.id)
+            .replace(/%videoURL%/g, () => video.url)
+            .replace(/%channelName%/g, () => video.channel.name)
+            .replace(/%channelURL%/g, () => video.channel.url)
+            .replace(/%videoPlayer%/g, () => video.player);
 
         const fileNameTemplate = this.settings.vimeoNoteTitle
-            .replace(/%title%/g, video.title)
+            .replace(/%title%/g, () => video.title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const fileName = `${fileNameTemplate}.md`;

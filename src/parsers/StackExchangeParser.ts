@@ -43,43 +43,42 @@ class StackExchangeParser extends Parser {
         const question = await this.parseDocument(document);
 
         const fileNameTemplate = this.settings.stackExchangeNoteTitle
-            .replace(/%title%/g, question.title)
+            .replace(/%title%/g, () => question.title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const topAnswer = question.topAnswer
             ? this.settings.stackExchangeAnswer
                   .replace(/%date%/g, this.getFormattedDateForContent())
-                  .replace(/%answerContent%/g, question.topAnswer.content)
-                  .replace(/%authorName%/g, question.topAnswer.author.name)
-                  .replace(/%authorProfileURL%/g, question.topAnswer.author.profile)
+                  .replace(/%answerContent%/g, () => question.topAnswer.content)
+                  .replace(/%authorName%/g, () => question.topAnswer.author.name)
+                  .replace(/%authorProfileURL%/g, () => question.topAnswer.author.profile)
             : '';
-
         let answers = '';
         for (let i = 0; i < question.answers.length; i++) {
             const answer = this.settings.stackExchangeAnswer
                 .replace(/%date%/g, this.getFormattedDateForContent())
-                .replace(/%answerContent%/g, question.answers[i].content)
-                .replace(/%authorName%/g, question.answers[i].author.name)
-                .replace(/%authorProfileURL%/g, question.answers[i].author.profile);
+                .replace(/%answerContent%/g, () => question.answers[i].content)
+                .replace(/%authorName%/g, () => question.answers[i].author.name)
+                .replace(/%authorProfileURL%/g, () => question.answers[i].author.profile);
             answers = answers.concat('\n\n***\n\n', answer);
         }
 
         let content = this.settings.stackExchangeNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%questionTitle%/g, question.title)
-            .replace(/%questionURL%/g, question.url)
-            .replace(/%questionContent%/g, question.content)
-            .replace(/%authorName%/g, question.author.name)
-            .replace(/%authorProfileURL%/g, question.author.profile)
-            .replace(/%topAnswer%/g, topAnswer)
-            .replace(/%answers%/g, answers.trim());
+            .replace(/%questionTitle%/g, () => question.title)
+            .replace(/%questionURL%/g, () => question.url)
+            .replace(/%questionContent%/g, () => question.content)
+            .replace(/%authorName%/g, () => question.author.name)
+            .replace(/%authorProfileURL%/g, () => question.author.profile)
+            .replace(/%topAnswer%/g, () => topAnswer)
+            .replace(/%answers%/g, () => answers.trim());
 
         const assetsDir = this.settings.downloadStackExchangeAssetsInDir
             ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
             : this.settings.assetsDir;
 
         if (this.settings.downloadStackExchangeAssets && Platform.isDesktop) {
-            content = await replaceImages(app, content, assetsDir);
+            content = await replaceImages(this.app, content, assetsDir);
         }
 
         const fileName = `${fileNameTemplate}.md`;

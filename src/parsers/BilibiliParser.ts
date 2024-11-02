@@ -30,13 +30,13 @@ class BilibiliParser extends Parser {
 
         const content = this.settings.bilibiliNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoTitle%/g, videoTitle)
-            .replace(/%videoURL%/g, url)
-            .replace(/%videoId%/g, videoId)
-            .replace(/%videoPlayer%/g, videoPlayer);
+            .replace(/%videoTitle%/g, () => videoTitle)
+            .replace(/%videoURL%/g, () => url)
+            .replace(/%videoId%/g, () => videoId)
+            .replace(/%videoPlayer%/g, () => videoPlayer);
 
         const fileNameTemplate = this.settings.bilibiliNoteTitle
-            .replace(/%title%/g, videoTitle)
+            .replace(/%title%/g, () => videoTitle)
             .replace(/%date%/g, this.getFormattedDateForFilename());
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);

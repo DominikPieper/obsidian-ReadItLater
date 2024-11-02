@@ -35,13 +35,13 @@ class TwitterParser extends Parser {
 
         const processedContent = this.settings.twitterNote
             .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%tweetAuthorName%/g, tweetAuthorName)
-            .replace(/%tweetURL%/g, response.url)
-            .replace(/%tweetContent%/g, content)
-            .replace(/%tweetPublishDate%/g, this.getPublishedDateFromDOM(response.html));
+            .replace(/%tweetAuthorName%/g, () => tweetAuthorName)
+            .replace(/%tweetURL%/g, () => response.url)
+            .replace(/%tweetContent%/g, () => content)
+            .replace(/%tweetPublishDate%/g, () => this.getPublishedDateFromDOM(response.html));
 
         const fileNameTemplate = this.settings.twitterNoteTitle
-            .replace(/%tweetAuthorName%/g, tweetAuthorName)
+            .replace(/%tweetAuthorName%/g, () => tweetAuthorName)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
         const fileName = `${fileNameTemplate}.md`;
