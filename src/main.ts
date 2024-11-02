@@ -84,28 +84,35 @@ export default class ReadItLaterPlugin extends Plugin {
         await this.saveData(this.settings);
     }
 
-    checkForBatchSegments(clipboardContent: string): Array<string> {
-        if (this.settings.batchProcess == false) {
-            return [clipboardContent];
-        }
-        const cleanData = clipboardContent
-            .trim()
-            .split('\n')
-            .filter((line) => line.trim().length > 0);
-        const everyLineIsURL = cleanData.reduce((status: boolean, url: string): boolean => {
-            return status && url.substring(0, 4) == 'http';
-        }, true);
-        return everyLineIsURL ? cleanData : [clipboardContent];
-    }
-
     async processClipboard(): Promise<void> {
         const clipboardContent = await navigator.clipboard.readText();
-        const clipboardSegmentsList = this.checkForBatchSegments(clipboardContent);
+        if (this.settings.batchProcess) {
+            this._processUrlsBatch(clipboardContent)
+        }
+        else {
+            this._processUrlSingle(clipboardContent)
+        }
+    }
 
+    async _processUrlSingle(clipboardContent: string): Promise<void> {
+        const parser = await this.parserCreator.createParser(clipboardContent);
+        const note = await parser.prepareNote(clipboardContent);
+        await this.writeFile(note.fileName, note.content);
+    }
+
+    async _processUrlsBatch(clipboardContent: string): Promise<void> {
+        const clipboardSegmentsList = (() => {
+            const cleanData = clipboardContent
+                .trim()
+                .split('\n')
+                .filter((line) => line.trim().length > 0);
+            const everyLineIsURL = cleanData.reduce((status: boolean, url: string): boolean => {
+                return status && url.substring(0, 4) == 'http';
+            }, true);
+            return everyLineIsURL ? cleanData : [clipboardContent];
+        })()
         for (const clipboardSegment of clipboardSegmentsList) {
-            const parser = await this.parserCreator.createParser(clipboardSegment);
-            const note = await parser.prepareNote(clipboardSegment);
-            await this.writeFile(note.fileName, note.content);
+            this._processUrlSingle(clipboardSegment)
         }
     }
 
