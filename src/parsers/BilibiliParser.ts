@@ -1,8 +1,16 @@
 import { App, request } from 'obsidian';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
-import TemplateEngine from 'src/template/TemplateEngine';
+
+interface BilibiliNoteData {
+    date: string;
+    videoId: string;
+    videoTitle: string;
+    videoURL: string;
+    videoPlayer: string;
+}
 
 class BilibiliParser extends Parser {
     private PATTERN = /(bilibili.com)\/(video)?\/([a-z0-9]+)?/i;
@@ -16,6 +24,20 @@ class BilibiliParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
+        const data = await this.getNoteData(url);
+
+        const content = this.templateEngine.render(this.settings.bilibiliNote, data);
+
+        const fileNameTemplate = this.templateEngine.render(this.settings.bilibiliNoteTitle, {
+            title: data.videoTitle,
+            date: this.getFormattedDateForFilename(),
+        });
+
+        const fileName = `${fileNameTemplate}.md`;
+        return new Note(fileName, content);
+    }
+
+    private async getNoteData(url: string): Promise<BilibiliNoteData> {
         const response = await request({
             method: 'GET',
             url,
@@ -25,22 +47,15 @@ class BilibiliParser extends Parser {
             },
         });
         const videoHTML = new DOMParser().parseFromString(response, 'text/html');
-        const videoTitle = videoHTML.querySelector("[property~='og:title']").getAttribute('content');
-        const videoId = this.PATTERN.exec(url)[3];
-        const videoPlayer = `<iframe width="${this.settings.bilibiliEmbedWidth}" height="${this.settings.bilibiliEmbedHeight}" src="https://player.bilibili.com/player.html?autoplay=0&bvid=${videoId}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`;
+        const videoId = this.PATTERN.exec(url)[3] ?? '';
 
-        const content = this.settings.bilibiliNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoTitle%/g, () => videoTitle)
-            .replace(/%videoURL%/g, () => url)
-            .replace(/%videoId%/g, () => videoId)
-            .replace(/%videoPlayer%/g, () => videoPlayer);
-
-        const fileNameTemplate = this.settings.bilibiliNoteTitle
-            .replace(/%title%/g, () => videoTitle)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
-        const fileName = `${fileNameTemplate}.md`;
-        return new Note(fileName, content);
+        return {
+            date: this.getFormattedDateForContent(),
+            videoId: videoId,
+            videoTitle: videoHTML.querySelector("[property~='og:title']").getAttribute('content') ?? '',
+            videoURL: url,
+            videoPlayer: `<iframe width="${this.settings.bilibiliEmbedWidth}" height="${this.settings.bilibiliEmbedHeight}" src="https://player.bilibili.com/player.html?autoplay=0&bvid=${videoId}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`,
+        };
     }
 }
 

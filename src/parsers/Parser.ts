@@ -1,8 +1,8 @@
 import { App } from 'obsidian';
 import { formatCurrentDate, isValidUrl } from '../helpers';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
-import TemplateEngine from 'src/template/TemplateEngine';
 
 export abstract class Parser {
     protected app: App;

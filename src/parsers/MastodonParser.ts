@@ -1,10 +1,10 @@
 import { App, Platform, request } from 'obsidian';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { ReadItLaterSettings } from '../settings';
 import { isValidUrl, normalizeFilename, replaceImages } from '../helpers';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
-import TemplateEngine from 'src/template/TemplateEngine';
 
 const MASTODON_API = {
     INSTANCE: '/api/v2/instance',
@@ -34,6 +34,19 @@ interface Status {
     content: string;
     account: Account;
     media_attachments: MediaAttachment[];
+}
+
+interface MastodonNoteData {
+    date: string;
+    tootContent: string;
+    tootURL: string;
+    tootAuthorName: string;
+}
+
+interface MastodonReplyNoteData {
+    tootContent: string;
+    tootURL: string;
+    tootAuthorName: string;
 }
 
 class MastodonParser extends Parser {

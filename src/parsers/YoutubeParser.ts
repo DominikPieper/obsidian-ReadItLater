@@ -1,30 +1,39 @@
 import { App, moment, request } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { ReadItLaterSettings } from '../settings';
 import { handleError } from '../helpers';
 import { Note } from './Note';
 import { Parser } from './Parser';
-import TemplateEngine from 'src/template/TemplateEngine';
+
+interface YoutubeNoteData {
+    date: string;
+    videoId: string;
+    videoTitle: string;
+    videoDescription: string;
+    videoThumbnail: string;
+    videoDuration: Number;
+    videoDurationFormatted: string;
+    videoPublishDate: string;
+    videoViewsCount: Number;
+    videoURL: string;
+    videoTags: string;
+    videoPlayer: string;
+    channelId: string;
+    channelName: string;
+    channelURL: string;
+    extra: YoutubeVideo;
+}
 
 interface YoutubeVideo {
-    id: string;
-    url: string;
-    title: string;
-    description: string;
-    thumbnail: string;
-    duration: Number;
-    durationFormatted: string;
-    pubDate: string;
-    player: string;
-    viewsCount: Number;
+    thumbnails: GoogleApiYouTubeThumbnailResource;
+    publishedAt: Date;
     tags: string[];
     channel: YoutubeChannel;
 }
 
 interface YoutubeChannel {
-    id: string;
-    url: string;
-    name: string;
+    thumbnails: GoogleApiYouTubeThumbnailResource;
 }
 
 class YoutubeParser extends Parser {
@@ -39,35 +48,21 @@ class YoutubeParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
-        const video =
+        const data =
             this.settings.youtubeApiKey === '' ? await this.parseSchema(url) : await this.parseApiResponse(url);
 
-        const content = this.settings.youtubeNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoTitle%/g, () => video.title)
-            .replace(/%videoId%/g, () => video.id)
-            .replace(/%videoDescription%/g, () => video.description)
-            .replace(/%videoThumbnail%/g, () => video.thumbnail)
-            .replace(/%videoDuration%/g, video.duration.toString())
-            .replace(/%videoDurationFormatted%/g, video.durationFormatted)
-            .replace(/%videoPublishDate%/g, video.pubDate.toString())
-            .replace(/%videoViewsCount%/g, video.viewsCount.toString())
-            .replace(/%videoURL%/g, () => video.url)
-            .replace(/%channelId%/g, () => video.channel.id)
-            .replace(/%channelName%/g, () => video.channel.name)
-            .replace(/%channelURL%/g, () => video.channel.url)
-            .replace(/%videoTags%/g, () => video.tags.join(' '))
-            .replace(/%videoPlayer%/g, () => video.player);
+        const content = this.templateEngine.render(this.settings.youtubeNote, data);
 
-        const fileNameTemplate = this.settings.youtubeNoteTitle
-            .replace(/%title%/g, () => video.title)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
+        const fileNameTemplate = this.templateEngine.render(this.settings.youtubeNoteTitle, {
+            title: data.videoTitle,
+            date: this.getFormattedDateForFilename(),
+        });
 
         const fileName = `${fileNameTemplate}.md`;
         return new Note(fileName, content);
     }
 
-    private async parseApiResponse(url: string): Promise<YoutubeVideo> {
+    private async parseApiResponse(url: string): Promise<YoutubeNoteData> {
         const videoId = this.PATTERN.exec(url)[4];
         try {
             const videoApiResponse = await request({
@@ -98,28 +93,38 @@ class YoutubeParser extends Parser {
             const channel: GoogleApiYouTubeChannelResource = channelJsonResponse.items[0];
 
             const duration = parse(video.contentDetails.duration);
+
+            const tags: string[] = Object.prototype.hasOwnProperty.call(video, 'tags')
+                ? video.snippet.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#'))
+                : [];
+
             return {
-                id: video.id,
-                url: url,
-                title: video.snippet.title,
-                description: video.snippet.description,
-                thumbnail:
+                date: this.getFormattedDateForContent(),
+                videoId: video.id,
+                videoURL: url,
+                videoTitle: video.snippet.title,
+                videoDescription: video.snippet.description,
+                videoThumbnail:
                     video.snippet.thumbnails?.maxres?.url ??
                     video.snippet.thumbnails?.medium?.url ??
                     video.snippet.thumbnails?.default?.url ??
                     '',
-                player: this.getEmbedPlayer(video.id),
-                duration: toSeconds(duration),
-                durationFormatted: this.formatDuration(duration),
-                pubDate: moment(video.snippet.publishedAt).format(this.settings.dateContentFmt),
-                viewsCount: video.statistics.viewCount,
-                tags: Object.prototype.hasOwnProperty.call(video, 'tags')
-                    ? video.snippet.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#'))
-                    : [],
-                channel: {
-                    id: channel.id,
-                    url: `https://www.youtube.com/channel/${channel.id}`,
-                    name: channel.snippet.title ?? '',
+                videoPlayer: this.getEmbedPlayer(video.id),
+                videoDuration: toSeconds(duration),
+                videoDurationFormatted: this.formatDuration(duration),
+                videoPublishDate: moment(video.snippet.publishedAt).format(this.settings.dateContentFmt),
+                videoViewsCount: video.statistics.viewCount,
+                videoTags: tags.join(' '),
+                channelId: channel.id,
+                channelURL: `https://www.youtube.com/channel/${channel.id}`,
+                channelName: channel.snippet.title ?? '',
+                extra: {
+                    thumbnails: video.snippet.thumbnails,
+                    publishedAt: moment(video.snippet.publishedAt).toDate(),
+                    tags: tags,
+                    channel: {
+                        thumbnails: channel.snippet.thumbnails,
+                    },
                 },
             };
         } catch (e) {
@@ -127,7 +132,7 @@ class YoutubeParser extends Parser {
         }
     }
 
-    private async parseSchema(url: string): Promise<YoutubeVideo> {
+    private async parseSchema(url: string): Promise<YoutubeNoteData> {
         try {
             const response = await request({
                 method: 'GET',
@@ -149,23 +154,23 @@ class YoutubeParser extends Parser {
             const personSchemaElement = videoSchemaElement.querySelector('[itemtype="http://schema.org/Person"]');
 
             return {
-                id: videoId,
-                url: url,
-                title: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
-                description:
+                date: this.getFormattedDateForContent(),
+                videoId: videoId,
+                videoURL: url,
+                videoTitle: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
+                videoDescription:
                     videoSchemaElement?.querySelector('[itemprop="description"]')?.getAttribute('content') ?? '',
-                thumbnail: videoHTML.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '',
-                player: this.getEmbedPlayer(videoId),
-                duration: 0,
-                durationFormatted: '',
-                pubDate: '',
-                viewsCount: 0,
-                tags: [],
-                channel: {
-                    id: videoSchemaElement?.querySelector('[itemprop="channelId"')?.getAttribute('content') ?? '',
-                    url: personSchemaElement?.querySelector('[itemprop="url"]')?.getAttribute('href') ?? '',
-                    name: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
-                },
+                videoThumbnail: videoHTML.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '',
+                videoPlayer: this.getEmbedPlayer(videoId),
+                videoDuration: 0,
+                videoDurationFormatted: '',
+                videoPublishDate: '',
+                videoViewsCount: 0,
+                videoTags: '',
+                channelId: videoSchemaElement?.querySelector('[itemprop="channelId"')?.getAttribute('content') ?? '',
+                channelURL: personSchemaElement?.querySelector('[itemprop="url"]')?.getAttribute('href') ?? '',
+                channelName: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
+                extra: null,
             };
         } catch (e) {
             handleError(e);

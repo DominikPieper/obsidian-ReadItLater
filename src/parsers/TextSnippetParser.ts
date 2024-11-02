@@ -1,8 +1,8 @@
 import { App } from 'obsidian';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
-import TemplateEngine from 'src/template/TemplateEngine';
 
 class TextSnippetParser extends Parser {
     constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {

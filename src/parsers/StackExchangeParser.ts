@@ -1,11 +1,11 @@
 import { App, Platform, request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { normalizeFilename, replaceImages } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
-import TemplateEngine from 'src/template/TemplateEngine';
 
 interface StackExchangeQuestion {
     title: string;
