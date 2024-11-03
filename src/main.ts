@@ -106,14 +106,15 @@ export default class ReadItLaterPlugin extends Plugin {
 
     async _processUrlsBatch(clipboardContent: string): Promise<void> {
         const clipboardSegmentsList = (() => {
-            const cleanData = clipboardContent
+            const delimiter = this.settings.batchProcessDelimiter
+            const cleanClipboardData = clipboardContent
                 .trim()
-                .split('\n')
+                .split(delimiter)
                 .filter((line) => line.trim().length > 0);
-            const everyLineIsURL = cleanData.reduce((status: boolean, url: string): boolean => {
-                return status && url.substring(0, 4) == 'http';
+            const everyLineIsURL = cleanClipboardData.reduce((status: boolean, url: string): boolean => {
+                return status && isValidUrl(url);
             }, true);
-            return everyLineIsURL ? cleanData : [clipboardContent];
+            return everyLineIsURL ? cleanClipboardData : [clipboardContent];
         })()
         for (const clipboardSegment of clipboardSegmentsList) {
             this._processUrlSingle(clipboardSegment)

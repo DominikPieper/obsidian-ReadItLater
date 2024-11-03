@@ -92,6 +92,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
+        .setName('Batch Delimiter')
+        .setDesc('Split clipboard content by string')
+        .addText((text) =>
+            text
+                .setPlaceholder('\\n')
+                .setValue((this.plugin.settings.batchProcessDelimiter || DEFAULT_SETTINGS.batchProcessDelimiter).replace(/\n/g, '\\n'))
+                .onChange(async (value) => {
+                    this.plugin.settings.batchProcessDelimiter = value.replace(/\\n/g, '\n');
+                    await this.plugin.saveSettings();
+                }),
+        );
+
+        new Setting(containerEl)
             .setName('Date format string')
             .setDesc('Format of the %date% variable. NOTE: do not use symbols forbidden in file names.')
             .addText((text) =>
