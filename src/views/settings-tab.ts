@@ -1,4 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
+import { Delimiter, getDelimiterOptions } from 'src/enums/delimiter';
 import ReadItLaterPlugin from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
 
@@ -81,7 +82,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Batch process URLs')
-            .setDesc('If enabled, a list of urls (one url per line) will processed in sequence')
+            .setDesc('If enabled, a list of URLs will processed in sequence. Delimiter can be set in setting bellow.')
             .addToggle((toggle) =>
                 toggle
                     .setValue(this.plugin.settings.batchProcess ?? DEFAULT_SETTINGS.batchProcess)
@@ -92,17 +93,20 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-        .setName('Batch Delimiter')
-        .setDesc('Split clipboard content by string')
-        .addText((text) =>
-            text
-                .setPlaceholder('\\n')
-                .setValue((this.plugin.settings.batchProcessDelimiter || DEFAULT_SETTINGS.batchProcessDelimiter).replace(/\n/g, '\\n'))
-                .onChange(async (value) => {
-                    this.plugin.settings.batchProcessDelimiter = value.replace(/\\n/g, '\n');
+            .setName('Batch note creation delimiter')
+            .setDesc('Delimiter for batch list of notes')
+            .addDropdown((dropdown) => {
+                getDelimiterOptions().forEach((delimiterOption) =>
+                    dropdown.addOption(delimiterOption.option, delimiterOption.label),
+                );
+
+                dropdown.setValue(this.plugin.settings.batchProcessDelimiter || DEFAULT_SETTINGS.batchProcessDelimiter);
+
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.batchProcessDelimiter = value as Delimiter;
                     await this.plugin.saveSettings();
-                }),
-        );
+                });
+            });
 
         new Setting(containerEl)
             .setName('Date format string')

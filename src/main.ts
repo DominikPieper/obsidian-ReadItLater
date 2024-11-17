@@ -15,6 +15,7 @@ import ParserCreator from './parsers/ParserCreator';
 import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 import GithubParser from './parsers/GithubParser';
 import WikipediaParser from './parsers/WikipediaParser';
+import { Delimiter, getDelimiterValue } from './enums/delimiter';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -91,10 +92,9 @@ export default class ReadItLaterPlugin extends Plugin {
     async processClipboard(): Promise<void> {
         const clipboardContent = await navigator.clipboard.readText();
         if (this.settings.batchProcess) {
-            this._processUrlsBatch(clipboardContent)
-        }
-        else {
-            this._processUrlSingle(clipboardContent)
+            this._processUrlsBatch(clipboardContent);
+        } else {
+            this._processUrlSingle(clipboardContent);
         }
     }
 
@@ -106,18 +106,17 @@ export default class ReadItLaterPlugin extends Plugin {
 
     async _processUrlsBatch(clipboardContent: string): Promise<void> {
         const clipboardSegmentsList = (() => {
-            const delimiter = this.settings.batchProcessDelimiter
             const cleanClipboardData = clipboardContent
                 .trim()
-                .split(delimiter)
+                .split(getDelimiterValue(this.settings.batchProcessDelimiter))
                 .filter((line) => line.trim().length > 0);
             const everyLineIsURL = cleanClipboardData.reduce((status: boolean, url: string): boolean => {
                 return status && isValidUrl(url);
             }, true);
             return everyLineIsURL ? cleanClipboardData : [clipboardContent];
-        })()
+        })();
         for (const clipboardSegment of clipboardSegmentsList) {
-            this._processUrlSingle(clipboardSegment)
+            this._processUrlSingle(clipboardSegment);
         }
     }
 

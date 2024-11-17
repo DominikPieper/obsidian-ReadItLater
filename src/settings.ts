@@ -1,9 +1,11 @@
+import { Delimiter } from './enums/delimiter';
+
 export interface ReadItLaterSettings {
     inboxDir: string;
     assetsDir: string;
     openNewNote: boolean;
     batchProcess: boolean;
-    batchProcessDelimiter: string;
+    batchProcessDelimiter: Delimiter;
     openNewNoteInNewTab: boolean;
     youtubeNoteTitle: string;
     youtubeNote: string;
@@ -54,7 +56,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     assetsDir: 'ReadItLater Inbox/assets',
     openNewNote: false,
     batchProcess: false,
-    batchProcessDelimiter: '\n',
+    batchProcessDelimiter: Delimiter.NewLine,
     openNewNoteInNewTab: false,
     youtubeNoteTitle: 'Youtube - %title%',
     youtubeNote: '[[ReadItLater]] [[Youtube]]\n\n# [%videoTitle%](%videoURL%)\n\n%videoPlayer%',
