@@ -2,7 +2,7 @@ import { Note } from './Note';
 import WebsiteParser from './WebsiteParser';
 
 export default class GithubParser extends WebsiteParser {
-    private PATTERN = /^https?:\/\/(?:www\.)?github\.com\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)$/;
+    private PATTERN = /^https?:\/\/(?:www\.)?github\.com\/([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+)\/?$/;
 
     test(url: string): boolean {
         return this.isValidUrl(url) && this.PATTERN.test(url);

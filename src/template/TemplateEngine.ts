@@ -13,6 +13,15 @@ export default class TemplateEngine {
 
     constructor() {
         this.modifiers = {
+            blockquote: (value: string) => {
+                if (typeof value !== 'string') {
+                    return value;
+                }
+                return value
+                    .split('\n')
+                    .map((line) => `> ${line}`)
+                    .join('\n');
+            },
             lower: (value: string) => String(value).toLowerCase(),
             upper: (value: string) => String(value).toUpperCase(),
             capitalize: (value: string) => {
@@ -70,7 +79,7 @@ export default class TemplateEngine {
         return template.replace(simplePatternRegex, (match: string, path: string) => {
             try {
                 const value = this.resolveValue(path, data);
-                return value !== undefined ? String(value) : match;
+                return value !== undefined ? String(value) : '';
             } catch (e) {
                 console.warn(`Error processing simple pattern "${match}":`, e);
                 return match;
@@ -86,7 +95,10 @@ export default class TemplateEngine {
                 const [key, ...modifiers] = content.split('|').map((item) => item.trim());
                 const value = this.resolveValue(key, data);
 
-                if (value === undefined) return match;
+                if (value === undefined) {
+                    console.warn(`Unable to resolve ${key}`);
+                    return '';
+                }
 
                 let processedValue = value;
                 for (const modifier of modifiers) {

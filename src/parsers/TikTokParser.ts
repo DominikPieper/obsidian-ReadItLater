@@ -35,8 +35,7 @@ class TikTokParser extends Parser {
             date: this.getFormattedDateForFilename(),
         });
 
-        const fileName = `${fileNameTemplate}.md`;
-        return new Note(fileName, content);
+        return new Note(`${fileNameTemplate}.md`, content);
     }
 
     private async parseHtml(url: string): Promise<TiktokNoteData> {

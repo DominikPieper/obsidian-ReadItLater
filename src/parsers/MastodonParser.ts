@@ -36,17 +36,15 @@ interface Status {
     media_attachments: MediaAttachment[];
 }
 
-interface MastodonNoteData {
+interface MastodonStatusNoteData {
     date: string;
     tootContent: string;
     tootURL: string;
     tootAuthorName: string;
-}
-
-interface MastodonReplyNoteData {
-    tootContent: string;
-    tootURL: string;
-    tootAuthorName: string;
+    extra: {
+        status: Status;
+        replies: Status[];
+    };
 }
 
 class MastodonParser extends Parser {
@@ -63,38 +61,52 @@ class MastodonParser extends Parser {
         const statusId = mastodonUrl.pathname.split('/')[2];
 
         const status = await this.loadStatus(mastodonUrl.hostname, statusId);
+        let replies: Status[] = [];
+        if (this.settings.saveMastodonReplies) {
+            replies = await this.loadReplies(mastodonUrl.hostname, statusId);
+        }
 
-        const fileNameTemplate = this.settings.mastodonNoteTitle
-            .replace(/%tootAuthorName%/g, () => status.account.display_name)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
+        const fileNameTemplate = this.templateEngine.render(this.settings.mastodonNoteTitle, {
+            tootAuthorName: status.account.display_name,
+            date: this.getFormattedDateForFilename(),
+        });
 
         const assetsDir = this.settings.downloadMastodonMediaAttachmentsInDir
             ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
             : this.settings.assetsDir;
 
+        const data = await this.getNoteData(status, replies, assetsDir);
+
+        const content = this.templateEngine.render(this.settings.mastodonNote, data);
+
+        return new Note(`${fileNameTemplate}.md`, content);
+    }
+
+    private async getNoteData(status: Status, replies: Status[], assetsDir: string): Promise<MastodonStatusNoteData> {
         let parsedStatusContent = await this.parseStatus(status, assetsDir);
 
-        if (this.settings.saveMastodonReplies) {
-            const replies = await this.loadReplies(mastodonUrl.hostname, statusId);
+        if (replies.length > 0) {
             for (let i = 0; i < replies.length; i++) {
                 const parsedReply = await this.parseStatus(replies[i], assetsDir);
-                const processedReply = this.settings.mastodonReply
-                    .replace(/%tootAuthorName%/g, () => replies[i].account.display_name)
-                    .replace(/%tootURL%/g, () => replies[i].url)
-                    .replace(/%tootContent%/g, () => parsedReply);
+                const processedReply = this.templateEngine.render(this.settings.mastodonReply, {
+                    tootAuthorName: replies[i].account.display_name,
+                    tootURL: replies[i].url,
+                    tootContent: parsedReply,
+                });
                 parsedStatusContent = parsedStatusContent.concat('\n\n***\n\n', processedReply);
             }
         }
 
-        const processedContent = this.settings.mastodonNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%tootAuthorName%/g, () => status.account.display_name)
-            .replace(/%tootURL%/g, () => status.url)
-            .replace(/%tootContent%/g, () => parsedStatusContent);
-
-        const fileName = `${fileNameTemplate}.md`;
-
-        return new Note(fileName, processedContent);
+        return {
+            date: this.getFormattedDateForContent(),
+            tootAuthorName: status.account.display_name,
+            tootURL: status.url,
+            tootContent: parsedStatusContent,
+            extra: {
+                status: status,
+                replies: replies,
+            },
+        };
     }
 
     private async loadStatus(hostname: string, statusId: string): Promise<Status> {

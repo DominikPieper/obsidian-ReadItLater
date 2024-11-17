@@ -33,8 +33,7 @@ class BilibiliParser extends Parser {
             date: this.getFormattedDateForFilename(),
         });
 
-        const fileName = `${fileNameTemplate}.md`;
-        return new Note(fileName, content);
+        return new Note(`${fileNameTemplate}.md`, content);
     }
 
     private async getNoteData(url: string): Promise<BilibiliNoteData> {
