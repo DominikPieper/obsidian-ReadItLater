@@ -1,4 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
+import { Delimiter, getDelimiterOptions } from 'src/enums/delimiter';
 import ReadItLaterPlugin from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
 
@@ -78,6 +79,34 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         this.display();
                     }),
             );
+
+        new Setting(containerEl)
+            .setName('Batch process URLs')
+            .setDesc('If enabled, a list of URLs will processed in sequence. Delimiter can be set in setting bellow.')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(this.plugin.settings.batchProcess ?? DEFAULT_SETTINGS.batchProcess)
+                    .onChange(async (value) => {
+                        this.plugin.settings.batchProcess = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Batch note creation delimiter')
+            .setDesc('Delimiter for batch list of notes')
+            .addDropdown((dropdown) => {
+                getDelimiterOptions().forEach((delimiterOption) =>
+                    dropdown.addOption(delimiterOption.option, delimiterOption.label),
+                );
+
+                dropdown.setValue(this.plugin.settings.batchProcessDelimiter || DEFAULT_SETTINGS.batchProcessDelimiter);
+
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.batchProcessDelimiter = value as Delimiter;
+                    await this.plugin.saveSettings();
+                });
+            });
 
         new Setting(containerEl)
             .setName('Date format string')
