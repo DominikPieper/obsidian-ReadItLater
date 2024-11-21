@@ -16,9 +16,38 @@
 
 ## Introduction
 
-ReadItLater is a simple plugin for Obsidian to collect interesting information from your clipboard into your vault.
+Save the web with ReadItLater plugin for Obsidian. Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.
 
-To add something to your vault just click the `ReadItLater: Save clipboard` ribbon or run the `ReadItLater: Save clipboard` command. New note will be added to folder (default is `ReadItLater Inbox`) configured in plugin settings.
+ReadItLater can do a lot more than converting web pages to markdown. For every content type there is specific template with carefully selected variables to ease up your archiving process.
+
+To add something to your vault just click the `ReadItLater: Save clipboard` ribbon or run the `ReadItLater: Save clipboard` command. New note will be created in folder configured in plugin settings.
+
+## Template engine
+
+ReadItLater provides for every content type dedicated template that can be edited in plugin settings.
+
+### Variables
+
+Variables are rendered in template using familiar syntax `{{content}}`. Nested data types can be accessed using dot notation `{{author.name}}`.
+
+### Filters
+
+Variables output can be modified using filters. Filters are separated by `|` symbol. Filters can be chained, so output of the previous is passed to the next.
+
+<details>
+<summary>capitalize</summary>
+Modifies first character to uppercase and others to lowercase.
+</details>
+
+<details>
+<summary>lower</summary>
+Converts value to lowercase.
+</details>
+
+<details>
+<summary>upper</summary>
+Converts value to uppercase.
+</details>
 
 ## Content Types
 
@@ -187,7 +216,7 @@ Will be converted to note with embeded player in `<iframe>`.
 
 ### Website URL
 
-Will be parsed to readable form using [Mozilla Readability](https://github.com/mozilla/readability) and then converted to markdown. In case website content is marked by [Readbility](https://github.com/mozilla/readability) as not readable, empty note with URL will be created. 
+Will be parsed to readable form using [Mozilla Readability](https://github.com/mozilla/readability) and then converted to markdown. In case website content is marked by [Readbility](https://github.com/mozilla/readability) as not readable, empty note with URL will be created.
 
 If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/assets`) configured in plugin settings. (Supported only on desktop for now)
 
