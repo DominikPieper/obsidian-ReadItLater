@@ -72,14 +72,13 @@ class WebsiteParser extends Parser {
     }
 
     protected async getDocument(url: URL): Promise<Document> {
-
         const response = await request({
             url: 'https://r.jina.ai/',
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'Accept': 'application/json',
-                'X-Return-Format': 'markdown'
+                'X-Return-Format': 'markdown',
                 'X-Remove-Selector': 'header, .class, #id',
                 'X-Timeout': '30'
             },

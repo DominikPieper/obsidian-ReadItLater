@@ -49,7 +49,6 @@ export interface ReadItLaterSettings {
     tikTokEmbedWidth: string;
     tikTokEmbedHeight: string;
     extendShareMenu: boolean;
-    jinaApiKey: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
