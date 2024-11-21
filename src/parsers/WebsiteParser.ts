@@ -22,6 +22,19 @@ type Article = {
     publishedTime: string | null;
 };
 
+type JinaReaderResponse = {
+    code: number;
+    status: number;
+    data: {
+        title: string;
+        description: string;
+        url: string;
+        content: string;
+        images?: Record<string, string>;
+        links?: Record<string, string>;
+    };
+};
+
 class WebsiteParser extends Parser {
     constructor(app: App, settings: ReadItLaterSettings) {
         super(app, settings);
@@ -39,79 +52,59 @@ class WebsiteParser extends Parser {
     }
 
     protected async makeNote(document: Document, originUrl: URL): Promise<Note> {
-        if (!isProbablyReaderable(document)) {
-            new Notice('@mozilla/readability considers this document to unlikely be readerable.');
-        }
-
-        const previewUrl = this.extractPreviewUrl(document);
-        const readableDocument = new Readability(document).parse();
-
-        if (readableDocument === null || !Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
-            return this.notParsableArticle(originUrl.href, previewUrl);
-        }
+        const content = document.body.innerHTML;
+        const title = document.querySelector('h1')?.textContent || 'No title';
 
         return this.parsableArticle({
             url: originUrl.href,
-            previewImageUrl: previewUrl,
-            ...readableDocument,
+            previewImageUrl: null,
+            title: title,
+            content: content,
+            textContent: document.body.textContent || '',
+            length: content.length,
+            excerpt: '',
+            byline: '',
+            dir: 'ltr',
+            siteName: '',
+            lang: 'en',
+            publishedTime: null
         });
     }
 
     protected async getDocument(url: URL): Promise<Document> {
-        const response = await request({ method: 'GET', url: url.href });
-        const document = new DOMParser().parseFromString(response, 'text/html');
+        const response = await request({
+            url: 'https://r.jina.ai/',
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Return-Format': 'markdown',
+                'X-Remove-Selector': 'header, .class, #id',
+                'X-Timeout': '30'
+            },
+            body: JSON.stringify({
+                url: url.href,
+                options: 'Markdown'
+            })
+        });
 
-        //check for existing base element
-        const originBasElements = document.getElementsByTagName('base');
-        let originBaseUrl = null;
-        if (originBasElements.length > 0) {
-            originBaseUrl = originBasElements.item(0).getAttribute('href');
-            Array.from(originBasElements).forEach((originBasEl) => {
-                originBasEl.remove();
-            });
+        const jinaResponse = JSON.parse(response) as JinaReaderResponse;
+        
+        if (jinaResponse.code !== 200) {
+            throw new Error(`Failed to fetch content: ${jinaResponse.status}`);
         }
 
-        // Set base to allow Readability to resolve relative path's
-        const baseEl = document.createElement('base');
-        baseEl.setAttribute('href', getBaseUrl(originBaseUrl ?? url.href, url.origin));
-        document.head.append(baseEl);
-        const cleanDocumentBody = DOMPurify.sanitize(document.body.innerHTML);
-        document.body.innerHTML = cleanDocumentBody;
+        const doc = new DOMParser().parseFromString('<html><head></head><body></body></html>', 'text/html');
+        
+        const article = doc.createElement('article');
+        article.innerHTML = jinaResponse.data.content;
+        doc.body.appendChild(article);
 
-        /*
-        DOM optimizations from MarkDownload. Distributed under an Apache License 2.0: https://github.com/deathau/markdownload/blob/main/LICENSE
-        */
-        document.body.querySelectorAll('pre br')?.forEach((br) => {
-            // we need to keep <br> tags because they are removed by Readability.js
-            br.outerHTML = '<br-keep></br-keep>';
-        });
+        const title = doc.createElement('h1');
+        title.textContent = jinaResponse.data.title;
+        doc.body.insertBefore(title, article);
 
-        document.body.querySelectorAll('h1, h2, h3, h4, h5, h6')?.forEach((header) => {
-            // Readability.js will strip out headings from the dom if certain words appear in their className
-            // See: https://github.com/mozilla/readability/issues/807
-            header.className = '';
-        });
-
-        document.body.querySelectorAll('[class*=highlight-text],[class*=highlight-source]')?.forEach((codeSource) => {
-            const language = codeSource.className.match(/highlight-(?:text|source)-([a-z0-9]+)/)?.[1];
-            if (codeSource.firstElementChild.nodeName == 'PRE') {
-                codeSource.removeAttribute('data-snippet-clipboard-copy-content');
-                codeSource.firstElementChild.id = `code-lang-${language}`;
-            }
-        });
-
-        document.body.querySelectorAll('[class*=language-]')?.forEach((codeSource) => {
-            const language = codeSource.className.match(/language-([a-z0-9]+)/)?.[1];
-            codeSource.id = `code-lang-${language}`;
-        });
-
-        document.body.querySelectorAll('.codehilite > pre')?.forEach((codeSource) => {
-            if (codeSource.firstChild.nodeName !== 'CODE' && !codeSource.className.includes('language')) {
-                codeSource.id = 'code-lang-text';
-            }
-        });
-
-        return document;
+        return doc;
     }
 
     protected async parsableArticle(article: Article): Promise<Note> {
