@@ -49,6 +49,7 @@ export interface ReadItLaterSettings {
     tikTokEmbedWidth: string;
     tikTokEmbedHeight: string;
     extendShareMenu: boolean;
+    jinaApiKey: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -100,5 +101,5 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     tikTokNote: '[[ReadItLater]] [[TikTok]]\n\n%videoDescription%\n\n[%videoURL%](%videoURL%)\n\n%videoPlayer%',
     tikTokEmbedWidth: '325',
     tikTokEmbedHeight: '760',
-    extendShareMenu: true,
+    extendShareMenu: true
 };

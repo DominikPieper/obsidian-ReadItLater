@@ -714,5 +714,16 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.rows = 10;
                 textarea.inputEl.cols = 25;
             });
+
+        new Setting(containerEl)
+            .setName('Jina API Key')
+            .setDesc('Enter your Jina API key')
+            .addText(text => text
+                .setPlaceholder('Enter your API key')
+                .setValue(this.plugin.settings.jinaApiKey)
+                .onChange(async (value) => {
+                    this.plugin.settings.jinaApiKey = value;
+                    await this.plugin.saveSettings();
+                }));
     }
 }
