@@ -35,38 +35,57 @@ Variables are rendered in template using familiar syntax `{{ content }}`. Nested
 Variables output can be modified using filters. Filters are separated by `|` symbol. Filters can be chained, so output of the previous is passed to the next.
 
 <details>
+<summary>blockquote</summary>
+
+Adds quote prefix to each line of value.
+</details>
+
+<details>
 <summary>capitalize</summary>
+
+Modifies first character to uppercase and others to lowercase.
 
 ```
 {{ 'hello world'|capitalize}}
 
 outputs: Hello world
 ```
-
-Modifies first character to uppercase and others to lowercase.
 </details>
 
 <details>
 <summary>lower</summary>
+
+Converts value to lowercase.
 
 ```
 {{ 'Hello World'|lower}}
 
 outputs: hello world
 ```
-Converts value to lowercase.
+</details>
+
+<details>
+<summary>replace</summary>
+
+Replaces all occurrences in input value.
+
+```
+{{ 'Hello world'|replace('o') }}
+
+outputs: Hell wrld
+```
 </details>
 
 <details>
 <summary>upper</summary>
 
+Converts value to uppercase.
 
 ```
 {{ 'Hello World'|upper}}
 
 outputs: HELLO WORLD
 ```
-Converts value to uppercase.
 </details>
 
 ## Content Types

@@ -24,13 +24,40 @@ export default class TemplateEngine {
                     .map((line) => `> ${line}`)
                     .join('\n');
             },
-            lower: (value: string) => String(value).toLowerCase(),
-            upper: (value: string) => String(value).toUpperCase(),
             capitalize: (value: string) => {
+                if (!this.validateFilterValueType(value, 'capitalize', stringableTypes)) {
+                    return value;
+                }
                 const str = String(value);
                 return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
             },
+            join: (value: any[], separator: string = ',') => {
+                if (!this.validateFilterValueType(value, 'join', ['array'])) {
+                    return value;
+                }
+                return value.join(separator);
+            },
+            lower: (value: string) => {
+                if (!this.validateFilterValueType(value, 'lower', stringableTypes)) {
+                    return value;
+                }
+                String(value).toLowerCase();
+            },
+            map: (value: any[], transform: (item: any) => any) => {
+                if (!this.validateFilterValueType(value, 'map', ['array'])) {
+                    return value;
+                }
+                try {
+                    return value.map(transform);
+                } catch (e) {
+                    console.warn('Error in map modifier:', e);
+                    return value;
+                }
+            },
             replace: (value: string, search: string, replacement: string = '') => {
+                if (!this.validateFilterValueType(value, 'replace', stringableTypes)) {
+                    return value;
+                }
                 return value.replaceAll(search, replacement);
             },
             striptags: (value: string, allowedTags: string = '') => {
@@ -43,22 +70,11 @@ export default class TemplateEngine {
                 );
                 return value.replace(regex, '');
             },
-            join: (value: any[], separator: string = ',') => {
-                if (!this.validateFilterValueType(value, 'join', ['array'])) {
+            upper: (value: string) => {
+                if (!this.validateFilterValueType(value, 'upper', stringableTypes)) {
                     return value;
                 }
-                return value.join(separator);
-            },
-            map: (value: any[], transform: (item: any) => any) => {
-                if (!this.validateFilterValueType(value, 'map', ['array'])) {
-                    return value;
-                }
-                try {
-                    return value.map(transform);
-                } catch (e) {
-                    console.warn('Error in map modifier:', e);
-                    return value;
-                }
+                String(value).toUpperCase()
             },
         };
     }
