@@ -103,7 +103,13 @@ export default class TemplateEngine {
         return template.replace(simplePatternRegex, (match: string, path: string) => {
             try {
                 const value = this.resolveValue(path, data);
-                return value !== undefined ? String(value) : '';
+
+                if (value === undefined) {
+                    console.warn(`Unable to resolve ${path}`);
+                    return match;
+                }
+
+                return String(value);
             } catch (e) {
                 console.warn(`Error processing simple pattern "${match}":`, e);
                 return match;
@@ -133,7 +139,7 @@ export default class TemplateEngine {
 
                 if (value === undefined) {
                     console.warn(`Unable to resolve ${key}`);
-                    return '';
+                    return match;
                 }
 
                 let processedValue = value;
@@ -143,7 +149,7 @@ export default class TemplateEngine {
                 return String(processedValue);
             } catch (e) {
                 console.warn(`Error processing variable "${match}":`, e);
-                return '';
+                return match;
             }
         });
     }
