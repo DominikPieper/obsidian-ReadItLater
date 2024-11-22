@@ -1,15 +1,18 @@
 import { App } from 'obsidian';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { formatCurrentDate, isValidUrl } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 
 export abstract class Parser {
-    protected settings: ReadItLaterSettings;
     protected app: App;
+    protected settings: ReadItLaterSettings;
+    protected templateEngine: TemplateEngine;
 
-    protected constructor(app: App, settings: ReadItLaterSettings) {
+    protected constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
         this.app = app;
         this.settings = settings;
+        this.templateEngine = templateEngine;
     }
 
     abstract test(clipboardContent: string): boolean | Promise<boolean>;

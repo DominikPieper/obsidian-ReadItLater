@@ -1,4 +1,5 @@
 import { App, request } from 'obsidian';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
@@ -19,24 +20,21 @@ interface VideoObject extends Schema {
     url?: string;
 }
 
-interface VimeoVideo {
-    id: string;
-    url: string;
-    title: string;
-    player: string;
-    channel: VimeoChannel;
-}
-
-interface VimeoChannel {
-    name: string;
-    url: string;
+interface VimeoNoteData {
+    date: string;
+    videoId: string;
+    videoTitle: string;
+    videoURL: string;
+    videoPlayer: string;
+    channelName: string;
+    channelURL: string;
 }
 
 class VimeoParser extends Parser {
     private PATTERN = /(vimeo.com)\/(\d+)?/;
 
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(clipboardContent: string): boolean | Promise<boolean> {
@@ -44,26 +42,19 @@ class VimeoParser extends Parser {
     }
 
     async prepareNote(clipboardContent: string): Promise<Note> {
-        const video = await this.parseSchema(clipboardContent);
+        const data = await this.parseSchema(clipboardContent);
 
-        const content = this.settings.vimeoNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%videoTitle%/g, () => video.title)
-            .replace(/%videoId%/g, () => video.id)
-            .replace(/%videoURL%/g, () => video.url)
-            .replace(/%channelName%/g, () => video.channel.name)
-            .replace(/%channelURL%/g, () => video.channel.url)
-            .replace(/%videoPlayer%/g, () => video.player);
+        const content = this.templateEngine.render(this.settings.vimeoNote, data);
 
-        const fileNameTemplate = this.settings.vimeoNoteTitle
-            .replace(/%title%/g, () => video.title)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
+        const fileNameTemplate = this.templateEngine.render(this.settings.vimeoNoteTitle, {
+            title: data.videoTitle,
+            date: this.getFormattedDateForFilename(),
+        });
 
-        const fileName = `${fileNameTemplate}.md`;
-        return new Note(fileName, content);
+        return new Note(`${fileNameTemplate}.md`, content);
     }
 
-    private async parseSchema(url: string): Promise<VimeoVideo> {
+    private async parseSchema(url: string): Promise<VimeoNoteData> {
         const response = await request({
             method: 'GET',
             url,
@@ -80,14 +71,13 @@ class VimeoParser extends Parser {
         const videoIdRegexExec = this.PATTERN.exec(url);
 
         return {
-            id: videoIdRegexExec.length === 3 ? videoIdRegexExec[2] : '',
-            url: videoSchema?.url ?? '',
-            title: videoSchema?.name ?? '',
-            player: `<iframe width="${this.settings.vimeoEmbedWidth}" height="${this.settings.vimeoEmbedHeight}" src="${videoSchema?.embedUrl}" title="Vimeo video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
-            channel: {
-                name: videoSchema?.author?.name ?? '',
-                url: videoSchema?.author?.url ?? '',
-            },
+            date: this.getFormattedDateForContent(),
+            videoId: videoIdRegexExec.length === 3 ? videoIdRegexExec[2] : '',
+            videoURL: videoSchema?.url ?? '',
+            videoTitle: videoSchema?.name ?? '',
+            videoPlayer: `<iframe width="${this.settings.vimeoEmbedWidth}" height="${this.settings.vimeoEmbedHeight}" src="${videoSchema?.embedUrl}" title="Vimeo video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
+            channelName: videoSchema?.author?.name ?? '',
+            channelURL: videoSchema?.author?.url ?? '',
         };
     }
 }

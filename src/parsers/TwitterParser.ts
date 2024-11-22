@@ -1,14 +1,23 @@
 import { App, moment, request } from 'obsidian';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
 
+interface TweetNoteData {
+    date: string;
+    tweetAuthorName: string;
+    tweetURL: string;
+    tweetContent: string;
+    tweetPublishDate: string;
+}
+
 class TwitterParser extends Parser {
     private PATTERN = /(https:\/\/(twitter|x).com\/([a-zA-Z0-9_]+\/)([a-zA-Z0-9_]+\/[a-zA-Z0-9_]+))/;
 
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(url: string): boolean {
@@ -22,31 +31,36 @@ class TwitterParser extends Parser {
             twitterUrl.hostname = 'twitter.com';
         }
 
+        const data = await this.getTweetNoteData(twitterUrl);
+
+        const content = this.templateEngine.render(this.settings.twitterNote, data);
+
+        const fileNameTemplate = this.templateEngine.render(this.settings.twitterNoteTitle, {
+            tweetAuthorName: data.tweetAuthorName,
+            date: this.getFormattedDateForFilename(),
+        });
+
+        return new Note(`${fileNameTemplate}.md`, content);
+    }
+
+    private async getTweetNoteData(url: URL): Promise<TweetNoteData> {
         const response = JSON.parse(
             await request({
                 method: 'GET',
                 contentType: 'application/json',
-                url: `https://publish.twitter.com/oembed?url=${twitterUrl.href}`,
+                url: `https://publish.twitter.com/oembed?url=${url.href}`,
             }),
         );
 
-        const tweetAuthorName = response.author_name;
         const content = await parseHtmlContent(response.html);
 
-        const processedContent = this.settings.twitterNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%tweetAuthorName%/g, () => tweetAuthorName)
-            .replace(/%tweetURL%/g, () => response.url)
-            .replace(/%tweetContent%/g, () => content)
-            .replace(/%tweetPublishDate%/g, () => this.getPublishedDateFromDOM(response.html));
-
-        const fileNameTemplate = this.settings.twitterNoteTitle
-            .replace(/%tweetAuthorName%/g, () => tweetAuthorName)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
-
-        const fileName = `${fileNameTemplate}.md`;
-
-        return new Note(fileName, processedContent);
+        return {
+            date: this.getFormattedDateForContent(),
+            tweetAuthorName: response.author_name,
+            tweetURL: response.url,
+            tweetContent: content,
+            tweetPublishDate: this.getPublishedDateFromDOM(response.html),
+        };
     }
 
     private getPublishedDateFromDOM(html: string): string {

@@ -1,15 +1,14 @@
 import { App, Notice, Platform, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { formatDate, getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
 
-type Article = {
-    url: string;
-    previewImageUrl: string | null;
+interface ReadabilityArticle {
     title: string;
     content: string;
     textContent: string;
@@ -19,12 +18,25 @@ type Article = {
     dir: string;
     siteName: string;
     lang: string;
-    publishedTime: string | null;
-};
+    publishedTime: string;
+}
+
+interface WebsiteNoteData {
+    date: string;
+    articleTitle: string;
+    articleURL: string;
+    articleReadingTime: number;
+    articleContent: string;
+    siteName: string;
+    author: string;
+    previewURL: string;
+    publishedTime: string;
+    readabilityArticle: ReadabilityArticle;
+}
 
 class WebsiteParser extends Parser {
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(url: string): boolean {
@@ -50,10 +62,22 @@ class WebsiteParser extends Parser {
             return this.notParsableArticle(originUrl.href, previewUrl);
         }
 
+        const content = await parseHtmlContent(readableDocument.content);
+
         return this.parsableArticle({
-            url: originUrl.href,
-            previewImageUrl: previewUrl,
-            ...readableDocument,
+            date: this.getFormattedDateForContent(),
+            articleTitle: readableDocument.title || 'No title',
+            articleURL: originUrl.href,
+            articleReadingTime: this.getEstimatedReadingTime(readableDocument),
+            articleContent: content,
+            siteName: readableDocument.siteName || '',
+            author: readableDocument.byline || '',
+            previewURL: previewUrl || '',
+            publishedTime:
+                readableDocument.publishedTime !== null
+                    ? formatDate(readableDocument.publishedTime, this.settings.dateContentFmt)
+                    : '',
+            readabilityArticle: readableDocument,
         });
     }
 
@@ -114,27 +138,13 @@ class WebsiteParser extends Parser {
         return document;
     }
 
-    protected async parsableArticle(article: Article): Promise<Note> {
-        const title = article.title || 'No title';
-        const content = await parseHtmlContent(article.content);
-        const formattedPublishedTime =
-            article.publishedTime !== null ? formatDate(article.publishedTime, this.settings.dateContentFmt) : '';
+    protected async parsableArticle(data: WebsiteNoteData): Promise<Note> {
+        const fileNameTemplate = this.templateEngine.render(this.settings.parseableArticleNoteTitle, {
+            title: data.articleTitle,
+            date: this.getFormattedDateForFilename(),
+        });
 
-        const fileNameTemplate = this.settings.parseableArticleNoteTitle
-            .replace(/%title%/g, () => title)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
-
-        let processedContent = this.settings.parsableArticleNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%articleTitle%/g, () => title)
-            .replace(/%articleURL%/g, () => article.url)
-            .replace(/%articleReadingTime%/g, `${this.getEstimatedReadingTime(article)}`)
-            .replace(/%siteName%/g, () => article.siteName || '')
-            .replace(/%author%/g, () => article.byline || '')
-            .replace(/%previewURL%/g, () => article.previewImageUrl || '')
-            .replace(/%publishedTime%/g, formattedPublishedTime)
-            // Content must be the last replaced variable in order to prevent replacing website content.
-            .replace(/%articleContent%/g, () => content);
+        let processedContent = this.templateEngine.render(this.settings.parsableArticleNote, data);
 
         if (this.settings.downloadImages && Platform.isDesktop) {
             processedContent = await this.replaceImages(fileNameTemplate, processedContent);
@@ -190,7 +200,7 @@ class WebsiteParser extends Parser {
     /**
      * Returns estimated reading time of article in minutes
      */
-    private getEstimatedReadingTime(article: Article): number {
+    private getEstimatedReadingTime(article: ReadabilityArticle): number {
         const readingSpeed = this.getReadingSpeed(article.lang || 'en');
         const words = article.textContent.trim().split(/\s+/).length;
 

@@ -1,5 +1,6 @@
 import { App, Platform, request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
+import TemplateEngine from 'src/template/TemplateEngine';
 import { normalizeFilename, replaceImages } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
@@ -10,7 +11,7 @@ interface StackExchangeQuestion {
     title: string;
     content: string;
     url: string;
-    topAnswer: StackExchangeAnswer;
+    topAnswer: StackExchangeAnswer | null;
     answers: Array<StackExchangeAnswer>;
     author: StackExchangeUser;
 }
@@ -25,12 +26,26 @@ interface StackExchangeUser {
     profile: string;
 }
 
+interface StackExchangeNoteData {
+    date: string;
+    questionTitle: string;
+    questionURL: string;
+    questionContent: string;
+    authorName: string;
+    authorProfileURL: string;
+    topAnswer: string;
+    answers: string;
+    extra: {
+        question: StackExchangeQuestion;
+    };
+}
+
 class StackExchangeParser extends Parser {
     private PATTERN =
         /(https:\/\/|http:\/\/)(stackoverflow\.com|serverfault\.com|superuser\.com|askubuntu\.com|stackapps\.com|.*\.stackexchange\.com)\/(q|a|questions)\/(\d+)/;
 
-    constructor(app: App, settings: ReadItLaterSettings) {
-        super(app, settings);
+    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+        super(app, settings, templateEngine);
     }
 
     test(clipboardContent: string): boolean {
@@ -46,43 +61,55 @@ class StackExchangeParser extends Parser {
             .replace(/%title%/g, () => question.title)
             .replace(/%date%/g, this.getFormattedDateForFilename());
 
-        const topAnswer = question.topAnswer
-            ? this.settings.stackExchangeAnswer
-                  .replace(/%date%/g, this.getFormattedDateForContent())
-                  .replace(/%answerContent%/g, () => question.topAnswer.content)
-                  .replace(/%authorName%/g, () => question.topAnswer.author.name)
-                  .replace(/%authorProfileURL%/g, () => question.topAnswer.author.profile)
-            : '';
-        let answers = '';
-        for (let i = 0; i < question.answers.length; i++) {
-            const answer = this.settings.stackExchangeAnswer
-                .replace(/%date%/g, this.getFormattedDateForContent())
-                .replace(/%answerContent%/g, () => question.answers[i].content)
-                .replace(/%authorName%/g, () => question.answers[i].author.name)
-                .replace(/%authorProfileURL%/g, () => question.answers[i].author.profile);
-            answers = answers.concat('\n\n***\n\n', answer);
-        }
-
-        let content = this.settings.stackExchangeNote
-            .replace(/%date%/g, this.getFormattedDateForContent())
-            .replace(/%questionTitle%/g, () => question.title)
-            .replace(/%questionURL%/g, () => question.url)
-            .replace(/%questionContent%/g, () => question.content)
-            .replace(/%authorName%/g, () => question.author.name)
-            .replace(/%authorProfileURL%/g, () => question.author.profile)
-            .replace(/%topAnswer%/g, () => topAnswer)
-            .replace(/%answers%/g, () => answers.trim());
-
         const assetsDir = this.settings.downloadStackExchangeAssetsInDir
             ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
             : this.settings.assetsDir;
+
+        let content = this.templateEngine.render(this.settings.stackExchangeNote, this.getNoteData(question));
 
         if (this.settings.downloadStackExchangeAssets && Platform.isDesktop) {
             content = await replaceImages(this.app, content, assetsDir);
         }
 
-        const fileName = `${fileNameTemplate}.md`;
-        return new Note(fileName, content);
+        return new Note(`${fileNameTemplate}.md`, content);
+    }
+
+    private getNoteData(question: StackExchangeQuestion): StackExchangeNoteData {
+        const topAnswer = question.topAnswer
+            ? this.templateEngine.render(this.settings.stackExchangeAnswer, {
+                  date: this.getFormattedDateForContent(),
+                  answerContent: question.topAnswer.content,
+                  authorName: question.author.name,
+                  authorProfileURL: question.author.profile,
+              })
+            : '';
+
+        let answers = '';
+        for (let i = 0; i < question.answers.length; i++) {
+            answers = answers.concat(
+                '\n\n***\n\n',
+                this.templateEngine.render(this.settings.stackExchangeAnswer, {
+                    date: this.getFormattedDateForContent(),
+                    answerContent: question.answers[i].content,
+                    authorName: question.answers[i].author.name,
+                    authorProfileURL: question.answers[i].author.profile,
+                }),
+            );
+        }
+
+        return {
+            date: this.getFormattedDateForContent(),
+            questionTitle: question.title,
+            questionURL: question.url,
+            questionContent: question.content,
+            authorName: question.author.name,
+            authorProfileURL: question.author.profile,
+            topAnswer: topAnswer,
+            answers: answers.trim(),
+            extra: {
+                question: question,
+            },
+        };
     }
 
     private async parseDocument(document: Document): Promise<StackExchangeQuestion> {
