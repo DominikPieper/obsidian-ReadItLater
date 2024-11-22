@@ -74,7 +74,7 @@ export default class TemplateEngine {
                 if (!this.validateFilterValueType(value, 'upper', stringableTypes)) {
                     return value;
                 }
-                String(value).toUpperCase()
+                String(value).toUpperCase();
             },
         };
     }
