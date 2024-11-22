@@ -122,8 +122,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Date format string in contents')
-            .setDesc('Format of the %date% variable for contents')
+            .setName('Date format string in content')
+            .setDesc('Format of the %date% variable for content')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to YYYY-MM-DD')
@@ -156,7 +156,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Youtube note template title')
-            .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %title%')
@@ -169,9 +168,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Youtube note template')
-            .setDesc(
-                'Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%, %videoThumbnail%, %channelId%, %channelName%, %channelURL%',
-            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
@@ -238,7 +234,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Vimeo note title template')
-            .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %title%')
@@ -251,9 +246,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Vimeo note template')
-            .setDesc(
-                'Available variables: %date%, %videoTitle%, %videoURL%, %videoId%, %videoPlayer%, %channelName%, %channelURL%',
-            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.vimeoNote || DEFAULT_SETTINGS.vimeoNote)
@@ -302,7 +294,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Bilibili note template')
-            .setDesc('Available variables: %videoTitle%, %videoURL%, %videoId%, %videoPlayer%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.bilibiliNote || DEFAULT_SETTINGS.bilibiliNote)
@@ -338,7 +329,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Twitter note template title')
-            .setDesc('Available variables: %tweetAuthorName%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %tweetAuthorName%')
@@ -350,7 +340,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
         new Setting(containerEl)
             .setName('Twitter note template')
-            .setDesc('Available variables: %date%, %tweetAuthorName%, %tweetURL%, %tweetContent%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.twitterNote || DEFAULT_SETTINGS.twitterNote)
@@ -366,7 +355,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Stack Exchange note title template')
-            .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %title%')
@@ -379,9 +367,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Stack Exchange question note template')
-            .setDesc(
-                'Available variables: %date%, %questionTitle%, %questionURL%, %authorName%, %authorProfileURL%, %questionContent%, %topAnswer%, %answers%',
-            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.stackExchangeNote || DEFAULT_SETTINGS.stackExchangeNote)
@@ -395,7 +380,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Stack Exchange answer template')
-            .setDesc('Available variables: %date%, %answerContent%, %authorName%, %authorProfileURL%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.stackExchangeAnswer || DEFAULT_SETTINGS.stackExchangeAnswer)
@@ -444,7 +428,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Mastodon note template title')
-            .setDesc('Available variables: %tootAuthorName%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %tootAuthorName%')
@@ -457,7 +440,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Mastodon note template')
-            .setDesc('Available variables: %date%, %tootAuthorName%, %tootURL%, %tootContent%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.mastodonNote || DEFAULT_SETTINGS.mastodonNote)
@@ -525,7 +507,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Mastodon reply template')
-            .setDesc('Available variables: %tootAuthorName%, %tootURL%, %tootContent%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.mastodonReply || DEFAULT_SETTINGS.mastodonReply)
@@ -541,7 +522,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('TikTok note title template')
-            .setDesc('Available variables: %authorName%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('TikTok from %authorName% (%date%)')
@@ -554,9 +534,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('TikTok note template')
-            .setDesc(
-                'Available variables: %date%, %videoDescription%, %videoURL%, %videoId%, %videoPlayer%, %authorName%, %authorURL%',
-            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.tikTokNote || DEFAULT_SETTINGS.tikTokNote)
@@ -592,7 +569,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Readable article note template title')
-            .setDesc('Available variables: %title%, %date%')
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %title%')
@@ -607,9 +583,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Readable article note template')
-            .setDesc(
-                'Available variables: %date%, %articleTitle%, %articleURL%, %articleContent%, %author%, %siteName%, %articleReadingTime%, %previewURL%, %publishedTime%',
-            )
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
@@ -658,7 +631,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Nonreadable article note template title')
-            .setDesc('Available variables: %date%')
             .addText((text) =>
                 text
                     .setPlaceholder("Defaults to 'Article %date%'")
@@ -674,7 +646,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Nonreadable article note template')
-            .setDesc('Available variables: %date%, %articleURL%, %previewURL%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.notParsableArticleNote || DEFAULT_SETTINGS.notParsableArticleNote)
@@ -690,7 +661,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Text snippet note template title')
-            .setDesc('Available variables: %date%')
             .addText((text) =>
                 text
                     .setPlaceholder("Defaults to 'Note %date%'")
@@ -703,7 +673,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Text snippet note template')
-            .setDesc('Available variables: %date%, %content%')
             .addTextArea((textarea) => {
                 textarea
                     .setValue(this.plugin.settings.textSnippetNote || DEFAULT_SETTINGS.textSnippetNote)

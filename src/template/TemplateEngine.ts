@@ -2,11 +2,13 @@ interface TemplateData {
     [key: string]: any;
 }
 
-type ModifierFunction = (value: any, ...args: any[]) => string;
+type ModifierFunction = (value: any, ...args: any[]) => any;
 
 interface Modifiers {
     [key: string]: ModifierFunction;
 }
+
+const stringableTypes: string[] = ['string', 'number', 'bigint', 'symbol'];
 
 export default class TemplateEngine {
     private modifiers: Modifiers;
@@ -14,7 +16,7 @@ export default class TemplateEngine {
     constructor() {
         this.modifiers = {
             blockquote: (value: string) => {
-                if (typeof value !== 'string') {
+                if (!this.validateFilterValueType(value, 'blockquote', stringableTypes)) {
                     return value;
                 }
                 return value
@@ -32,7 +34,9 @@ export default class TemplateEngine {
                 return value.replaceAll(search, replacement);
             },
             striptags: (value: string, allowedTags: string = '') => {
-                if (typeof value !== 'string') return String(value);
+                if (!this.validateFilterValueType(value, 'striptags', stringableTypes)) {
+                    return value;
+                }
                 const regex = new RegExp(
                     `<(?!/?(${allowedTags.replace(/[<>]/g, '').split(',').join('|')})s*/?)[^>]+>`,
                     'gi',
@@ -40,16 +44,20 @@ export default class TemplateEngine {
                 return value.replace(regex, '');
             },
             join: (value: any[], separator: string = ',') => {
-                if (!Array.isArray(value)) return String(value);
+                if (!this.validateFilterValueType(value, 'join', ['array'])) {
+                    return value;
+                }
                 return value.join(separator);
             },
             map: (value: any[], transform: (item: any) => any) => {
-                if (!Array.isArray(value)) return String(value);
+                if (!this.validateFilterValueType(value, 'map', ['array'])) {
+                    return value;
+                }
                 try {
-                    return value.map(transform).join('');
+                    return value.map(transform);
                 } catch (e) {
                     console.warn('Error in map modifier:', e);
-                    return String(value);
+                    return value;
                 }
             },
         };
@@ -93,7 +101,19 @@ export default class TemplateEngine {
         return template.replace(variableRegex, (match: string, content: string) => {
             try {
                 const [key, ...modifiers] = content.split('|').map((item) => item.trim());
-                const value = this.resolveValue(key, data);
+
+                // check if value is raw string
+                const rawStringRegex = /(['"])((?:[^\\]|\\.)*?)\1/;
+                const rawStringMatch = rawStringRegex.exec(key);
+
+                let value;
+
+                // if value is raw string don't resolve value from template data
+                if (rawStringMatch !== null) {
+                    value = rawStringMatch[2];
+                } else {
+                    value = this.resolveValue(key, data);
+                }
 
                 if (value === undefined) {
                     console.warn(`Unable to resolve ${key}`);
@@ -107,7 +127,7 @@ export default class TemplateEngine {
                 return String(processedValue);
             } catch (e) {
                 console.warn(`Error processing variable "${match}":`, e);
-                return match;
+                return '';
             }
         });
     }
@@ -296,5 +316,22 @@ export default class TemplateEngine {
             console.warn(`Error applying modifier "${modifierString}":`, e);
             return value;
         }
+    }
+
+    private validateFilterValueType(value: any, filter: string, supportedTypes: string[]): boolean {
+        const valueType = typeof value;
+
+        if (supportedTypes.includes(valueType)) {
+            return true;
+        }
+
+        if (supportedTypes.includes('array')) {
+            return Array.isArray(value);
+        }
+
+        console.warn(
+            `Filter ${filter} supports following types ${supportedTypes.join(', ')}, but ${valueType} was provided.`,
+        );
+        return false;
     }
 }

@@ -1,6 +1,6 @@
 import { App } from 'obsidian';
-import { formatCurrentDate, isValidUrl } from '../helpers';
 import TemplateEngine from 'src/template/TemplateEngine';
+import { formatCurrentDate, isValidUrl } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 
