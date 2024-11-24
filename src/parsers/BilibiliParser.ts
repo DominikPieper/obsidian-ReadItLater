@@ -24,19 +24,20 @@ class BilibiliParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
-        const data = await this.getNoteData(url);
+        const createdAt = new Date();
+        const data = await this.getNoteData(url, createdAt);
 
         const content = this.templateEngine.render(this.settings.bilibiliNote, data);
 
         const fileNameTemplate = this.templateEngine.render(this.settings.bilibiliNoteTitle, {
             title: data.videoTitle,
-            date: this.getFormattedDateForFilename(),
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.bilibiliContentTypeSlug, createdAt);
     }
 
-    private async getNoteData(url: string): Promise<BilibiliNoteData> {
+    private async getNoteData(url: string, createdAt: Date): Promise<BilibiliNoteData> {
         const response = await request({
             method: 'GET',
             url,
@@ -49,7 +50,7 @@ class BilibiliParser extends Parser {
         const videoId = this.PATTERN.exec(url)[3] ?? '';
 
         return {
-            date: this.getFormattedDateForContent(),
+            date: this.getFormattedDateForContent(createdAt),
             videoId: videoId,
             videoTitle: videoHTML.querySelector("[property~='og:title']").getAttribute('content') ?? '',
             videoURL: url,

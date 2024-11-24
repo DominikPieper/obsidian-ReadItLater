@@ -88,6 +88,16 @@ outputs: HELLO WORLD
 ```
 </details>
 
+## Inbox and Assets directories
+
+You can use template variables in `Inbox dir` and `Assets dir` settings to better distribute content in your Vault.
+
+| Directory template variable | Description                                        |
+| --------------------------- | -------------------------------------------------- |
+| date                        | Current date in format from plguin settins         |
+| fileName                    | Filename of new note                               |
+| contentType                 | Slug of detected content type from plugin settings |
+
 ## Content Types
 
 Structure of note content is determined by URL. Currenty plugin supports saving content of websites and embedding content from multiple services. Each content type has title and note template with replacable variables, which can be edited in plugin settings.

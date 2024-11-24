@@ -2,7 +2,7 @@ import { App, Notice, Platform, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
 import TemplateEngine from 'src/template/TemplateEngine';
-import { formatDate, getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
+import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
@@ -55,30 +55,34 @@ class WebsiteParser extends Parser {
             new Notice('@mozilla/readability considers this document to unlikely be readerable.');
         }
 
+        const createdAt = new Date();
         const previewUrl = this.extractPreviewUrl(document);
         const readableDocument = new Readability(document).parse();
 
         if (readableDocument === null || !Object.prototype.hasOwnProperty.call(readableDocument, 'content')) {
-            return this.notParsableArticle(originUrl.href, previewUrl);
+            return this.notParsableArticle(originUrl.href, previewUrl, createdAt);
         }
 
         const content = await parseHtmlContent(readableDocument.content);
 
-        return this.parsableArticle({
-            date: this.getFormattedDateForContent(),
-            articleTitle: readableDocument.title || 'No title',
-            articleURL: originUrl.href,
-            articleReadingTime: this.getEstimatedReadingTime(readableDocument),
-            articleContent: content,
-            siteName: readableDocument.siteName || '',
-            author: readableDocument.byline || '',
-            previewURL: previewUrl || '',
-            publishedTime:
-                readableDocument.publishedTime !== null
-                    ? formatDate(readableDocument.publishedTime, this.settings.dateContentFmt)
-                    : '',
-            readabilityArticle: readableDocument,
-        });
+        return this.parsableArticle(
+            {
+                date: this.getFormattedDateForContent(createdAt),
+                articleTitle: readableDocument.title || 'No title',
+                articleURL: originUrl.href,
+                articleReadingTime: this.getEstimatedReadingTime(readableDocument),
+                articleContent: content,
+                siteName: readableDocument.siteName || '',
+                author: readableDocument.byline || '',
+                previewURL: previewUrl || '',
+                publishedTime:
+                    readableDocument.publishedTime !== null
+                        ? this.getFormattedDateForContent(readableDocument.publishedTime)
+                        : '',
+                readabilityArticle: readableDocument,
+            },
+            createdAt,
+        );
     }
 
     protected async getDocument(url: URL): Promise<Document> {
@@ -138,22 +142,22 @@ class WebsiteParser extends Parser {
         return document;
     }
 
-    protected async parsableArticle(data: WebsiteNoteData): Promise<Note> {
+    protected async parsableArticle(data: WebsiteNoteData, createdAt: Date): Promise<Note> {
         const fileNameTemplate = this.templateEngine.render(this.settings.parseableArticleNoteTitle, {
             title: data.articleTitle,
-            date: this.getFormattedDateForFilename(),
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
         let processedContent = this.templateEngine.render(this.settings.parsableArticleNote, data);
 
         if (this.settings.downloadImages && Platform.isDesktop) {
-            processedContent = await this.replaceImages(fileNameTemplate, processedContent);
+            processedContent = await this.replaceImages(fileNameTemplate, processedContent, createdAt);
         }
 
-        return new Note(`${fileNameTemplate}.md`, processedContent);
+        return new Note(fileNameTemplate, 'md', processedContent, this.settings.parseableArticleContentType, createdAt);
     }
 
-    protected async notParsableArticle(url: string, previewUrl: string | null): Promise<Note> {
+    protected async notParsableArticle(url: string, previewUrl: string | null, createdAt: Date): Promise<Note> {
         console.error('Website not parseable');
 
         let content = this.settings.notParsableArticleNote
@@ -162,14 +166,14 @@ class WebsiteParser extends Parser {
 
         const fileNameTemplate = this.settings.notParseableArticleNoteTitle.replace(
             /%date%/g,
-            this.getFormattedDateForFilename(),
+            this.getFormattedDateForFilename(createdAt),
         );
 
         if (this.settings.downloadImages && Platform.isDesktop) {
-            content = await this.replaceImages(fileNameTemplate, content);
+            content = await this.replaceImages(fileNameTemplate, content, createdAt);
         }
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.notParseableArticleContentType, createdAt);
     }
 
     /**
@@ -187,13 +191,23 @@ class WebsiteParser extends Parser {
 
     /**
      * Replaces distant images by their locally downloaded counterparts.
-     * @param noteName The note name
-     * @param content The note content
      */
-    protected async replaceImages(noteName: string, content: string): Promise<string> {
-        const assetsDir = this.settings.downloadImagesInArticleDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(noteName)}/`
-            : this.settings.assetsDir;
+    protected async replaceImages(fileName: string, content: string, createdAt: Date): Promise<string> {
+        let assetsDir;
+        if (this.settings.downloadImagesInArticleDir) {
+            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+                date: '',
+                fileName: '',
+                contentType: '',
+            });
+            assetsDir = `${assetsDir}/${normalizeFilename(fileName)}`;
+        } else {
+            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+                date: this.getFormattedDateForFilename(createdAt),
+                fileName: normalizeFilename(fileName),
+                contentType: this.settings.parseableArticleContentType,
+            });
+        }
         return replaceImages(this.app, content, assetsDir);
     }
 

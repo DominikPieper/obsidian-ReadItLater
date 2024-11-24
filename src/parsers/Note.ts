@@ -1,9 +1,17 @@
-export class Note {
-    public readonly fileName: string;
-    public readonly content: string;
+import { normalizeFilename } from 'src/helpers';
 
-    constructor(fileName: string, content: string) {
-        this.fileName = fileName;
-        this.content = content;
+export class Note {
+    constructor(
+        public readonly fileName: string,
+        public readonly fileExtension: string,
+        public readonly content: string,
+        public readonly contentType: string,
+        public readonly createdAt: Date,
+    ) {
+        this.fileName = normalizeFilename(this.fileName);
+    }
+
+    public getFullFilename(): string {
+        return `${this.fileName}.${this.fileExtension}`;
     }
 }

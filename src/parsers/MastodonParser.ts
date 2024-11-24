@@ -57,6 +57,7 @@ class MastodonParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
+        const createdAt = new Date();
         const mastodonUrl = new URL(url);
         const statusId = mastodonUrl.pathname.split('/')[2];
 
@@ -68,21 +69,38 @@ class MastodonParser extends Parser {
 
         const fileNameTemplate = this.templateEngine.render(this.settings.mastodonNoteTitle, {
             tootAuthorName: status.account.display_name,
-            date: this.getFormattedDateForFilename(),
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
-        const assetsDir = this.settings.downloadMastodonMediaAttachmentsInDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
-            : this.settings.assetsDir;
+        let assetsDir;
+        if (this.settings.downloadMastodonMediaAttachmentsInDir) {
+            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+                date: '',
+                fileName: '',
+                contentType: '',
+            });
+            assetsDir = `${assetsDir}/${normalizeFilename(fileNameTemplate)}`;
+        } else {
+            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+                date: this.getFormattedDateForFilename(createdAt),
+                fileName: normalizeFilename(fileNameTemplate),
+                contentType: this.settings.mastodonContentTypeSlug,
+            });
+        }
 
-        const data = await this.getNoteData(status, replies, assetsDir);
+        const data = await this.getNoteData(status, replies, assetsDir, createdAt);
 
         const content = this.templateEngine.render(this.settings.mastodonNote, data);
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.mastodonContentTypeSlug, createdAt);
     }
 
-    private async getNoteData(status: Status, replies: Status[], assetsDir: string): Promise<MastodonStatusNoteData> {
+    private async getNoteData(
+        status: Status,
+        replies: Status[],
+        assetsDir: string,
+        createdAt: Date,
+    ): Promise<MastodonStatusNoteData> {
         let parsedStatusContent = await this.parseStatus(status, assetsDir);
 
         if (replies.length > 0) {
@@ -98,7 +116,7 @@ class MastodonParser extends Parser {
         }
 
         return {
-            date: this.getFormattedDateForContent(),
+            date: this.getFormattedDateForContent(createdAt),
             tootAuthorName: status.account.display_name,
             tootURL: status.url,
             tootContent: parsedStatusContent,

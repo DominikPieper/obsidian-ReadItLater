@@ -53,31 +53,47 @@ class StackExchangeParser extends Parser {
     }
 
     async prepareNote(clipboardContent: string): Promise<Note> {
+        const createdAt = new Date();
         const response = await request({ method: 'GET', url: clipboardContent });
         const document = new DOMParser().parseFromString(response, 'text/html');
         const question = await this.parseDocument(document);
 
         const fileNameTemplate = this.settings.stackExchangeNoteTitle
             .replace(/%title%/g, () => question.title)
-            .replace(/%date%/g, this.getFormattedDateForFilename());
+            .replace(/%date%/g, this.getFormattedDateForFilename(createdAt));
 
-        const assetsDir = this.settings.downloadStackExchangeAssetsInDir
-            ? `${this.settings.assetsDir}/${normalizeFilename(fileNameTemplate)}/`
-            : this.settings.assetsDir;
+        let assetsDir;
+        if (this.settings.downloadStackExchangeAssetsInDir) {
+            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+                date: '',
+                fileName: '',
+                contentType: '',
+            });
+            assetsDir = `${assetsDir}/${normalizeFilename(fileNameTemplate)}`;
+        } else {
+            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+                date: this.getFormattedDateForFilename(createdAt),
+                fileName: normalizeFilename(fileNameTemplate),
+                contentType: this.settings.stackExchangeContentType,
+            });
+        }
 
-        let content = this.templateEngine.render(this.settings.stackExchangeNote, this.getNoteData(question));
+        let content = this.templateEngine.render(
+            this.settings.stackExchangeNote,
+            this.getNoteData(question, createdAt),
+        );
 
         if (this.settings.downloadStackExchangeAssets && Platform.isDesktop) {
             content = await replaceImages(this.app, content, assetsDir);
         }
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.stackExchangeContentType, createdAt);
     }
 
-    private getNoteData(question: StackExchangeQuestion): StackExchangeNoteData {
+    private getNoteData(question: StackExchangeQuestion, createdAt: Date): StackExchangeNoteData {
         const topAnswer = question.topAnswer
             ? this.templateEngine.render(this.settings.stackExchangeAnswer, {
-                  date: this.getFormattedDateForContent(),
+                  date: this.getFormattedDateForContent(createdAt),
                   answerContent: question.topAnswer.content,
                   authorName: question.author.name,
                   authorProfileURL: question.author.profile,
@@ -89,7 +105,7 @@ class StackExchangeParser extends Parser {
             answers = answers.concat(
                 '\n\n***\n\n',
                 this.templateEngine.render(this.settings.stackExchangeAnswer, {
-                    date: this.getFormattedDateForContent(),
+                    date: this.getFormattedDateForContent(createdAt),
                     answerContent: question.answers[i].content,
                     authorName: question.answers[i].author.name,
                     authorProfileURL: question.answers[i].author.profile,
@@ -98,7 +114,7 @@ class StackExchangeParser extends Parser {
         }
 
         return {
-            date: this.getFormattedDateForContent(),
+            date: this.getFormattedDateForContent(createdAt),
             questionTitle: question.title,
             questionURL: question.url,
             questionContent: question.content,

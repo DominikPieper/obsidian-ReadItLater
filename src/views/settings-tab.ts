@@ -25,8 +25,12 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             )
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to root')
-                    .setValue(this.plugin.settings.inboxDir || DEFAULT_SETTINGS.inboxDir)
+                    .setPlaceholder('Defaults to vault root directory')
+                    .setValue(
+                        typeof this.plugin.settings.inboxDir === 'undefined'
+                            ? DEFAULT_SETTINGS.inboxDir
+                            : this.plugin.settings.inboxDir,
+                    )
                     .onChange(async (value) => {
                         this.plugin.settings.inboxDir = value;
                         await this.plugin.saveSettings();
@@ -40,8 +44,12 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             )
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to root')
-                    .setValue(this.plugin.settings.assetsDir || DEFAULT_SETTINGS.inboxDir + '/assets')
+                    .setPlaceholder('Defaults to vault root directory')
+                    .setValue(
+                        typeof this.plugin.settings.assetsDir === 'undefined'
+                            ? DEFAULT_SETTINGS.inboxDir + '/assets'
+                            : this.plugin.settings.assetsDir,
+                    )
                     .onChange(async (value) => {
                         this.plugin.settings.assetsDir = value;
                         await this.plugin.saveSettings();
@@ -113,8 +121,12 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc('Format of the %date% variable. NOTE: do not use symbols forbidden in file names.')
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to YYYY-MM-DD HH-mm-ss')
-                    .setValue(this.plugin.settings.dateTitleFmt || DEFAULT_SETTINGS.dateTitleFmt)
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.dateTitleFmt}`)
+                    .setValue(
+                        typeof this.plugin.settings.dateTitleFmt === 'undefined'
+                            ? DEFAULT_SETTINGS.dateTitleFmt
+                            : this.plugin.settings.dateTitleFmt,
+                    )
                     .onChange(async (value) => {
                         this.plugin.settings.dateTitleFmt = value;
                         await this.plugin.saveSettings();
@@ -126,8 +138,12 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc('Format of the %date% variable for content')
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to YYYY-MM-DD')
-                    .setValue(this.plugin.settings.dateContentFmt || DEFAULT_SETTINGS.dateContentFmt)
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.dateContentFmt}`)
+                    .setValue(
+                        typeof this.plugin.settings.dateContentFmt === 'undefined'
+                            ? DEFAULT_SETTINGS.dateContentFmt
+                            : this.plugin.settings.dateContentFmt,
+                    )
                     .onChange(async (value) => {
                         this.plugin.settings.dateContentFmt = value;
                         await this.plugin.saveSettings();
@@ -154,26 +170,49 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.createEl('h2', { text: 'YouTube' });
 
-        new Setting(containerEl).setName('Youtube note template title').addText((text) =>
-            text
-                .setPlaceholder('Defaults to %title%')
-                .setValue(this.plugin.settings.youtubeNoteTitle || DEFAULT_SETTINGS.youtubeNoteTitle)
-                .onChange(async (value) => {
-                    this.plugin.settings.youtubeNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
+        new Setting(containerEl)
+            .setName('Youtube content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.youtubeContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.youtubeContentTypeSlug
+                            : this.plugin.settings.youtubeContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
-        new Setting(containerEl).setName('Youtube note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.youtubeNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Youtube note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeNoteTitle}`)
+                    .setValue(this.plugin.settings.youtubeNoteTitle || DEFAULT_SETTINGS.youtubeNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Youtube note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.youtubeNote || DEFAULT_SETTINGS.youtubeNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Youtube Data API v3 key')
@@ -228,24 +267,49 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.createEl('h2', { text: 'Vimeo' });
 
-        new Setting(containerEl).setName('Vimeo note title template').addText((text) =>
-            text
-                .setPlaceholder('Defaults to %title%')
-                .setValue(this.plugin.settings.vimeoNoteTitle || DEFAULT_SETTINGS.vimeoNoteTitle)
-                .onChange(async (value) => {
-                    this.plugin.settings.vimeoNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
+        new Setting(containerEl)
+            .setName('Vimeo content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.vimeoContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.vimeoContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.vimeoContentTypeSlug
+                            : this.plugin.settings.vimeoContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
-        new Setting(containerEl).setName('Vimeo note template').addTextArea((textarea) => {
-            textarea.setValue(this.plugin.settings.vimeoNote || DEFAULT_SETTINGS.vimeoNote).onChange(async (value) => {
-                this.plugin.settings.vimeoNote = value;
-                await this.plugin.saveSettings();
+        new Setting(containerEl)
+            .setName('Vimeo note title template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(this.plugin.settings.vimeoNoteTitle || DEFAULT_SETTINGS.vimeoNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Vimeo note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.vimeoNote || DEFAULT_SETTINGS.vimeoNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
             });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
 
         new Setting(containerEl).setName('Vimeo embed player width').addText((text) =>
             text
@@ -270,8 +334,25 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         containerEl.createEl('h2', { text: 'Bilibili' });
 
         new Setting(containerEl)
+            .setName('Bilibili content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.bilibiliContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.bilibiliContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.bilibiliContentTypeSlug
+                            : this.plugin.settings.bilibiliContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.bilibiliContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
             .setName('Bilibili note template title')
-            .setDesc('Available variables: %title%')
+            .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
                     .setPlaceholder('Defaults to %title%')
@@ -282,16 +363,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl).setName('Bilibili note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.bilibiliNote || DEFAULT_SETTINGS.bilibiliNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.bilibiliNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Bilibili note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.bilibiliNote || DEFAULT_SETTINGS.bilibiliNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.bilibiliNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl).setName('Bilibili embed player width').addText((text) =>
             text
@@ -315,27 +399,67 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.createEl('h2', { text: 'Twitter' });
 
-        new Setting(containerEl).setName('Twitter note template title').addText((text) =>
-            text
-                .setPlaceholder('Defaults to %tweetAuthorName%')
-                .setValue(this.plugin.settings.twitterNoteTitle || DEFAULT_SETTINGS.twitterNoteTitle)
-                .onChange(async (value) => {
-                    this.plugin.settings.twitterNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
-        new Setting(containerEl).setName('Twitter note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.twitterNote || DEFAULT_SETTINGS.twitterNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.twitterNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Twitter content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.twitterContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.twitterContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.twitterContentTypeSlug
+                            : this.plugin.settings.twitterContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.twitterContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Twitter note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %tweetAuthorName%')
+                    .setValue(this.plugin.settings.twitterNoteTitle || DEFAULT_SETTINGS.twitterNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.twitterNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+        new Setting(containerEl)
+            .setName('Twitter note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.twitterNote || DEFAULT_SETTINGS.twitterNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.twitterNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         containerEl.createEl('h2', { text: 'Stack Exchange' });
+
+        new Setting(containerEl)
+            .setName('Stack Exchange content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.stackExchangeContentType}`)
+                    .setValue(
+                        typeof this.plugin.settings.stackExchangeContentType === 'undefined'
+                            ? DEFAULT_SETTINGS.stackExchangeContentType
+                            : this.plugin.settings.stackExchangeContentType,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.stackExchangeContentType = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
         new Setting(containerEl).setName('Stack Exchange note title template').addText((text) =>
             text
@@ -347,31 +471,39 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        new Setting(containerEl).setName('Stack Exchange question note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.stackExchangeNote || DEFAULT_SETTINGS.stackExchangeNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.stackExchangeNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Stack Exchange question note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.stackExchangeNote || DEFAULT_SETTINGS.stackExchangeNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.stackExchangeNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
-        new Setting(containerEl).setName('Stack Exchange answer template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.stackExchangeAnswer || DEFAULT_SETTINGS.stackExchangeAnswer)
-                .onChange(async (value) => {
-                    this.plugin.settings.stackExchangeAnswer = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Stack Exchange answer template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.stackExchangeAnswer || DEFAULT_SETTINGS.stackExchangeAnswer)
+                    .onChange(async (value) => {
+                        this.plugin.settings.stackExchangeAnswer = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Download media attachments')
-            .setDesc('If enabled, media attachments are downloaded to the assets folder (only Desktop App feature)')
+            .setDesc(
+                'Media attachments will be downloaded to the assets folder (Desktop App feature only). To dynamically change destination folder you can use variables. Check variables reference to learn more.',
+            )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
@@ -381,14 +513,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadStackExchangeAssets = value;
-                        stackExchangeMediaAttachmentsInDirSetting.setDisabled(!value);
+                        if (value === false) {
+                            this.plugin.settings.downloadStackExchangeAssetsInDir = false;
+                        }
                         await this.plugin.saveSettings();
+                        this.display();
                     }),
             );
 
-        const stackExchangeMediaAttachmentsInDirSetting = new Setting(containerEl)
+        new Setting(containerEl)
             .setName('Download media attachments to folder')
-            .setDesc('If enabled, the media attachments are stored in their own folder.')
+            .setDesc(
+                'Media attachments will be downloaded to the note assets folder (Desktop App feature only). Overrides assets folder template.',
+            )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
@@ -398,37 +535,64 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadStackExchangeAssetsInDir = value;
+                        if (value === true) {
+                            this.plugin.settings.downloadStackExchangeAssets = true;
+                        }
                         await this.plugin.saveSettings();
+                        this.display();
                     }),
             );
 
         containerEl.createEl('h2', { text: 'Mastodon' });
 
-        new Setting(containerEl).setName('Mastodon note template title').addText((text) =>
-            text
-                .setPlaceholder('Defaults to %tootAuthorName%')
-                .setValue(this.plugin.settings.mastodonNoteTitle || DEFAULT_SETTINGS.mastodonNoteTitle)
-                .onChange(async (value) => {
-                    this.plugin.settings.mastodonNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
+        new Setting(containerEl)
+            .setName('Mastodon content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.mastodonContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.mastodonContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.mastodonContentTypeSlug
+                            : this.plugin.settings.mastodonContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.mastodonContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
-        new Setting(containerEl).setName('Mastodon note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.mastodonNote || DEFAULT_SETTINGS.mastodonNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.mastodonNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Mastodon note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %tootAuthorName%')
+                    .setValue(this.plugin.settings.mastodonNoteTitle || DEFAULT_SETTINGS.mastodonNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.mastodonNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Mastodon note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.mastodonNote || DEFAULT_SETTINGS.mastodonNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.mastodonNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Download media attachments')
             .setDesc(
-                'If enabled, media attachments of toot are downloaded to the assets folder (only Desktop App feature)',
+                'Media attachments will be downloaded to the assets folder (Desktop App feature only). To dynamically change destination folder you can use variables. Check variables reference to learn more.',
             )
             .addToggle((toggle) =>
                 toggle
@@ -439,14 +603,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadMastodonMediaAttachments = value;
-                        mastodonMediaAttachmentsInDirSetting.setDisabled(!value);
+                        if (value === false) {
+                            this.plugin.settings.downloadMastodonMediaAttachmentsInDir = false;
+                        }
                         await this.plugin.saveSettings();
+                        this.display();
                     }),
             );
 
-        const mastodonMediaAttachmentsInDirSetting = new Setting(containerEl)
+        new Setting(containerEl)
             .setName('Download media attachments to folder')
-            .setDesc('If enabled, the media attachments of toot are stored in their own folder.')
+            .setDesc(
+                'Media attachments will be downloaded to the note assets folder (Desktop App feature only). Overrides assets folder template.',
+            )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
@@ -459,7 +628,11 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadMastodonMediaAttachmentsInDir = value;
+                        if (value === true) {
+                            this.plugin.settings.downloadMastodonMediaAttachments = true;
+                        }
                         await this.plugin.saveSettings();
+                        this.display();
                     }),
             );
 
@@ -492,26 +665,49 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.createEl('h2', { text: 'TikTok' });
 
-        new Setting(containerEl).setName('TikTok note title template').addText((text) =>
-            text
-                .setPlaceholder('TikTok from %authorName% (%date%)')
-                .setValue(this.plugin.settings.tikTokNoteTitle || DEFAULT_SETTINGS.tikTokNoteTitle)
-                .onChange(async (value) => {
-                    this.plugin.settings.tikTokNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
+        new Setting(containerEl)
+            .setName('TikTok content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.tikTokContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.tikTokContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.tikTokContentTypeSlug
+                            : this.plugin.settings.tikTokContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.tikTokContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
-        new Setting(containerEl).setName('TikTok note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.tikTokNote || DEFAULT_SETTINGS.tikTokNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.tikTokNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('TikTok note title template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('TikTok from %authorName% (%date%)')
+                    .setValue(this.plugin.settings.tikTokNoteTitle || DEFAULT_SETTINGS.tikTokNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.tikTokNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('TikTok note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.tikTokNote || DEFAULT_SETTINGS.tikTokNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.tikTokNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl).setName('TikTok embed player width').addText((text) =>
             text
@@ -535,30 +731,57 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.createEl('h2', { text: 'Readable Article' });
 
-        new Setting(containerEl).setName('Readable article note template title').addText((text) =>
-            text
-                .setPlaceholder('Defaults to %title%')
-                .setValue(this.plugin.settings.parseableArticleNoteTitle || DEFAULT_SETTINGS.parseableArticleNoteTitle)
-                .onChange(async (value) => {
-                    this.plugin.settings.parseableArticleNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
+        new Setting(containerEl)
+            .setName('Readable content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.parseableArticleContentType}`)
+                    .setValue(
+                        typeof this.plugin.settings.parseableArticleContentType === 'undefined'
+                            ? DEFAULT_SETTINGS.parseableArticleContentType
+                            : this.plugin.settings.parseableArticleContentType,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.parseableArticleContentType = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
-        new Setting(containerEl).setName('Readable article note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.parsableArticleNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Readable article note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(
+                        this.plugin.settings.parseableArticleNoteTitle || DEFAULT_SETTINGS.parseableArticleNoteTitle,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.parseableArticleNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Readable article note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.parsableArticleNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         new Setting(containerEl)
             .setName('Download images')
-            .setDesc('If enabled, images in article are downloaded to the assets folder (only Desktop App feature)')
+            .setDesc(
+                'Images from article will be downloaded to the assets folder (Desktop App feature only). To dynamically change destination folder you can use variables. Check variables reference to learn more.',
+            )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
@@ -568,14 +791,19 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadImages = value;
-                        imagesInArticleDirSettings.setDisabled(!value);
+                        if (value === false) {
+                            this.plugin.settings.downloadImagesInArticleDir = false;
+                        }
                         await this.plugin.saveSettings();
+                        this.display();
                     }),
             );
 
-        const imagesInArticleDirSettings = new Setting(containerEl)
+        new Setting(containerEl)
             .setName('Download images to note folder')
-            .setDesc('If enabled, the images in article are stored in their own folder.')
+            .setDesc(
+                'Images from article will be downloaded to the note assets folder (Desktop App feature only). Overrides assets folder template.',
+            )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
@@ -585,56 +813,117 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadImagesInArticleDir = value;
+                        if (value === true) {
+                            this.plugin.settings.downloadImages = true;
+                        }
                         await this.plugin.saveSettings();
+                        this.display();
                     }),
             );
 
         containerEl.createEl('h2', { text: 'Nonreadable Article' });
 
-        new Setting(containerEl).setName('Nonreadable article note template title').addText((text) =>
-            text
-                .setPlaceholder("Defaults to 'Article %date%'")
-                .setValue(
-                    this.plugin.settings.notParseableArticleNoteTitle || DEFAULT_SETTINGS.notParseableArticleNoteTitle,
-                )
-                .onChange(async (value) => {
-                    this.plugin.settings.notParseableArticleNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
+        new Setting(containerEl)
+            .setName('Nonreadable content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.notParseableArticleContentType}`)
+                    .setValue(
+                        typeof this.plugin.settings.notParseableArticleContentType === 'undefined'
+                            ? DEFAULT_SETTINGS.notParseableArticleContentType
+                            : this.plugin.settings.notParseableArticleContentType,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.notParseableArticleContentType = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
-        new Setting(containerEl).setName('Nonreadable article note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.notParsableArticleNote || DEFAULT_SETTINGS.notParsableArticleNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.notParsableArticleNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Nonreadable article note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder("Defaults to 'Article %date%'")
+                    .setValue(
+                        this.plugin.settings.notParseableArticleNoteTitle ||
+                        DEFAULT_SETTINGS.notParseableArticleNoteTitle,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.notParseableArticleNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Nonreadable article note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.notParsableArticleNote || DEFAULT_SETTINGS.notParsableArticleNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.notParsableArticleNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         containerEl.createEl('h2', { text: 'Text Snippet' });
 
-        new Setting(containerEl).setName('Text snippet note template title').addText((text) =>
-            text
-                .setPlaceholder("Defaults to 'Note %date%'")
-                .setValue(this.plugin.settings.textSnippetNoteTitle || DEFAULT_SETTINGS.textSnippetNoteTitle)
-                .onChange(async (value) => {
-                    this.plugin.settings.textSnippetNoteTitle = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
+        new Setting(containerEl)
+            .setName('Text Snippet content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.textSnippetContentType}`)
+                    .setValue(
+                        typeof this.plugin.settings.textSnippetContentType === 'undefined'
+                            ? DEFAULT_SETTINGS.textSnippetContentType
+                            : this.plugin.settings.textSnippetContentType,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.textSnippetContentType = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
 
-        new Setting(containerEl).setName('Text snippet note template').addTextArea((textarea) => {
-            textarea
-                .setValue(this.plugin.settings.textSnippetNote || DEFAULT_SETTINGS.textSnippetNote)
-                .onChange(async (value) => {
-                    this.plugin.settings.textSnippetNote = value;
-                    await this.plugin.saveSettings();
-                });
-            textarea.inputEl.rows = 10;
-            textarea.inputEl.cols = 25;
-        });
+        new Setting(containerEl)
+            .setName('Text snippet note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder("Defaults to 'Note %date%'")
+                    .setValue(this.plugin.settings.textSnippetNoteTitle || DEFAULT_SETTINGS.textSnippetNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.textSnippetNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Text snippet note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.textSnippetNote || DEFAULT_SETTINGS.textSnippetNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.textSnippetNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+    }
+
+    private createHTMLDiv(html: string): DocumentFragment {
+        return createFragment((documentFragment) => (documentFragment.createDiv().innerHTML = html));
+    }
+
+    private createTemplateVariableReferenceDiv(prepend: string = ''): DocumentFragment {
+        return this.createHTMLDiv(
+            `<p>${prepend} See the <a href="https://github.com/DominikPieper/obsidian-ReadItLater?tab=readme-ov-file#template-engine">template variables reference</a></p>`,
+        );
     }
 }
