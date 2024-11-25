@@ -1,4 +1,4 @@
-import { Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
+import { CapacitorAdapter, FileSystemAdapter, Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
 import { checkAndCreateFolder, formatDate, isValidUrl } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
@@ -18,6 +18,7 @@ import WikipediaParser from './parsers/WikipediaParser';
 import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
 import { Note } from './parsers/Note';
+import { getOsOptimizedPath } from './helpers/fileutils';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -134,6 +135,13 @@ export default class ReadItLaterPlugin extends Plugin {
 
     async writeFile(note: Note): Promise<void> {
         let filePath;
+
+        if (this.app.vault.adapter instanceof CapacitorAdapter || this.app.vault.adapter instanceof FileSystemAdapter) {
+            filePath = getOsOptimizedPath('/', note.getFullFilename(), this.app.vault.adapter);
+        } else {
+            filePath = normalizePath(`/${note.getFullFilename()}`);
+        }
+
         if (this.settings.inboxDir) {
             const inboxDir = this.templateEngine.render(this.settings.inboxDir, {
                 date: formatDate(note.createdAt, this.settings.dateTitleFmt),
@@ -141,9 +149,14 @@ export default class ReadItLaterPlugin extends Plugin {
                 contentType: note.contentType,
             });
             await checkAndCreateFolder(this.app.vault, inboxDir);
-            filePath = normalizePath(`${inboxDir}/${note.getFullFilename()}`);
-        } else {
-            filePath = normalizePath(`/${note.getFullFilename()}`);
+            if (
+                this.app.vault.adapter instanceof CapacitorAdapter ||
+                this.app.vault.adapter instanceof FileSystemAdapter
+            ) {
+                filePath = getOsOptimizedPath(inboxDir, note.getFullFilename(), this.app.vault.adapter);
+            } else {
+                filePath = normalizePath(`${inboxDir}/${note.getFullFilename()}`);
+            }
         }
 
         if (await this.app.vault.adapter.exists(filePath)) {
