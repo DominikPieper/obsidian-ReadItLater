@@ -1,7 +1,7 @@
 {
   "name": "obsidian-ReadItLater",
   "version": "0.7.0",
-  "description": "Plugin for Obsidian to collect interesting information from your clipboard into your vault",
+  "description": "Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs development",

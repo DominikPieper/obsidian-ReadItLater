@@ -26,19 +26,20 @@ class TikTokParser extends Parser {
     }
 
     async prepareNote(clipboardContent: string): Promise<Note> {
-        const data = await this.parseHtml(clipboardContent);
+        const createdAt = new Date();
+        const data = await this.parseHtml(clipboardContent, createdAt);
 
         const content = this.templateEngine.render(this.settings.tikTokNote, data);
 
         const fileNameTemplate = this.templateEngine.render(this.settings.tikTokNoteTitle, {
             authorName: data.authorName,
-            date: this.getFormattedDateForFilename(),
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.tikTokContentTypeSlug, createdAt);
     }
 
-    private async parseHtml(url: string): Promise<TiktokNoteData> {
+    private async parseHtml(url: string, createdAt: Date): Promise<TiktokNoteData> {
         const response = await request({
             method: 'GET',
             url,
@@ -52,7 +53,7 @@ class TikTokParser extends Parser {
         const videoRegexExec = this.PATTERN.exec(url);
 
         return {
-            date: this.getFormattedDateForContent(),
+            date: this.getFormattedDateForContent(createdAt),
             videoId: videoRegexExec[4],
             videoURL: videoHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') ?? url,
             videoDescription: videoHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') ?? '',

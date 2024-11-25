@@ -20,7 +20,15 @@ Save the web with ReadItLater plugin for Obsidian. Archive web pages for reading
 
 ReadItLater can do a lot more than converting web pages to markdown. For every content type there is specific template with carefully selected variables to ease up your archiving process.
 
-To add something to your vault just click the `ReadItLater: Save clipboard` ribbon or run the `ReadItLater: Save clipboard` command. New note will be created in folder configured in plugin settings.
+To add something to your Vault just click the `ReadItLater: Save clipboard` ribbon or run the `ReadItLater: Save clipboard` command. New note will be created in folder configured in plugin settings.
+
+### What makes ReadItLater plugin great?
+
+- Simple, but powerful template engine
+- Carefully selected predefined template variables to straightforward archiving process
+- Compatibility with Obsidian iOS and Android apps
+- Downloading images from articles to your Vault
+- Batch processing of URLs list
 
 ## Template engine
 
@@ -87,6 +95,16 @@ Converts value to uppercase.
 outputs: HELLO WORLD
 ```
 </details>
+
+## Inbox and Assets directories
+
+You can use template variables in `Inbox dir` and `Assets dir` settings to better distribute content in your Vault.
+
+| Directory template variable | Description                                        |
+| --------------------------- | -------------------------------------------------- |
+| date                        | Current date in format from plguin settins         |
+| fileName                    | Filename of new note                               |
+| contentType                 | Slug of detected content type from plugin settings |
 
 ## Content Types
 

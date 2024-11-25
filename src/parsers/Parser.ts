@@ -1,6 +1,6 @@
 import { App } from 'obsidian';
 import TemplateEngine from 'src/template/TemplateEngine';
-import { formatCurrentDate, isValidUrl } from '../helpers';
+import { formatDate, isValidUrl } from '../helpers';
 import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 
@@ -23,11 +23,11 @@ export abstract class Parser {
         return isValidUrl(url);
     }
 
-    protected getFormattedDateForFilename(): string {
-        return formatCurrentDate(this.settings.dateTitleFmt);
+    protected getFormattedDateForFilename(date: Date | string): string {
+        return formatDate(date, this.settings.dateTitleFmt);
     }
 
-    protected getFormattedDateForContent(): string {
-        return formatCurrentDate(this.settings.dateContentFmt);
+    protected getFormattedDateForContent(date: Date | string): string {
+        return formatDate(date, this.settings.dateContentFmt);
     }
 }

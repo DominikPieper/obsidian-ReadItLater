@@ -42,19 +42,20 @@ class VimeoParser extends Parser {
     }
 
     async prepareNote(clipboardContent: string): Promise<Note> {
-        const data = await this.parseSchema(clipboardContent);
+        const createdAt = new Date();
+        const data = await this.parseSchema(clipboardContent, createdAt);
 
         const content = this.templateEngine.render(this.settings.vimeoNote, data);
 
         const fileNameTemplate = this.templateEngine.render(this.settings.vimeoNoteTitle, {
             title: data.videoTitle,
-            date: this.getFormattedDateForFilename(),
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.vimeoContentTypeSlug, createdAt);
     }
 
-    private async parseSchema(url: string): Promise<VimeoNoteData> {
+    private async parseSchema(url: string, createdAt: Date): Promise<VimeoNoteData> {
         const response = await request({
             method: 'GET',
             url,
@@ -71,7 +72,7 @@ class VimeoParser extends Parser {
         const videoIdRegexExec = this.PATTERN.exec(url);
 
         return {
-            date: this.getFormattedDateForContent(),
+            date: this.getFormattedDateForContent(createdAt),
             videoId: videoIdRegexExec.length === 3 ? videoIdRegexExec[2] : '',
             videoURL: videoSchema?.url ?? '',
             videoTitle: videoSchema?.name ?? '',

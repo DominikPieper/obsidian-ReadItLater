@@ -48,20 +48,23 @@ class YoutubeParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
+        const createdAt = new Date();
         const data =
-            this.settings.youtubeApiKey === '' ? await this.parseSchema(url) : await this.parseApiResponse(url);
+            this.settings.youtubeApiKey === ''
+                ? await this.parseSchema(url, createdAt)
+                : await this.parseApiResponse(url, createdAt);
 
         const content = this.templateEngine.render(this.settings.youtubeNote, data);
 
         const fileNameTemplate = this.templateEngine.render(this.settings.youtubeNoteTitle, {
             title: data.videoTitle,
-            date: this.getFormattedDateForFilename(),
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.youtubeContentTypeSlug, createdAt);
     }
 
-    private async parseApiResponse(url: string): Promise<YoutubeNoteData> {
+    private async parseApiResponse(url: string, createdAt: Date): Promise<YoutubeNoteData> {
         const videoId = this.PATTERN.exec(url)[4];
         try {
             const videoApiResponse = await request({
@@ -98,7 +101,7 @@ class YoutubeParser extends Parser {
                 : [];
 
             return {
-                date: this.getFormattedDateForContent(),
+                date: this.getFormattedDateForContent(createdAt),
                 videoId: video.id,
                 videoURL: url,
                 videoTitle: video.snippet.title,
@@ -131,7 +134,7 @@ class YoutubeParser extends Parser {
         }
     }
 
-    private async parseSchema(url: string): Promise<YoutubeNoteData> {
+    private async parseSchema(url: string, createdAt: Date): Promise<YoutubeNoteData> {
         try {
             const response = await request({
                 method: 'GET',
@@ -153,7 +156,7 @@ class YoutubeParser extends Parser {
             const personSchemaElement = videoSchemaElement.querySelector('[itemtype="http://schema.org/Person"]');
 
             return {
-                date: this.getFormattedDateForContent(),
+                date: this.getFormattedDateForContent(createdAt),
                 videoId: videoId,
                 videoURL: url,
                 videoTitle: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',

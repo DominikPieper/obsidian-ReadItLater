@@ -1,5 +1,5 @@
 import { Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
-import { checkAndCreateFolder, isValidUrl, normalizeFilename } from './helpers';
+import { checkAndCreateFolder, formatDate, isValidUrl } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
 import YoutubeParser from './parsers/YoutubeParser';
@@ -15,8 +15,9 @@ import ParserCreator from './parsers/ParserCreator';
 import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 import GithubParser from './parsers/GithubParser';
 import WikipediaParser from './parsers/WikipediaParser';
-import { Delimiter, getDelimiterValue } from './enums/delimiter';
+import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
+import { Note } from './parsers/Note';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -105,7 +106,7 @@ export default class ReadItLaterPlugin extends Plugin {
     async _processUrlSingle(clipboardContent: string): Promise<void> {
         const parser = await this.parserCreator.createParser(clipboardContent);
         const note = await parser.prepareNote(clipboardContent);
-        await this.writeFile(note.fileName, note.content);
+        await this.writeFile(note);
     }
 
     async _processUrlsBatch(clipboardContent: string): Promise<void> {
@@ -128,28 +129,31 @@ export default class ReadItLaterPlugin extends Plugin {
         const parser = await this.parserCreator.createParser(content);
 
         const note = await parser.prepareNote(content);
-        await this.writeFile(note.fileName, note.content);
+        await this.writeFile(note);
     }
 
-    async writeFile(fileName: string, content: string): Promise<void> {
+    async writeFile(note: Note): Promise<void> {
         let filePath;
-        fileName = normalizeFilename(fileName);
-        await checkAndCreateFolder(this.app.vault, this.settings.inboxDir);
-
         if (this.settings.inboxDir) {
-            filePath = normalizePath(`${this.settings.inboxDir}/${fileName}`);
+            const inboxDir = this.templateEngine.render(this.settings.inboxDir, {
+                date: formatDate(note.createdAt, this.settings.dateTitleFmt),
+                fileName: note.fileName,
+                contentType: note.contentType,
+            });
+            await checkAndCreateFolder(this.app.vault, inboxDir);
+            filePath = normalizePath(`${inboxDir}/${note.getFullFilename()}`);
         } else {
-            filePath = normalizePath(`/${fileName}`);
+            filePath = normalizePath(`/${note.getFullFilename()}`);
         }
 
         if (await this.app.vault.adapter.exists(filePath)) {
-            new Notice(`${fileName} already exists!`);
+            new Notice(`${note.getFullFilename()} already exists!`);
         } else {
-            const newFile = await this.app.vault.create(filePath, content);
+            const newFile = await this.app.vault.create(filePath, note.content);
             if (this.settings.openNewNote || this.settings.openNewNoteInNewTab) {
                 this.app.workspace.getLeaf(this.settings.openNewNoteInNewTab ? 'tab' : false).openFile(newFile);
             }
-            new Notice(`${fileName} created successful`);
+            new Notice(`${note.getFullFilename()} created successful`);
         }
     }
 }

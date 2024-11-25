@@ -8,7 +8,8 @@ interface Modifiers {
     [key: string]: ModifierFunction;
 }
 
-const stringableTypes: string[] = ['string', 'number', 'bigint', 'symbol'];
+export const stringableTypes: string[] = ['string', 'number', 'bigint', 'symbol'];
+export const variableRegex = /{{(.*?)}}/g;
 
 export default class TemplateEngine {
     private modifiers: Modifiers;
@@ -118,8 +119,6 @@ export default class TemplateEngine {
     }
 
     private processVariables(template: string, data: TemplateData): string {
-        const variableRegex = /{{(.*?)}}/g;
-
         return template.replace(variableRegex, (match: string, content: string) => {
             try {
                 const [key, ...modifiers] = content.split('|').map((item) => item.trim());

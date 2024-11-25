@@ -25,25 +25,26 @@ class TwitterParser extends Parser {
     }
 
     async prepareNote(url: string): Promise<Note> {
+        const createdAt = new Date();
         const twitterUrl = new URL(url);
 
         if (twitterUrl.hostname === 'x.com') {
             twitterUrl.hostname = 'twitter.com';
         }
 
-        const data = await this.getTweetNoteData(twitterUrl);
+        const data = await this.getTweetNoteData(twitterUrl, createdAt);
 
         const content = this.templateEngine.render(this.settings.twitterNote, data);
 
         const fileNameTemplate = this.templateEngine.render(this.settings.twitterNoteTitle, {
             tweetAuthorName: data.tweetAuthorName,
-            date: this.getFormattedDateForFilename(),
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(`${fileNameTemplate}.md`, content);
+        return new Note(fileNameTemplate, 'md', content, this.settings.twitterContentTypeSlug, createdAt);
     }
 
-    private async getTweetNoteData(url: URL): Promise<TweetNoteData> {
+    private async getTweetNoteData(url: URL, createdAt: Date): Promise<TweetNoteData> {
         const response = JSON.parse(
             await request({
                 method: 'GET',
@@ -55,7 +56,7 @@ class TwitterParser extends Parser {
         const content = await parseHtmlContent(response.html);
 
         return {
-            date: this.getFormattedDateForContent(),
+            date: this.getFormattedDateForContent(createdAt),
             tweetAuthorName: response.author_name,
             tweetURL: response.url,
             tweetContent: content,
