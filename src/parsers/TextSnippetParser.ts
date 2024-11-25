@@ -15,14 +15,15 @@ class TextSnippetParser extends Parser {
 
     async prepareNote(text: string): Promise<Note> {
         const createdAt = new Date();
-        const fileNameTemplate = this.settings.textSnippetNoteTitle.replace(
-            /%date%/g,
-            this.getFormattedDateForFilename(createdAt),
-        );
 
-        const content = this.settings.textSnippetNote
-            .replace(/%content%/g, () => text)
-            .replace(/%date%/g, this.getFormattedDateForContent(createdAt));
+        const fileNameTemplate = this.templateEngine.render(this.settings.textSnippetNoteTitle, {
+            date: this.getFormattedDateForFilename(createdAt)
+        });
+
+        const content = this.templateEngine.render(this.settings.textSnippetNote, {
+            content: text,
+            date: this.getFormattedDateForContent(createdAt)
+        });
         return new Note(fileNameTemplate, 'md', content, this.settings.textSnippetContentType, createdAt);
     }
 }

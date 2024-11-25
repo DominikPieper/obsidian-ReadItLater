@@ -19,9 +19,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         containerEl.createEl('h2', { text: 'General' });
 
         new Setting(containerEl)
-            .setName('Inbox dir')
+            .setName('Inbox directory')
             .setDesc(
-                'Enter valid folder name. For nested folders use this format: Folder A/Folder B. If no folder is entered, new note will be created in vault root.',
+                'Enter valid directory name. For nested directory use this format: Directory A/Directory B. If no directory is entered, new note will be created in vault root.',
             )
             .addText((text) =>
                 text
@@ -38,9 +38,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Assets dir')
+            .setName('Assets directory')
             .setDesc(
-                'Enter valid folder name. For nested folders use this format: Folder A/Folder B. If no folder is entered, new note will be created in vault root.',
+                'Enter valid directory name. For nested directory use this format: Directory A/Directory B. If no directory is entered, new note will be created in Vault root.',
             )
             .addText((text) =>
                 text
@@ -502,7 +502,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Download media attachments')
             .setDesc(
-                'Media attachments will be downloaded to the assets folder (Desktop App feature only). To dynamically change destination folder you can use variables. Check variables reference to learn more.',
+                'Media attachments will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
             )
             .addToggle((toggle) =>
                 toggle
@@ -522,9 +522,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Download media attachments to folder')
+            .setName('Download media attachments to note directory')
             .setDesc(
-                'Media attachments will be downloaded to the note assets folder (Desktop App feature only). Overrides assets folder template.',
+                'Media attachments will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
             )
             .addToggle((toggle) =>
                 toggle
@@ -592,7 +592,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Download media attachments')
             .setDesc(
-                'Media attachments will be downloaded to the assets folder (Desktop App feature only). To dynamically change destination folder you can use variables. Check variables reference to learn more.',
+                'Media attachments will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
             )
             .addToggle((toggle) =>
                 toggle
@@ -612,9 +612,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Download media attachments to folder')
+            .setName('Download media attachments to note directory')
             .setDesc(
-                'Media attachments will be downloaded to the note assets folder (Desktop App feature only). Overrides assets folder template.',
+                'Media attachments will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
             )
             .addToggle((toggle) =>
                 toggle
@@ -780,7 +780,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
         new Setting(containerEl)
             .setName('Download images')
             .setDesc(
-                'Images from article will be downloaded to the assets folder (Desktop App feature only). To dynamically change destination folder you can use variables. Check variables reference to learn more.',
+                'Images from article will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
             )
             .addToggle((toggle) =>
                 toggle
@@ -800,9 +800,9 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Download images to note folder')
+            .setName('Download images to note directory')
             .setDesc(
-                'Images from article will be downloaded to the note assets folder (Desktop App feature only). Overrides assets folder template.',
+                'Images from article will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
             )
             .addToggle((toggle) =>
                 toggle

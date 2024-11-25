@@ -58,9 +58,10 @@ class StackExchangeParser extends Parser {
         const document = new DOMParser().parseFromString(response, 'text/html');
         const question = await this.parseDocument(document);
 
-        const fileNameTemplate = this.settings.stackExchangeNoteTitle
-            .replace(/%title%/g, () => question.title)
-            .replace(/%date%/g, this.getFormattedDateForFilename(createdAt));
+        const fileNameTemplate = this.templateEngine.render(this.settings.stackExchangeNoteTitle, {
+            title: question.title,
+            date: this.getFormattedDateForFilename(createdAt)
+        });
 
         let assetsDir;
         if (this.settings.downloadStackExchangeAssetsInDir) {
@@ -95,8 +96,8 @@ class StackExchangeParser extends Parser {
             ? this.templateEngine.render(this.settings.stackExchangeAnswer, {
                   date: this.getFormattedDateForContent(createdAt),
                   answerContent: question.topAnswer.content,
-                  authorName: question.author.name,
-                  authorProfileURL: question.author.profile,
+                  authorName: question.topAnswer.author.name,
+                  authorProfileURL: question.topAnswer.author.profile,
               })
             : '';
 
