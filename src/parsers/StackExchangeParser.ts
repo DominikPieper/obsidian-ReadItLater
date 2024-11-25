@@ -60,7 +60,7 @@ class StackExchangeParser extends Parser {
 
         const fileNameTemplate = this.templateEngine.render(this.settings.stackExchangeNoteTitle, {
             title: question.title,
-            date: this.getFormattedDateForFilename(createdAt)
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
         let assetsDir;

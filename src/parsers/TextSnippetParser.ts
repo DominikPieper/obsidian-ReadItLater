@@ -17,12 +17,12 @@ class TextSnippetParser extends Parser {
         const createdAt = new Date();
 
         const fileNameTemplate = this.templateEngine.render(this.settings.textSnippetNoteTitle, {
-            date: this.getFormattedDateForFilename(createdAt)
+            date: this.getFormattedDateForFilename(createdAt),
         });
 
         const content = this.templateEngine.render(this.settings.textSnippetNote, {
             content: text,
-            date: this.getFormattedDateForContent(createdAt)
+            date: this.getFormattedDateForContent(createdAt),
         });
         return new Note(fileNameTemplate, 'md', content, this.settings.textSnippetContentType, createdAt);
     }

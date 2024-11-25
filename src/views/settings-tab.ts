@@ -848,7 +848,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     .setPlaceholder("Defaults to 'Article %date%'")
                     .setValue(
                         this.plugin.settings.notParseableArticleNoteTitle ||
-                        DEFAULT_SETTINGS.notParseableArticleNoteTitle,
+                            DEFAULT_SETTINGS.notParseableArticleNoteTitle,
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.notParseableArticleNoteTitle = value;
