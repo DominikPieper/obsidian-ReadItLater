@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-read-it-later",
 	"name": "ReadItLater",
-	"version": "0.7.0",
+	"version": "0.8.0",
 	"minAppVersion": "1.6.2",
 	"description": "Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.",
 	"author": "Dominik Pieper",

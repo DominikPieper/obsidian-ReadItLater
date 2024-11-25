@@ -1,6 +1,6 @@
 {
   "name": "obsidian-ReadItLater",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.",
   "main": "main.js",
   "scripts": {
