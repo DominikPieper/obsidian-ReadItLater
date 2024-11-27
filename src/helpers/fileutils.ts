@@ -81,6 +81,7 @@ export function getDefaultFilesystenLimits(platformType: PlatformType): Filesyst
         case PlatformType.MacOS:
         case PlatformType.iOS:
         case PlatformType.Android:
+        case PlatformType.Mobile:
             return createFilesystemLimits(1024, 255);
         case PlatformType.Windows:
         default:

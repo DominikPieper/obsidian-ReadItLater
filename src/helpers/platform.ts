@@ -6,6 +6,8 @@ export enum PlatformType {
     Windows,
     Android,
     iOS,
+    Desktop,
+    Mobile,
 }
 
 export function getPlatformType(): PlatformType {
@@ -19,6 +21,7 @@ export function getPlatformType(): PlatformType {
         if (Platform.isWin) {
             return PlatformType.Windows;
         }
+        return PlatformType.Desktop;
     } else {
         if (Platform.isAndroidApp) {
             return PlatformType.Android;
@@ -26,7 +29,6 @@ export function getPlatformType(): PlatformType {
         if (Platform.isIosApp) {
             return PlatformType.iOS;
         }
+        return PlatformType.Mobile;
     }
-
-    throw new Error('Unable to detect platform type');
 }
