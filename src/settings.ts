@@ -59,6 +59,8 @@ export interface ReadItLaterSettings {
     tikTokEmbedWidth: string;
     tikTokEmbedHeight: string;
     extendShareMenu: boolean;
+    filesystemLimitPath: number | null;
+    filesystemLimitFileName: number | null;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -123,4 +125,6 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     tikTokEmbedWidth: '325',
     tikTokEmbedHeight: '760',
     extendShareMenu: true,
+    filesystemLimitPath: null,
+    filesystemLimitFileName: null,
 };

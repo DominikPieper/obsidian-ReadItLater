@@ -1,10 +1,11 @@
 import path from 'path';
 import { CapacitorAdapter, FileSystemAdapter, normalizePath } from 'obsidian';
+import { ReadItLaterSettings } from 'src/settings';
 import { PlatformType, getPlatformType } from './platform';
 
 interface FilesystemLimits {
     path: number;
-    file: number;
+    fileName: number;
 }
 
 export function isValidUrl(url: string, allowedProtocols: string[] = []): boolean {
@@ -41,14 +42,14 @@ export function getOsOptimizedPath(
     path: string,
     fileName: string,
     dataAdapter: CapacitorAdapter | FileSystemAdapter,
+    filesystemLimits: FilesystemLimits,
 ): string {
-    const filesystemLimits = getDefaultFilesystenLimits();
     const fileExtension = `.${fileName.split('.').pop()}`;
 
     let optimizedFileName = fileName;
-    if (optimizedFileName.length > filesystemLimits.file) {
+    if (optimizedFileName.length > filesystemLimits.fileName) {
         optimizedFileName =
-            optimizedFileName.substring(0, filesystemLimits.file - fileExtension.length) + `${fileExtension}`;
+            optimizedFileName.substring(0, filesystemLimits.fileName - fileExtension.length) + `${fileExtension}`;
     }
 
     let optimizedFilePath = normalizePath(`${path}/${optimizedFileName}`);
@@ -61,15 +62,19 @@ export function getOsOptimizedPath(
             ) + `${fileExtension}`;
     }
 
-    console.log(optimizedFileName);
-    console.log(optimizedFilePath);
-
     return optimizedFilePath;
 }
 
-function getDefaultFilesystenLimits(): FilesystemLimits {
-    const platformType = getPlatformType();
+export function getFileSystemLimits(platformType: PlatformType, settings: ReadItLaterSettings): FilesystemLimits {
+    const defaultFilesystenLimits = getDefaultFilesystenLimits(platformType);
 
+    return {
+        path: settings.filesystemLimitPath ?? defaultFilesystenLimits.path,
+        fileName: settings.filesystemLimitFileName ?? defaultFilesystenLimits.fileName,
+    };
+}
+
+export function getDefaultFilesystenLimits(platformType: PlatformType): FilesystemLimits {
     switch (platformType) {
         case PlatformType.Linux:
             return createFilesystemLimits(4096, 255);
@@ -83,6 +88,6 @@ function getDefaultFilesystenLimits(): FilesystemLimits {
     }
 }
 
-function createFilesystemLimits(path: number, file: number): FilesystemLimits {
-    return { path: path, file: file };
+function createFilesystemLimits(path: number, fileName: number): FilesystemLimits {
+    return { path: path, fileName: fileName };
 }

@@ -18,17 +18,24 @@ import WikipediaParser from './parsers/WikipediaParser';
 import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
 import { Note } from './parsers/Note';
-import { getOsOptimizedPath } from './helpers/fileutils';
+import { getFileSystemLimits, getOsOptimizedPath } from './helpers/fileutils';
+import { PlatformType, getPlatformType } from './helpers/platform';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
 
+    private platformType: PlatformType;
     private parserCreator: ParserCreator;
     private templateEngine: TemplateEngine;
+
+    getPlatformType(): PlatformType {
+        return this.platformType;
+    }
 
     async onload(): Promise<void> {
         await this.loadSettings();
 
+        this.platformType = getPlatformType();
         this.templateEngine = new TemplateEngine();
         this.parserCreator = new ParserCreator([
             new YoutubeParser(this.app, this.settings, this.templateEngine),
@@ -134,10 +141,11 @@ export default class ReadItLaterPlugin extends Plugin {
     }
 
     async writeFile(note: Note): Promise<void> {
+        const fileSystemLimits = getFileSystemLimits(this.platformType, this.settings);
         let filePath;
 
         if (this.app.vault.adapter instanceof CapacitorAdapter || this.app.vault.adapter instanceof FileSystemAdapter) {
-            filePath = getOsOptimizedPath('/', note.getFullFilename(), this.app.vault.adapter);
+            filePath = getOsOptimizedPath('/', note.getFullFilename(), this.app.vault.adapter, fileSystemLimits);
         } else {
             filePath = normalizePath(`/${note.getFullFilename()}`);
         }
@@ -153,7 +161,12 @@ export default class ReadItLaterPlugin extends Plugin {
                 this.app.vault.adapter instanceof CapacitorAdapter ||
                 this.app.vault.adapter instanceof FileSystemAdapter
             ) {
-                filePath = getOsOptimizedPath(inboxDir, note.getFullFilename(), this.app.vault.adapter);
+                filePath = getOsOptimizedPath(
+                    inboxDir,
+                    note.getFullFilename(),
+                    this.app.vault.adapter,
+                    fileSystemLimits,
+                );
             } else {
                 filePath = normalizePath(`${inboxDir}/${note.getFullFilename()}`);
             }

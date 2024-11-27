@@ -1,5 +1,6 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
 import { Delimiter, getDelimiterOptions } from 'src/enums/delimiter';
+import { getDefaultFilesystenLimits } from 'src/helpers/fileutils';
 import ReadItLaterPlugin from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
 
@@ -915,6 +916,48 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.rows = 10;
                 textarea.inputEl.cols = 25;
             });
+
+        containerEl.createEl('h2', { text: 'Advanced' });
+
+        const defaultFilesystemLimits = getDefaultFilesystenLimits(this.plugin.getPlatformType());
+
+        new Setting(containerEl)
+            .setName('Maximum file path length')
+            .setDesc(`Defaults to ${defaultFilesystemLimits.path} characters on your current platform.`)
+            .addText((text) =>
+                text.setPlaceholder(String(defaultFilesystemLimits.path)).onChange(async (value) => {
+                    const trimmedValue = value.trim();
+                    if (trimmedValue !== '' && Number.isNaN(Number(trimmedValue))) {
+                        new Notice('Maximum file path length must be a number.');
+                        return;
+                    }
+                    if (trimmedValue === '') {
+                        this.plugin.settings.filesystemLimitPath = null;
+                    } else {
+                        this.plugin.settings.filesystemLimitPath = Number(trimmedValue);
+                    }
+                    await this.plugin.saveSettings();
+                }),
+            );
+
+        new Setting(containerEl)
+            .setName('Maximum file name length')
+            .setDesc(`Defaults to ${defaultFilesystemLimits.fileName} characters on your current platform.`)
+            .addText((text) =>
+                text.setPlaceholder(String(defaultFilesystemLimits.fileName)).onChange(async (value) => {
+                    const trimmedValue = value.trim();
+                    if (trimmedValue !== '' && Number.isNaN(Number(trimmedValue))) {
+                        new Notice('Maximum file name length must be a number.');
+                        return;
+                    }
+                    if (trimmedValue === '') {
+                        this.plugin.settings.filesystemLimitFileName = null;
+                    } else {
+                        this.plugin.settings.filesystemLimitFileName = Number(trimmedValue);
+                    }
+                    await this.plugin.saveSettings();
+                }),
+            );
     }
 
     private createHTMLDiv(html: string): DocumentFragment {
