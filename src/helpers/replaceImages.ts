@@ -1,38 +1,50 @@
-import { basename } from 'path';
-import { App, DataAdapter } from 'obsidian';
+import { App, CapacitorAdapter, DataAdapter, FileSystemAdapter, normalizePath, requestUrl } from 'obsidian';
 import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from 'src/constants/urlProtocols';
-import { isValidUrl, normalizeFilename, pathJoin } from './fileutils';
+import ReadItLaterPlugin from 'src/main';
+import { FilesystemLimits, getFileExtensionFromMimeType, getOsOptimizedPath, isValidUrl } from './fileutils';
 import { checkAndCreateFolder } from './checkAndCreateFolder';
-import { downloadImage } from './downloadImage';
-import { linkHashes } from './linkHash';
+import { createRandomString } from './stringUtils';
 
 type Replacer = {
     (match: string, anchor: string, link: string): Promise<string>;
 };
 
-export const EXTERNAL_MEDIA_LINK_PATTERN = /!\[(?<anchor>.*?)\]\((?<link>.+?)\)/g;
-export async function replaceImages(app: App, content: string, assetsDir: string): Promise<string> {
-    return await replaceAsync(content, EXTERNAL_MEDIA_LINK_PATTERN, imageTagProcessor(app, assetsDir));
+const EXTERNAL_MEDIA_LINK_PATTERN = /!\[(?<anchor>.*?)\]\((?<link>.+?)\)/g;
+const CREATE_FILENAME_ATTEMPTS = 5;
+const MAX_FILENAME_INDEX = 1000;
+
+export async function replaceImages(
+    app: App,
+    plugin: ReadItLaterPlugin,
+    noteFileName: string,
+    content: string,
+    assetsDir: string,
+): Promise<string> {
+    return await replaceAsync(
+        content,
+        EXTERNAL_MEDIA_LINK_PATTERN,
+        imageTagProcessor(app, plugin, noteFileName, assetsDir),
+    );
 }
 
-export function replaceAsync(string: string, searchValue: string | RegExp, replacer: Replacer) {
+async function replaceAsync(content: string, searchValue: string | RegExp, replacer: Replacer) {
     try {
         if (typeof replacer === 'function') {
             // 1. Run fake pass of `replace`, collect values from `replacer` calls
             // 2. Resolve them with `Promise.all`
             // 3. Run `replace` with resolved values
             const values: Promise<string>[] = [];
-            String.prototype.replace.call(string, searchValue, function (match: string, anchor: string, link: string) {
+            String.prototype.replace.call(content, searchValue, function (match: string, anchor: string, link: string) {
                 values.push(replacer(match, anchor, link));
                 return '';
             });
             return Promise.all(values).then(function (resolvedValues) {
-                return String.prototype.replace.call(string, searchValue, function () {
+                return String.prototype.replace.call(content, searchValue, function () {
                     return resolvedValues.shift();
                 });
             });
         } else {
-            return Promise.resolve(String.prototype.replace.call(string, searchValue, replacer));
+            return Promise.resolve(String.prototype.replace.call(content, searchValue, replacer));
         }
     } catch (error) {
         console.error();
@@ -40,35 +52,30 @@ export function replaceAsync(string: string, searchValue: string | RegExp, repla
     }
 }
 
-export const FILENAME_ATTEMPTS = 5;
-export function imageTagProcessor(app: App, mediaDir: string) {
+function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: string, assetsDir: string) {
     return async function processImageTag(match: string, anchor: string, link: string): Promise<string> {
         if (!isValidUrl(link, [HTTP_PROTOCOL, HTTPS_PROTOCOL])) {
             return match;
         }
         const url = new URL(link);
-        await checkAndCreateFolder(app.vault, mediaDir);
+        await checkAndCreateFolder(app.vault, assetsDir);
 
         try {
             const { fileContent, fileExtension } = await downloadImage(url);
 
             let attempt = 0;
-            while (attempt < FILENAME_ATTEMPTS) {
+            while (attempt < CREATE_FILENAME_ATTEMPTS) {
                 try {
                     const { fileName, needWrite } = await chooseFileName(
                         app.vault.adapter,
-                        mediaDir,
-                        anchor,
-                        url,
-                        fileContent,
+                        plugin.getFileSystemLimits(),
+                        assetsDir,
+                        noteFileName,
                         fileExtension,
                     );
 
                     if (needWrite && fileName) {
                         await app.vault.createBinary(fileName, fileContent);
-                    }
-
-                    if (fileName) {
                         const maskedFilename = fileName.replace(/\s/g, '%20');
                         return `![${anchor}](${maskedFilename})`;
                     } else {
@@ -90,66 +97,55 @@ export function imageTagProcessor(app: App, mediaDir: string) {
     };
 }
 
-export const FORBIDDEN_SYMBOLS_FILENAME_PATTERN = /\s+/g;
-
-export const FILENAME_TEMPLATE = 'media';
-export const MAX_FILENAME_INDEX = 1000;
-
 async function chooseFileName(
-    adapter: DataAdapter,
-    dir: string,
-    baseName: string,
-    url: URL,
-    contentData: ArrayBuffer,
-    fileExtension: string | false,
+    dataAdapter: DataAdapter,
+    filesystemLimits: FilesystemLimits,
+    assetsDir: string,
+    noteFileName: string,
+    fileExtension: string,
 ): Promise<{ fileName: string; needWrite: boolean }> {
-    if (!fileExtension) {
+    if (fileExtension === '') {
         return { fileName: '', needWrite: false };
     }
-    // if there is no anchor try get file name from url
-    if (!baseName) {
-        baseName = basename(url.pathname);
-    }
-    // if there is no part for file name from url use name template
-    if (!baseName) {
-        baseName = FILENAME_TEMPLATE;
-    }
 
-    // if filename already ends with correct extension, remove it to work with base name
-    if (baseName.endsWith(`.${fileExtension}`)) {
-        baseName = baseName.slice(0, -1 * (fileExtension.length + 1));
-    }
-
-    baseName = normalizeFilename(baseName);
-
+    let needWrite = false;
     let fileName = '';
-    let needWrite = true;
     let index = 0;
-    while (!fileName && index < MAX_FILENAME_INDEX) {
-        const suggestedName = index
-            ? pathJoin(dir, `${baseName}-${index}.${fileExtension}`)
-            : pathJoin(dir, `${baseName}.${fileExtension}`);
-
-        if (await adapter.exists(suggestedName, false)) {
-            linkHashes.ensureHashGenerated(url, contentData);
-
-            const fileData = await adapter.readBinary(suggestedName);
-
-            if (linkHashes.isSame(url, fileData)) {
-                fileName = suggestedName;
-                needWrite = false;
-            }
+    while (fileName === '' && index < MAX_FILENAME_INDEX) {
+        let suggestedName;
+        if (dataAdapter instanceof CapacitorAdapter || dataAdapter instanceof FileSystemAdapter) {
+            suggestedName = getOsOptimizedPath(
+                assetsDir,
+                `${noteFileName}-${createRandomString(10)}.${fileExtension}`,
+                dataAdapter,
+                filesystemLimits,
+            );
         } else {
+            suggestedName = `${assetsDir}/${noteFileName}-${createRandomString(10)}.${fileExtension}`;
+        }
+
+        if (!(await dataAdapter.exists(normalizePath(suggestedName), false))) {
             fileName = suggestedName;
+            needWrite = true;
         }
 
         index++;
     }
-    if (!fileName) {
+    if (fileName === '') {
         throw new Error('Failed to generate file name for media file.');
     }
 
-    linkHashes.ensureHashGenerated(url, contentData);
-
     return { fileName, needWrite };
+}
+
+async function downloadImage(url: URL): Promise<{ fileContent: ArrayBuffer; fileExtension: string }> {
+    const res = await requestUrl({
+        url: url.href,
+        method: 'get',
+    });
+
+    return {
+        fileContent: res.arrayBuffer,
+        fileExtension: getFileExtensionFromMimeType(res.headers['content-type'] || '') ?? '',
+    };
 }

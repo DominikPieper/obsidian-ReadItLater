@@ -1,8 +1,6 @@
-import { App, Platform, request } from 'obsidian';
+import { request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
-import TemplateEngine from 'src/template/TemplateEngine';
 import { normalizeFilename, replaceImages } from '../helpers';
-import { ReadItLaterSettings } from '../settings';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
@@ -44,10 +42,6 @@ class StackExchangeParser extends Parser {
     private PATTERN =
         /(https:\/\/|http:\/\/)(stackoverflow\.com|serverfault\.com|superuser\.com|askubuntu\.com|stackapps\.com|.*\.stackexchange\.com)\/(q|a|questions)\/(\d+)/;
 
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     test(clipboardContent: string): boolean {
         return this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
     }
@@ -58,42 +52,48 @@ class StackExchangeParser extends Parser {
         const document = new DOMParser().parseFromString(response, 'text/html');
         const question = await this.parseDocument(document);
 
-        const fileNameTemplate = this.templateEngine.render(this.settings.stackExchangeNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.stackExchangeNoteTitle, {
             title: question.title,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
         let assetsDir;
-        if (this.settings.downloadStackExchangeAssetsInDir) {
-            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+        if (this.plugin.settings.downloadStackExchangeAssetsInDir) {
+            assetsDir = this.templateEngine.render(this.plugin.settings.assetsDir, {
                 date: '',
                 fileName: '',
                 contentType: '',
             });
             assetsDir = `${assetsDir}/${normalizeFilename(fileNameTemplate)}`;
         } else {
-            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+            assetsDir = this.templateEngine.render(this.plugin.settings.assetsDir, {
                 date: this.getFormattedDateForFilename(createdAt),
                 fileName: normalizeFilename(fileNameTemplate),
-                contentType: this.settings.stackExchangeContentType,
+                contentType: this.plugin.settings.stackExchangeContentType,
             });
         }
 
         let content = this.templateEngine.render(
-            this.settings.stackExchangeNote,
+            this.plugin.settings.stackExchangeNote,
             this.getNoteData(question, createdAt),
         );
 
-        if (this.settings.downloadStackExchangeAssets && Platform.isDesktop) {
-            content = await replaceImages(this.app, content, assetsDir);
+        if (this.plugin.settings.downloadStackExchangeAssets) {
+            content = await replaceImages(
+                this.app,
+                this.plugin,
+                normalizeFilename(fileNameTemplate),
+                content,
+                assetsDir,
+            );
         }
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.stackExchangeContentType, createdAt);
+        return new Note(fileNameTemplate, 'md', content, this.plugin.settings.stackExchangeContentType, createdAt);
     }
 
     private getNoteData(question: StackExchangeQuestion, createdAt: Date): StackExchangeNoteData {
         const topAnswer = question.topAnswer
-            ? this.templateEngine.render(this.settings.stackExchangeAnswer, {
+            ? this.templateEngine.render(this.plugin.settings.stackExchangeAnswer, {
                   date: this.getFormattedDateForContent(createdAt),
                   answerContent: question.topAnswer.content,
                   authorName: question.topAnswer.author.name,
@@ -105,7 +105,7 @@ class StackExchangeParser extends Parser {
         for (let i = 0; i < question.answers.length; i++) {
             answers = answers.concat(
                 '\n\n***\n\n',
-                this.templateEngine.render(this.settings.stackExchangeAnswer, {
+                this.templateEngine.render(this.plugin.settings.stackExchangeAnswer, {
                     date: this.getFormattedDateForContent(createdAt),
                     answerContent: question.answers[i].content,
                     authorName: question.answers[i].author.name,

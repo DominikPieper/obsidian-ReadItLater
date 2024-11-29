@@ -1,6 +1,4 @@
-import { App, request } from 'obsidian';
-import TemplateEngine from 'src/template/TemplateEngine';
-import { ReadItLaterSettings } from '../settings';
+import { request } from 'obsidian';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
@@ -33,10 +31,6 @@ interface VimeoNoteData {
 class VimeoParser extends Parser {
     private PATTERN = /(vimeo.com)\/(\d+)?/;
 
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     test(clipboardContent: string): boolean | Promise<boolean> {
         return this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
     }
@@ -45,14 +39,14 @@ class VimeoParser extends Parser {
         const createdAt = new Date();
         const data = await this.parseSchema(clipboardContent, createdAt);
 
-        const content = this.templateEngine.render(this.settings.vimeoNote, data);
+        const content = this.templateEngine.render(this.plugin.settings.vimeoNote, data);
 
-        const fileNameTemplate = this.templateEngine.render(this.settings.vimeoNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.vimeoNoteTitle, {
             title: data.videoTitle,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.vimeoContentTypeSlug, createdAt);
+        return new Note(fileNameTemplate, 'md', content, this.plugin.settings.vimeoContentTypeSlug, createdAt);
     }
 
     private async parseSchema(url: string, createdAt: Date): Promise<VimeoNoteData> {
@@ -76,7 +70,7 @@ class VimeoParser extends Parser {
             videoId: videoIdRegexExec.length === 3 ? videoIdRegexExec[2] : '',
             videoURL: videoSchema?.url ?? '',
             videoTitle: videoSchema?.name ?? '',
-            videoPlayer: `<iframe width="${this.settings.vimeoEmbedWidth}" height="${this.settings.vimeoEmbedHeight}" src="${videoSchema?.embedUrl}" title="Vimeo video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
+            videoPlayer: `<iframe width="${this.plugin.settings.vimeoEmbedWidth}" height="${this.plugin.settings.vimeoEmbedHeight}" src="${videoSchema?.embedUrl}" title="Vimeo video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`,
             channelName: videoSchema?.author?.name ?? '',
             channelURL: videoSchema?.author?.url ?? '',
         };

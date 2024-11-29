@@ -1,7 +1,5 @@
-import { App, moment, request } from 'obsidian';
+import {moment, request } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
-import TemplateEngine from 'src/template/TemplateEngine';
-import { ReadItLaterSettings } from '../settings';
 import { handleError } from '../helpers';
 import { Note } from './Note';
 import { Parser } from './Parser';
@@ -39,10 +37,6 @@ interface YoutubeChannel {
 class YoutubeParser extends Parser {
     private PATTERN = /(youtube.com|youtu.be)\/(watch|shorts)?(\?v=|\/)?([^&#?]*)/;
 
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     test(url: string): boolean {
         return this.isValidUrl(url) && this.PATTERN.test(url);
     }
@@ -50,18 +44,18 @@ class YoutubeParser extends Parser {
     async prepareNote(url: string): Promise<Note> {
         const createdAt = new Date();
         const data =
-            this.settings.youtubeApiKey === ''
+            this.plugin.settings.youtubeApiKey === ''
                 ? await this.parseSchema(url, createdAt)
                 : await this.parseApiResponse(url, createdAt);
 
-        const content = this.templateEngine.render(this.settings.youtubeNote, data);
+        const content = this.templateEngine.render(this.plugin.settings.youtubeNote, data);
 
-        const fileNameTemplate = this.templateEngine.render(this.settings.youtubeNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.youtubeNoteTitle, {
             title: data.videoTitle,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.youtubeContentTypeSlug, createdAt);
+        return new Note(fileNameTemplate, 'md', content, this.plugin.settings.youtubeContentTypeSlug, createdAt);
     }
 
     private async parseApiResponse(url: string, createdAt: Date): Promise<YoutubeNoteData> {
@@ -69,7 +63,7 @@ class YoutubeParser extends Parser {
         try {
             const videoApiResponse = await request({
                 method: 'GET',
-                url: `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,status,topicDetails&id=${videoId}&key=${this.settings.youtubeApiKey}`,
+                url: `https://www.googleapis.com/youtube/v3/videos?part=contentDetails,snippet,statistics,status,topicDetails&id=${videoId}&key=${this.plugin.settings.youtubeApiKey}`,
                 headers: {
                     Accept: 'application/json',
                 },
@@ -83,7 +77,7 @@ class YoutubeParser extends Parser {
 
             const channelApiResponse = await request({
                 method: 'GET',
-                url: `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id=${video.snippet.channelId}&key=${this.settings.youtubeApiKey}`,
+                url: `https://www.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics&id=${video.snippet.channelId}&key=${this.plugin.settings.youtubeApiKey}`,
                 headers: {
                     Accept: 'application/json',
                 },
@@ -114,7 +108,7 @@ class YoutubeParser extends Parser {
                 videoPlayer: this.getEmbedPlayer(video.id),
                 videoDuration: toSeconds(duration),
                 videoDurationFormatted: this.formatDuration(duration),
-                videoPublishDate: moment(video.snippet.publishedAt).format(this.settings.dateContentFmt),
+                videoPublishDate: moment(video.snippet.publishedAt).format(this.plugin.settings.dateContentFmt),
                 videoViewsCount: video.statistics.viewCount,
                 videoTags: tags.join(' '),
                 channelId: channel.id,
@@ -214,8 +208,8 @@ class YoutubeParser extends Parser {
     }
 
     private getEmbedPlayer(videoId: string): string {
-        const domain = this.settings.youtubeUsePrivacyEnhancedEmbed ? 'youtube-nocookie.com' : 'youtube.com';
-        return `<iframe width="${this.settings.youtubeEmbedWidth}" height="${this.settings.youtubeEmbedHeight}" src="https://www.${domain}/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        const domain = this.plugin.settings.youtubeUsePrivacyEnhancedEmbed ? 'youtube-nocookie.com' : 'youtube.com';
+        return `<iframe width="${this.plugin.settings.youtubeEmbedWidth}" height="${this.plugin.settings.youtubeEmbedHeight}" src="https://www.${domain}/embed/${videoId}" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
     }
 }
 

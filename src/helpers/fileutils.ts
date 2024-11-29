@@ -1,9 +1,9 @@
-import path from 'path';
 import { CapacitorAdapter, FileSystemAdapter, normalizePath } from 'obsidian';
 import { ReadItLaterSettings } from 'src/settings';
-import { PlatformType, getPlatformType } from './platform';
+import mime from 'mime';
+import { PlatformType } from './platform';
 
-interface FilesystemLimits {
+export interface FilesystemLimits {
     path: number;
     fileName: number;
 }
@@ -32,19 +32,13 @@ export function normalizeFilename(fileName: string): string {
     return fileName.replace(/[:#/\\|?*<>"]/g, '');
 }
 
-export function pathJoin(dir: string, subpath: string): string {
-    const result = path.join(dir, subpath);
-    // it seems that obsidian do not understand paths with backslashes in Windows, so turn them into forward slashes
-    return normalizePath(result.replace(/\\/g, '/'));
-}
-
 export function getOsOptimizedPath(
     path: string,
     fileName: string,
     dataAdapter: CapacitorAdapter | FileSystemAdapter,
     filesystemLimits: FilesystemLimits,
 ): string {
-    const fileExtension = `.${fileName.split('.').pop()}`;
+    const fileExtension = `.${getFileExtension(fileName)}`;
 
     let optimizedFileName = fileName;
     if (optimizedFileName.length > filesystemLimits.fileName) {
@@ -87,6 +81,18 @@ export function getDefaultFilesystenLimits(platformType: PlatformType): Filesyst
         default:
             return createFilesystemLimits(256, 256);
     }
+}
+
+export function getFileExtension(fileName: string): string {
+    if (!fileName.includes('.')) {
+        return '';
+    }
+
+    return fileName.split('.').pop();
+}
+
+export function getFileExtensionFromMimeType(mimeType: string): string {
+    return mime.getExtension(mimeType) ?? '';
 }
 
 function createFilesystemLimits(path: number, fileName: number): FilesystemLimits {

@@ -1,17 +1,17 @@
 import { App } from 'obsidian';
 import TemplateEngine from 'src/template/TemplateEngine';
+import ReadItLaterPlugin from 'src/main';
 import { formatDate, isValidUrl } from '../helpers';
-import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 
 export abstract class Parser {
     protected app: App;
-    protected settings: ReadItLaterSettings;
+    protected plugin: ReadItLaterPlugin;
     protected templateEngine: TemplateEngine;
 
-    protected constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
+    constructor(app: App, plugin: ReadItLaterPlugin, templateEngine: TemplateEngine) {
         this.app = app;
-        this.settings = settings;
+        this.plugin = plugin;
         this.templateEngine = templateEngine;
     }
 
@@ -24,10 +24,10 @@ export abstract class Parser {
     }
 
     protected getFormattedDateForFilename(date: Date | string): string {
-        return formatDate(date, this.settings.dateTitleFmt);
+        return formatDate(date, this.plugin.settings.dateTitleFmt);
     }
 
     protected getFormattedDateForContent(date: Date | string): string {
-        return formatDate(date, this.settings.dateContentFmt);
+        return formatDate(date, this.plugin.settings.dateContentFmt);
     }
 }
