@@ -1,4 +1,14 @@
-import { CapacitorAdapter, FileSystemAdapter, Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
+import {
+    CapacitorAdapter,
+    FileSystemAdapter,
+    Menu,
+    MenuItem,
+    Notice,
+    Platform,
+    Plugin,
+    addIcon,
+    normalizePath,
+} from 'obsidian';
 import { checkAndCreateFolder, formatDate, isValidUrl } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
@@ -18,37 +28,36 @@ import WikipediaParser from './parsers/WikipediaParser';
 import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
 import { Note } from './parsers/Note';
-import { getFileSystemLimits, getOsOptimizedPath } from './helpers/fileutils';
-import { PlatformType, getPlatformType } from './helpers/platform';
+import { FilesystemLimits, getFileSystemLimits, getOsOptimizedPath } from './helpers/fileutils';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
 
-    private platformType: PlatformType;
     private parserCreator: ParserCreator;
     private templateEngine: TemplateEngine;
+    private fileSystemLimits: FilesystemLimits;
 
-    getPlatformType(): PlatformType {
-        return this.platformType;
+    getFileSystemLimits(): FilesystemLimits {
+        return this.fileSystemLimits;
     }
 
     async onload(): Promise<void> {
         await this.loadSettings();
 
-        this.platformType = getPlatformType();
+        this.fileSystemLimits = getFileSystemLimits(Platform, this.settings);
         this.templateEngine = new TemplateEngine();
         this.parserCreator = new ParserCreator([
-            new YoutubeParser(this.app, this.settings, this.templateEngine),
-            new VimeoParser(this.app, this.settings, this.templateEngine),
-            new BilibiliParser(this.app, this.settings, this.templateEngine),
-            new TwitterParser(this.app, this.settings, this.templateEngine),
-            new StackExchangeParser(this.app, this.settings, this.templateEngine),
-            new MastodonParser(this.app, this.settings, this.templateEngine),
-            new TikTokParser(this.app, this.settings, this.templateEngine),
-            new GithubParser(this.app, this.settings, this.templateEngine),
-            new WikipediaParser(this.app, this.settings, this.templateEngine),
-            new WebsiteParser(this.app, this.settings, this.templateEngine),
-            new TextSnippetParser(this.app, this.settings, this.templateEngine),
+            new YoutubeParser(this.app, this, this.templateEngine),
+            new VimeoParser(this.app, this, this.templateEngine),
+            new BilibiliParser(this.app, this, this.templateEngine),
+            new TwitterParser(this.app, this, this.templateEngine),
+            new StackExchangeParser(this.app, this, this.templateEngine),
+            new MastodonParser(this.app, this, this.templateEngine),
+            new TikTokParser(this.app, this, this.templateEngine),
+            new GithubParser(this.app, this, this.templateEngine),
+            new WikipediaParser(this.app, this, this.templateEngine),
+            new WebsiteParser(this.app, this, this.templateEngine),
+            new TextSnippetParser(this.app, this, this.templateEngine),
         ]);
 
         addIcon('read-it-later', clipboardIcon);
@@ -141,11 +150,10 @@ export default class ReadItLaterPlugin extends Plugin {
     }
 
     async writeFile(note: Note): Promise<void> {
-        const fileSystemLimits = getFileSystemLimits(this.platformType, this.settings);
         let filePath;
 
         if (this.app.vault.adapter instanceof CapacitorAdapter || this.app.vault.adapter instanceof FileSystemAdapter) {
-            filePath = getOsOptimizedPath('/', note.getFullFilename(), this.app.vault.adapter, fileSystemLimits);
+            filePath = getOsOptimizedPath('/', note.getFullFilename(), this.app.vault.adapter, this.fileSystemLimits);
         } else {
             filePath = normalizePath(`/${note.getFullFilename()}`);
         }
@@ -165,7 +173,7 @@ export default class ReadItLaterPlugin extends Plugin {
                     inboxDir,
                     note.getFullFilename(),
                     this.app.vault.adapter,
-                    fileSystemLimits,
+                    this.fileSystemLimits,
                 );
             } else {
                 filePath = normalizePath(`${inboxDir}/${note.getFullFilename()}`);

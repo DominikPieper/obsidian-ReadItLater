@@ -1,6 +1,4 @@
-import { App, moment, request } from 'obsidian';
-import TemplateEngine from 'src/template/TemplateEngine';
-import { ReadItLaterSettings } from '../settings';
+import { moment, request } from 'obsidian';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
@@ -16,10 +14,6 @@ interface TweetNoteData {
 class TwitterParser extends Parser {
     private PATTERN = /(https:\/\/(twitter|x).com\/([a-zA-Z0-9_]+\/)([a-zA-Z0-9_]+\/[a-zA-Z0-9_]+))/;
 
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     test(url: string): boolean {
         return this.isValidUrl(url) && this.PATTERN.test(url);
     }
@@ -34,14 +28,14 @@ class TwitterParser extends Parser {
 
         const data = await this.getTweetNoteData(twitterUrl, createdAt);
 
-        const content = this.templateEngine.render(this.settings.twitterNote, data);
+        const content = this.templateEngine.render(this.plugin.settings.twitterNote, data);
 
-        const fileNameTemplate = this.templateEngine.render(this.settings.twitterNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.twitterNoteTitle, {
             tweetAuthorName: data.tweetAuthorName,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.twitterContentTypeSlug, createdAt);
+        return new Note(fileNameTemplate, 'md', content, this.plugin.settings.twitterContentTypeSlug, createdAt);
     }
 
     private async getTweetNoteData(url: URL, createdAt: Date): Promise<TweetNoteData> {
@@ -69,7 +63,7 @@ class TwitterParser extends Parser {
         const dateElement = dom.querySelector('blockquote > a');
         const date = moment(dateElement.textContent);
 
-        return date.isValid() ? date.format(this.settings.dateContentFmt) : '';
+        return date.isValid() ? date.format(this.plugin.settings.dateContentFmt) : '';
     }
 }
 

@@ -1,6 +1,4 @@
-import { App, request } from 'obsidian';
-import TemplateEngine from 'src/template/TemplateEngine';
-import { ReadItLaterSettings } from '../settings';
+import { request } from 'obsidian';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
@@ -17,10 +15,6 @@ interface TiktokNoteData {
 class TikTokParser extends Parser {
     private PATTERN = /(tiktok.com)\/(\S+)\/(video)\/(\d+)/;
 
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     test(clipboardContent: string): boolean | Promise<boolean> {
         return this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
     }
@@ -29,14 +23,14 @@ class TikTokParser extends Parser {
         const createdAt = new Date();
         const data = await this.parseHtml(clipboardContent, createdAt);
 
-        const content = this.templateEngine.render(this.settings.tikTokNote, data);
+        const content = this.templateEngine.render(this.plugin.settings.tikTokNote, data);
 
-        const fileNameTemplate = this.templateEngine.render(this.settings.tikTokNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.tikTokNoteTitle, {
             authorName: data.authorName,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.tikTokContentTypeSlug, createdAt);
+        return new Note(fileNameTemplate, 'md', content, this.plugin.settings.tikTokContentTypeSlug, createdAt);
     }
 
     private async parseHtml(url: string, createdAt: Date): Promise<TiktokNoteData> {
@@ -57,7 +51,7 @@ class TikTokParser extends Parser {
             videoId: videoRegexExec[4],
             videoURL: videoHTML.querySelector('meta[property="og:url"]')?.getAttribute('content') ?? url,
             videoDescription: videoHTML.querySelector('meta[property="og:description"]')?.getAttribute('content') ?? '',
-            videoPlayer: `<iframe width="${this.settings.tikTokEmbedWidth}" height="${this.settings.tikTokEmbedHeight}" src="https://www.tiktok.com/embed/v2/${videoRegexExec[4]}"></iframe>`,
+            videoPlayer: `<iframe width="${this.plugin.settings.tikTokEmbedWidth}" height="${this.plugin.settings.tikTokEmbedHeight}" src="https://www.tiktok.com/embed/v2/${videoRegexExec[4]}"></iframe>`,
             authorName: videoRegexExec[2],
             authorURL: `https://www.tiktok.com/${videoRegexExec[2]}`,
         };

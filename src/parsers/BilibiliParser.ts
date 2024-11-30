@@ -1,6 +1,4 @@
-import { App, request } from 'obsidian';
-import TemplateEngine from 'src/template/TemplateEngine';
-import { ReadItLaterSettings } from '../settings';
+import { request } from 'obsidian';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
@@ -15,10 +13,6 @@ interface BilibiliNoteData {
 class BilibiliParser extends Parser {
     private PATTERN = /(bilibili.com)\/(video)?\/([a-z0-9]+)?/i;
 
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     test(url: string): boolean {
         return this.isValidUrl(url) && this.PATTERN.test(url);
     }
@@ -27,14 +21,14 @@ class BilibiliParser extends Parser {
         const createdAt = new Date();
         const data = await this.getNoteData(url, createdAt);
 
-        const content = this.templateEngine.render(this.settings.bilibiliNote, data);
+        const content = this.templateEngine.render(this.plugin.settings.bilibiliNote, data);
 
-        const fileNameTemplate = this.templateEngine.render(this.settings.bilibiliNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.bilibiliNoteTitle, {
             title: data.videoTitle,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.bilibiliContentTypeSlug, createdAt);
+        return new Note(fileNameTemplate, 'md', content, this.plugin.settings.bilibiliContentTypeSlug, createdAt);
     }
 
     private async getNoteData(url: string, createdAt: Date): Promise<BilibiliNoteData> {
@@ -54,7 +48,7 @@ class BilibiliParser extends Parser {
             videoId: videoId,
             videoTitle: videoHTML.querySelector("[property~='og:title']").getAttribute('content') ?? '',
             videoURL: url,
-            videoPlayer: `<iframe width="${this.settings.bilibiliEmbedWidth}" height="${this.settings.bilibiliEmbedHeight}" src="https://player.bilibili.com/player.html?autoplay=0&bvid=${videoId}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`,
+            videoPlayer: `<iframe width="${this.plugin.settings.bilibiliEmbedWidth}" height="${this.plugin.settings.bilibiliEmbedHeight}" src="https://player.bilibili.com/player.html?autoplay=0&bvid=${videoId}" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe>`,
         };
     }
 }

@@ -1,6 +1,4 @@
-import { App, Platform, request } from 'obsidian';
-import TemplateEngine from 'src/template/TemplateEngine';
-import { ReadItLaterSettings } from '../settings';
+import { Platform, request } from 'obsidian';
 import { isValidUrl, normalizeFilename, replaceImages } from '../helpers';
 import { Parser } from './Parser';
 import { Note } from './Note';
@@ -48,10 +46,6 @@ interface MastodonStatusNoteData {
 }
 
 class MastodonParser extends Parser {
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     async test(url: string): Promise<boolean> {
         return isValidUrl(url) && (await this.testIsMastodon(url));
     }
@@ -63,50 +57,51 @@ class MastodonParser extends Parser {
 
         const status = await this.loadStatus(mastodonUrl.hostname, statusId);
         let replies: Status[] = [];
-        if (this.settings.saveMastodonReplies) {
+        if (this.plugin.settings.saveMastodonReplies) {
             replies = await this.loadReplies(mastodonUrl.hostname, statusId);
         }
 
-        const fileNameTemplate = this.templateEngine.render(this.settings.mastodonNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.mastodonNoteTitle, {
             tootAuthorName: status.account.display_name,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
         let assetsDir;
-        if (this.settings.downloadMastodonMediaAttachmentsInDir) {
-            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+        if (this.plugin.settings.downloadMastodonMediaAttachmentsInDir) {
+            assetsDir = this.templateEngine.render(this.plugin.settings.assetsDir, {
                 date: '',
                 fileName: '',
                 contentType: '',
             });
             assetsDir = `${assetsDir}/${normalizeFilename(fileNameTemplate)}`;
         } else {
-            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+            assetsDir = this.templateEngine.render(this.plugin.settings.assetsDir, {
                 date: this.getFormattedDateForFilename(createdAt),
                 fileName: normalizeFilename(fileNameTemplate),
-                contentType: this.settings.mastodonContentTypeSlug,
+                contentType: this.plugin.settings.mastodonContentTypeSlug,
             });
         }
 
-        const data = await this.getNoteData(status, replies, assetsDir, createdAt);
+        const data = await this.getNoteData(status, replies, assetsDir, normalizeFilename(fileNameTemplate), createdAt);
 
-        const content = this.templateEngine.render(this.settings.mastodonNote, data);
+        const content = this.templateEngine.render(this.plugin.settings.mastodonNote, data);
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.mastodonContentTypeSlug, createdAt);
+        return new Note(fileNameTemplate, 'md', content, this.plugin.settings.mastodonContentTypeSlug, createdAt);
     }
 
     private async getNoteData(
         status: Status,
         replies: Status[],
+        fileName: string,
         assetsDir: string,
         createdAt: Date,
     ): Promise<MastodonStatusNoteData> {
-        let parsedStatusContent = await this.parseStatus(status, assetsDir);
+        let parsedStatusContent = await this.parseStatus(status, fileName, assetsDir);
 
         if (replies.length > 0) {
             for (let i = 0; i < replies.length; i++) {
-                const parsedReply = await this.parseStatus(replies[i], assetsDir);
-                const processedReply = this.templateEngine.render(this.settings.mastodonReply, {
+                const parsedReply = await this.parseStatus(replies[i], fileName, assetsDir);
+                const processedReply = this.templateEngine.render(this.plugin.settings.mastodonReply, {
                     tootAuthorName: replies[i].account.display_name,
                     tootURL: replies[i].url,
                     tootContent: parsedReply,
@@ -157,12 +152,18 @@ class MastodonParser extends Parser {
         return response.descendants;
     }
 
-    private async parseStatus(status: Status, assetsDir: string): Promise<string> {
+    private async parseStatus(status: Status, fileName: string, assetsDir: string): Promise<string> {
         const parsedStatusContent = await parseHtmlContent(status.content);
 
         const mediaAttachments =
-            this.settings.downloadMastodonMediaAttachments && Platform.isDesktop
-                ? await replaceImages(this.app, this.prepareMedia(status.media_attachments), assetsDir)
+            this.plugin.settings.downloadMastodonMediaAttachments && Platform.isDesktop
+                ? await replaceImages(
+                      this.app,
+                      this.plugin,
+                      fileName,
+                      this.prepareMedia(status.media_attachments),
+                      assetsDir,
+                  )
                 : this.prepareMedia(status.media_attachments);
 
         return parsedStatusContent.concat(mediaAttachments);

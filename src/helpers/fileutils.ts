@@ -1,9 +1,8 @@
-import path from 'path';
-import { CapacitorAdapter, FileSystemAdapter, normalizePath } from 'obsidian';
+import { CapacitorAdapter, FileSystemAdapter, Platform, normalizePath } from 'obsidian';
 import { ReadItLaterSettings } from 'src/settings';
-import { PlatformType, getPlatformType } from './platform';
+import mime from 'mime';
 
-interface FilesystemLimits {
+export interface FilesystemLimits {
     path: number;
     fileName: number;
 }
@@ -32,19 +31,13 @@ export function normalizeFilename(fileName: string): string {
     return fileName.replace(/[:#/\\|?*<>"]/g, '');
 }
 
-export function pathJoin(dir: string, subpath: string): string {
-    const result = path.join(dir, subpath);
-    // it seems that obsidian do not understand paths with backslashes in Windows, so turn them into forward slashes
-    return normalizePath(result.replace(/\\/g, '/'));
-}
-
 export function getOsOptimizedPath(
     path: string,
     fileName: string,
     dataAdapter: CapacitorAdapter | FileSystemAdapter,
     filesystemLimits: FilesystemLimits,
 ): string {
-    const fileExtension = `.${fileName.split('.').pop()}`;
+    const fileExtension = `.${getFileExtension(fileName)}`;
 
     let optimizedFileName = fileName;
     if (optimizedFileName.length > filesystemLimits.fileName) {
@@ -65,8 +58,8 @@ export function getOsOptimizedPath(
     return optimizedFilePath;
 }
 
-export function getFileSystemLimits(platformType: PlatformType, settings: ReadItLaterSettings): FilesystemLimits {
-    const defaultFilesystenLimits = getDefaultFilesystenLimits(platformType);
+export function getFileSystemLimits(platform: typeof Platform, settings: ReadItLaterSettings): FilesystemLimits {
+    const defaultFilesystenLimits = getDefaultFilesystenLimits(platform);
 
     return {
         path: settings.filesystemLimitPath ?? defaultFilesystenLimits.path,
@@ -74,19 +67,27 @@ export function getFileSystemLimits(platformType: PlatformType, settings: ReadIt
     };
 }
 
-export function getDefaultFilesystenLimits(platformType: PlatformType): FilesystemLimits {
-    switch (platformType) {
-        case PlatformType.Linux:
-            return createFilesystemLimits(4096, 255);
-        case PlatformType.MacOS:
-        case PlatformType.iOS:
-        case PlatformType.Android:
-        case PlatformType.Mobile:
-            return createFilesystemLimits(1024, 255);
-        case PlatformType.Windows:
-        default:
-            return createFilesystemLimits(256, 256);
+export function getDefaultFilesystenLimits(platform: typeof Platform): FilesystemLimits {
+    if (platform.isLinux) {
+        return createFilesystemLimits(4096, 255);
     }
+    if (platform.isMacOS || platform.isIosApp || platform.isAndroidApp || platform.isMobile) {
+        return createFilesystemLimits(1024, 255);
+    }
+
+    return createFilesystemLimits(256, 256);
+}
+
+export function getFileExtension(fileName: string): string {
+    if (!fileName.includes('.')) {
+        return '';
+    }
+
+    return fileName.split('.').pop();
+}
+
+export function getFileExtensionFromMimeType(mimeType: string): string {
+    return mime.getExtension(mimeType) ?? '';
 }
 
 function createFilesystemLimits(path: number, fileName: number): FilesystemLimits {

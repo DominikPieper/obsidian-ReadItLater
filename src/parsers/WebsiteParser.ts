@@ -1,9 +1,7 @@
-import { App, Notice, Platform, request } from 'obsidian';
+import { Notice, Platform, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
-import TemplateEngine from 'src/template/TemplateEngine';
 import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
-import { ReadItLaterSettings } from '../settings';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
@@ -35,10 +33,6 @@ interface WebsiteNoteData {
 }
 
 class WebsiteParser extends Parser {
-    constructor(app: App, settings: ReadItLaterSettings, templateEngine: TemplateEngine) {
-        super(app, settings, templateEngine);
-    }
-
     test(url: string): boolean {
         return this.isValidUrl(url);
     }
@@ -86,7 +80,14 @@ class WebsiteParser extends Parser {
     }
 
     protected async getDocument(url: URL): Promise<Document> {
-        const response = await request({ method: 'GET', url: url.href });
+        const response = await request({
+            method: 'GET',
+            url: url.href,
+            headers: {
+                'user-agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            },
+        });
         const document = new DOMParser().parseFromString(response, 'text/html');
 
         //check for existing base element
@@ -143,37 +144,61 @@ class WebsiteParser extends Parser {
     }
 
     protected async parsableArticle(data: WebsiteNoteData, createdAt: Date): Promise<Note> {
-        const fileNameTemplate = this.templateEngine.render(this.settings.parseableArticleNoteTitle, {
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.parseableArticleNoteTitle, {
             title: data.articleTitle,
             date: this.getFormattedDateForFilename(createdAt),
         });
 
-        let processedContent = this.templateEngine.render(this.settings.parsableArticleNote, data);
+        let processedContent = this.templateEngine.render(this.plugin.settings.parsableArticleNote, data);
 
-        if (this.settings.downloadImages && Platform.isDesktop) {
-            processedContent = await this.replaceImages(fileNameTemplate, processedContent, createdAt);
+        if (this.plugin.settings.downloadImages && Platform.isDesktop) {
+            processedContent = await replaceImages(
+                this.app,
+                this.plugin,
+                normalizeFilename(fileNameTemplate),
+                processedContent,
+                this.getAssetsDir(fileNameTemplate, createdAt),
+            );
         }
 
-        return new Note(fileNameTemplate, 'md', processedContent, this.settings.parseableArticleContentType, createdAt);
+        return new Note(
+            fileNameTemplate,
+            'md',
+            processedContent,
+            this.plugin.settings.parseableArticleContentType,
+            createdAt,
+        );
     }
 
     protected async notParsableArticle(url: string, previewUrl: string | null, createdAt: Date): Promise<Note> {
         console.error('Website not parseable');
 
-        let content = this.settings.notParsableArticleNote
-            .replace(/%articleURL%/g, () => url)
-            .replace(/%previewURL%/g, () => previewUrl || '');
+        let content = this.templateEngine.render(this.plugin.settings.notParsableArticleNote, {
+            articleURL: url,
+            previewURL: previewUrl,
+        });
 
-        const fileNameTemplate = this.settings.notParseableArticleNoteTitle.replace(
-            /%date%/g,
-            this.getFormattedDateForFilename(createdAt),
-        );
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.notParseableArticleNoteTitle, {
+            date: this.getFormattedDateForFilename(createdAt),
+        });
 
-        if (this.settings.downloadImages && Platform.isDesktop) {
-            content = await this.replaceImages(fileNameTemplate, content, createdAt);
+        if (this.plugin.settings.downloadImages && Platform.isDesktop) {
+            content = await replaceImages(
+                this.app,
+                this.plugin,
+                normalizeFilename(fileNameTemplate),
+                content,
+                this.getAssetsDir(fileNameTemplate, createdAt),
+            );
         }
 
-        return new Note(fileNameTemplate, 'md', content, this.settings.notParseableArticleContentType, createdAt);
+        return new Note(
+            fileNameTemplate,
+            'md',
+            content,
+            this.plugin.settings.notParseableArticleContentType,
+            createdAt,
+        );
     }
 
     /**
@@ -189,26 +214,21 @@ class WebsiteParser extends Parser {
         return previewMetaElement?.getAttribute('content');
     }
 
-    /**
-     * Replaces distant images by their locally downloaded counterparts.
-     */
-    protected async replaceImages(fileName: string, content: string, createdAt: Date): Promise<string> {
-        let assetsDir;
-        if (this.settings.downloadImagesInArticleDir) {
-            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
+    protected getAssetsDir(fileName: string, createdAt: Date): string {
+        if (this.plugin.settings.downloadImagesInArticleDir) {
+            const assetsDir = this.templateEngine.render(this.plugin.settings.assetsDir, {
                 date: '',
                 fileName: '',
                 contentType: '',
             });
-            assetsDir = `${assetsDir}/${normalizeFilename(fileName)}`;
-        } else {
-            assetsDir = this.templateEngine.render(this.settings.assetsDir, {
-                date: this.getFormattedDateForFilename(createdAt),
-                fileName: normalizeFilename(fileName),
-                contentType: this.settings.parseableArticleContentType,
-            });
+            return `${assetsDir}/${normalizeFilename(fileName)}`;
         }
-        return replaceImages(this.app, content, assetsDir);
+
+        return this.templateEngine.render(this.plugin.settings.assetsDir, {
+            date: this.getFormattedDateForFilename(createdAt),
+            fileName: normalizeFilename(fileName),
+            contentType: this.plugin.settings.parseableArticleContentType,
+        });
     }
 
     /**
