@@ -2,7 +2,7 @@ import { Note } from './Note';
 import WebsiteParser from './WebsiteParser';
 
 export default class WikipediaParser extends WebsiteParser {
-    private PATTERN = /^(?:https?:\/\/)?(?:[a-z]{2,3}(?:-[a-z]{2,3})?)\.wikipedia\.org\/wiki\/([^/]+)$/i;
+    private PATTERN = /^(?:https?:\/\/)?(?:[a-z]{2,3}(?:-[a-z]{2,3})?)(?:\.m)?\.wikipedia\.org\/wiki\/([^\/]+)$/i;
 
     test(url: string): boolean {
         return this.isValidUrl(url) && this.PATTERN.test(url);
