@@ -52,7 +52,7 @@ async function replaceAsync(content: string, searchValue: string | RegExp, repla
     }
 }
 
-function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: string, assetsDir: string) {
+function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: string, assetsDir: string): Replacer {
     return async function processImageTag(match: string, anchor: string, link: string): Promise<string> {
         if (!isValidUrl(link, [HTTP_PROTOCOL, HTTPS_PROTOCOL])) {
             return match;
@@ -74,7 +74,7 @@ function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: st
                         fileExtension,
                     );
 
-                    if (needWrite && fileName) {
+                    if (needWrite && fileName !== '') {
                         await app.vault.createBinary(fileName, fileContent);
                         const maskedFilename = fileName.replace(/\s/g, '%20');
                         return `![${anchor}](${maskedFilename})`;
@@ -82,16 +82,13 @@ function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: st
                         return match;
                     }
                 } catch (error) {
-                    if (error.message === 'File already exists.') {
-                        attempt++;
-                    } else {
-                        throw error;
-                    }
+                    console.warn(error);
+                    attempt++;
                 }
             }
             return match;
         } catch (error) {
-            console.warn('Image processing failed: ', error);
+            console.warn(error);
             return match;
         }
     };
@@ -130,9 +127,6 @@ async function chooseFileName(
         }
 
         index++;
-    }
-    if (fileName === '') {
-        throw new Error('Failed to generate file name for media file.');
     }
 
     return { fileName, needWrite };

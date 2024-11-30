@@ -1,4 +1,4 @@
-import {moment, request } from 'obsidian';
+import { moment, request } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
 import { handleError } from '../helpers';
 import { Note } from './Note';
@@ -135,7 +135,7 @@ class YoutubeParser extends Parser {
                 url,
                 headers: {
                     'user-agent':
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
                 },
             });
 

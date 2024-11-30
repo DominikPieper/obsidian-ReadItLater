@@ -1,4 +1,4 @@
-import { Notice, request } from 'obsidian';
+import { Notice, Platform, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
@@ -80,7 +80,14 @@ class WebsiteParser extends Parser {
     }
 
     protected async getDocument(url: URL): Promise<Document> {
-        const response = await request({ method: 'GET', url: url.href });
+        const response = await request({
+            method: 'GET',
+            url: url.href,
+            headers: {
+                'user-agent':
+                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+            },
+        });
         const document = new DOMParser().parseFromString(response, 'text/html');
 
         //check for existing base element
@@ -144,7 +151,7 @@ class WebsiteParser extends Parser {
 
         let processedContent = this.templateEngine.render(this.plugin.settings.parsableArticleNote, data);
 
-        if (this.plugin.settings.downloadImages) {
+        if (this.plugin.settings.downloadImages && Platform.isDesktop) {
             processedContent = await replaceImages(
                 this.app,
                 this.plugin,
@@ -166,16 +173,16 @@ class WebsiteParser extends Parser {
     protected async notParsableArticle(url: string, previewUrl: string | null, createdAt: Date): Promise<Note> {
         console.error('Website not parseable');
 
-        let content = this.plugin.settings.notParsableArticleNote
-            .replace(/%articleURL%/g, () => url)
-            .replace(/%previewURL%/g, () => previewUrl || '');
+        let content = this.templateEngine.render(this.plugin.settings.notParsableArticleNote, {
+            articleURL: url,
+            previewURL: previewUrl,
+        });
 
-        const fileNameTemplate = this.plugin.settings.notParseableArticleNoteTitle.replace(
-            /%date%/g,
-            this.getFormattedDateForFilename(createdAt),
-        );
+        const fileNameTemplate = this.templateEngine.render(this.plugin.settings.notParseableArticleNoteTitle, {
+            date: this.getFormattedDateForFilename(createdAt),
+        });
 
-        if (this.plugin.settings.downloadImages) {
+        if (this.plugin.settings.downloadImages && Platform.isDesktop) {
             content = await replaceImages(
                 this.app,
                 this.plugin,

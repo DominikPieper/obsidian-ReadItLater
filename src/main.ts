@@ -1,4 +1,14 @@
-import { CapacitorAdapter, FileSystemAdapter, Menu, MenuItem, Notice, Plugin, addIcon, normalizePath } from 'obsidian';
+import {
+    CapacitorAdapter,
+    FileSystemAdapter,
+    Menu,
+    MenuItem,
+    Notice,
+    Platform,
+    Plugin,
+    addIcon,
+    normalizePath,
+} from 'obsidian';
 import { checkAndCreateFolder, formatDate, isValidUrl } from './helpers';
 import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
@@ -19,19 +29,13 @@ import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
 import { Note } from './parsers/Note';
 import { FilesystemLimits, getFileSystemLimits, getOsOptimizedPath } from './helpers/fileutils';
-import { PlatformType, getPlatformType } from './helpers/platform';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
 
-    private platformType: PlatformType;
     private parserCreator: ParserCreator;
     private templateEngine: TemplateEngine;
     private fileSystemLimits: FilesystemLimits;
-
-    getPlatformType(): PlatformType {
-        return this.platformType;
-    }
 
     getFileSystemLimits(): FilesystemLimits {
         return this.fileSystemLimits;
@@ -40,8 +44,7 @@ export default class ReadItLaterPlugin extends Plugin {
     async onload(): Promise<void> {
         await this.loadSettings();
 
-        this.platformType = getPlatformType();
-        this.fileSystemLimits = getFileSystemLimits(this.platformType, this.settings);
+        this.fileSystemLimits = getFileSystemLimits(Platform, this.settings);
         this.templateEngine = new TemplateEngine();
         this.parserCreator = new ParserCreator([
             new YoutubeParser(this.app, this, this.templateEngine),

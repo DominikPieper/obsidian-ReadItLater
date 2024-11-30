@@ -1,4 +1,4 @@
-import { request } from 'obsidian';
+import { Platform, request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { normalizeFilename, replaceImages } from '../helpers';
 import { Parser } from './Parser';
@@ -78,7 +78,7 @@ class StackExchangeParser extends Parser {
             this.getNoteData(question, createdAt),
         );
 
-        if (this.plugin.settings.downloadStackExchangeAssets) {
+        if (this.plugin.settings.downloadStackExchangeAssets && Platform.isDesktop) {
             content = await replaceImages(
                 this.app,
                 this.plugin,
