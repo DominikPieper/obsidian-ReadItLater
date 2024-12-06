@@ -1,4 +1,4 @@
-import { App, Notice, PluginSettingTab, Setting } from 'obsidian';
+import { App, Notice, Platform, PluginSettingTab, Setting } from 'obsidian';
 import { Delimiter, getDelimiterOptions } from 'src/enums/delimiter';
 import { getDefaultFilesystenLimits } from 'src/helpers/fileutils';
 import ReadItLaterPlugin from 'src/main';
@@ -919,7 +919,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.createEl('h2', { text: 'Advanced' });
 
-        const defaultFilesystemLimits = getDefaultFilesystenLimits(this.plugin.getPlatformType());
+        const defaultFilesystemLimits = getDefaultFilesystenLimits(Platform);
 
         new Setting(containerEl)
             .setName('Maximum file path length')
