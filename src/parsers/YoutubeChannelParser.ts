@@ -88,7 +88,52 @@ export default class YoutubeChannelParser extends Parser {
     }
 
     private async parseApiResponse(url: string, createdAt: Date): Promise<YoutubeChannelNoteData> {
-        return { channelId: '', channelURL: '', channelName: '' };
+        const apiURL = new URL('https://youtube.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings');
+
+        const [, channelURL, channelId, legacyUsername, handle] = this.PATTERN.exec(url);
+        if (channelId) {
+            apiURL.searchParams.append('id', channelId);
+        } else if (handle) {
+            apiURL.searchParams.append('forHandle', handle);
+        } else if (legacyUsername) {
+            apiURL.searchParams.append('forUsername', legacyUsername);
+        } else {
+            throw new Error('Unable to compose Youtube API URL');
+        }
+
+        apiURL.searchParams.append('key', this.plugin.settings.youtubeApiKey);
+
+        try {
+            const channelApiResponse = await request({
+                method: 'GET',
+                url: apiURL.toString(),
+                headers: {
+                    Accept: 'application/json',
+                },
+            });
+
+            const channelJsonResponse = JSON.parse(channelApiResponse);
+            if (channelJsonResponse.items.length === 0) {
+                throw new Error(`Channel (${url}) cannot be fetched from API`);
+            }
+            const channel: GoogleApiYouTubeChannelResource = channelJsonResponse.items[0];
+
+            return {
+                date: this.getFormattedDateForContent(createdAt),
+                channelId: channel.id,
+                channelTitle: channel.snippet.title,
+                channelDescription: channel.snippet.description,
+                channelURL: channelURL,
+                channelAvatar: channel.snippet.thumbnails?.high.url ?? channel.snippet.thumbnails.default.url,
+                channelBanner: channel.brandingSettings.image.bannerExternalUrl,
+                channelSubscribersCount: channel.statistics.subscriberCount,
+                channelVideosCount: channel.statistics.videoCount,
+                channelVideosURL: `${channelURL}/videos`,
+                channelShortsURL: `${channelURL}/shorts`
+            }
+        } catch (e) {
+            handleError(e);
+        }
     }
 
     private parseNumberValue(numberValue: string): number {
