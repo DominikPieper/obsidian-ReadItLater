@@ -35,7 +35,7 @@ interface YoutubeChannel {
 }
 
 class YoutubeParser extends Parser {
-    private PATTERN = /(youtube.com|youtu.be)\/(watch|shorts)?(\?v=|\/)?([^&#?]*)/;
+    private PATTERN = /^(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]+)(?:\?([^&\s]+(?:&[^&\s]+)*))?$/;
 
     test(url: string): boolean {
         return this.isValidUrl(url) && this.PATTERN.test(url);

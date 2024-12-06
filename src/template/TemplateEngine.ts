@@ -1,3 +1,5 @@
+import { lexify } from "src/helpers/numberUtils";
+
 interface TemplateData {
     [key: string]: any;
 }
@@ -37,6 +39,9 @@ export default class TemplateEngine {
                     return value;
                 }
                 return value.join(separator);
+            },
+            numberLexify: (value: number) => {
+                return lexify(value);
             },
             lower: (value: string) => {
                 if (!this.validateFilterValueType(value, 'lower', stringableTypes)) {

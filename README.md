@@ -61,7 +61,19 @@ outputs: Hello world
 </details>
 
 <details>
-<summary>lower</summary>
+<summary>numberLexify</summary>
+
+Converts number to lexified format.
+
+```
+{{ 12682|numberLexify}}
+
+outputs: 12.6K
+```
+</details>
+
+<details>
+<summary></summary>
 
 Converts value to lowercase.
 
