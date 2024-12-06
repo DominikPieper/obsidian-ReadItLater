@@ -1,4 +1,4 @@
-import { lexify } from "src/helpers/numberUtils";
+import { lexify } from 'src/helpers/numberUtils';
 
 interface TemplateData {
     [key: string]: any;

@@ -1,8 +1,8 @@
-import { handleError } from "src/helpers";
-import { Note } from "./Note";
-import { Parser } from "./Parser";
-import { request } from "obsidian";
-import { getJavascriptDeclarationByName } from "src/helpers/domUtils";
+import { handleError } from 'src/helpers';
+import { request } from 'obsidian';
+import { getJavascriptDeclarationByName } from 'src/helpers/domUtils';
+import { Note } from './Note';
+import { Parser } from './Parser';
 
 interface YoutubeChannelNoteData {
     date: string;
@@ -19,7 +19,8 @@ interface YoutubeChannelNoteData {
 }
 
 export default class YoutubeChannelParser extends Parser {
-    private PATTERN = /^(https?:\/\/(?:(?:www|m)\.)?youtube\.com\/(?:channel\/(UC[\w-]{22})|c\/([^\s\/]+)|@([\w-]+)))(?:\/.*)?$/u;
+    private PATTERN =
+        /^(https?:\/\/(?:(?:www|m)\.)?youtube\.com\/(?:channel\/(UC[\w-]{22})|c\/([^\s\/]+)|@([\w-]+)))(?:\/.*)?$/u;
 
     test(url: string): boolean {
         return this.isValidUrl(url) && this.PATTERN.test(url);
@@ -31,7 +32,6 @@ export default class YoutubeChannelParser extends Parser {
             this.plugin.settings.youtubeApiKey === ''
                 ? await this.parseSchema(url, createdAt)
                 : await this.parseApiResponse(url, createdAt);
-        console.log(data);
 
         const content = this.templateEngine.render(this.plugin.settings.youtubeChannelNote, data);
 
@@ -59,12 +59,16 @@ export default class YoutubeChannelParser extends Parser {
             const declaration = getJavascriptDeclarationByName('ytInitialData', channelHTML.querySelectorAll('script'));
             const jsonData = JSON.parse(declaration.value);
 
-            const jsonDataSubscribersCount = jsonData?.header?.pageHeaderRenderer?.content?.pageHeaderViewModel?.metadata?.contentMetadataViewModel?.metadataRows?.[1]?.metadataParts?.[0]?.text.content;
+            const jsonDataSubscribersCount =
+                jsonData?.header?.pageHeaderRenderer?.content?.pageHeaderViewModel?.metadata?.contentMetadataViewModel
+                    ?.metadataRows?.[1]?.metadataParts?.[0]?.text.content;
             if (jsonDataSubscribersCount === null) {
                 console.warn('Unable to parse subscribers count.');
             }
 
-            const jsonDataVideosCount = jsonData?.header?.pageHeaderRenderer?.content?.pageHeaderViewModel?.metadata?.contentMetadataViewModel?.metadataRows?.[1]?.metadataParts?.[1]?.text.content;
+            const jsonDataVideosCount =
+                jsonData?.header?.pageHeaderRenderer?.content?.pageHeaderViewModel?.metadata?.contentMetadataViewModel
+                    ?.metadataRows?.[1]?.metadataParts?.[1]?.text.content;
             if (jsonDataVideosCount === null) {
                 console.warn('Unable to parse subscribers count.');
             }
@@ -76,19 +80,23 @@ export default class YoutubeChannelParser extends Parser {
                 channelDescription: jsonData?.metadata?.channelMetadataRenderer?.description ?? '',
                 channelURL: channelURL,
                 channelAvatar: jsonData?.metadata?.channelMetadataRenderer?.avatar?.thumbnails?.[0]?.url ?? '',
-                channelBanner: jsonData?.header?.pageHeaderRenderer?.content?.pageHeaderViewModel?.banner?.imageBannerViewModel?.image?.sources?.[0]?.url ?? '',
+                channelBanner:
+                    jsonData?.header?.pageHeaderRenderer?.content?.pageHeaderViewModel?.banner?.imageBannerViewModel
+                        ?.image?.sources?.[0]?.url ?? '',
                 channelSubscribersCount: this.parseNumberValue(jsonDataSubscribersCount ?? ''),
                 channelVideosCount: this.parseNumberValue(jsonDataVideosCount ?? ''),
                 channelVideosURL: `${channelURL}/videos`,
-                channelShortsURL: `${channelURL}/shorts`
-            }
+                channelShortsURL: `${channelURL}/shorts`,
+            };
         } catch (error) {
             handleError(error);
         }
     }
 
     private async parseApiResponse(url: string, createdAt: Date): Promise<YoutubeChannelNoteData> {
-        const apiURL = new URL('https://youtube.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings');
+        const apiURL = new URL(
+            'https://youtube.googleapis.com/youtube/v3/channels?part=snippet,contentDetails,statistics,brandingSettings',
+        );
 
         const [, channelURL, channelId, legacyUsername, handle] = this.PATTERN.exec(url);
         if (channelId) {
@@ -96,7 +104,9 @@ export default class YoutubeChannelParser extends Parser {
         } else if (handle) {
             apiURL.searchParams.append('forHandle', handle);
         } else if (legacyUsername) {
-            apiURL.searchParams.append('forUsername', legacyUsername);
+            // if channel name contains special international characters, API does not return valid response
+            const channelNoteDOMData = await this.parseSchema(url, createdAt);
+            apiURL.searchParams.append('id', channelNoteDOMData.channelId);
         } else {
             throw new Error('Unable to compose Youtube API URL');
         }
@@ -125,12 +135,12 @@ export default class YoutubeChannelParser extends Parser {
                 channelDescription: channel.snippet.description,
                 channelURL: channelURL,
                 channelAvatar: channel.snippet.thumbnails?.high.url ?? channel.snippet.thumbnails.default.url,
-                channelBanner: channel.brandingSettings.image.bannerExternalUrl,
+                channelBanner: channel.brandingSettings?.image?.bannerExternalUrl ?? '',
                 channelSubscribersCount: channel.statistics.subscriberCount,
                 channelVideosCount: channel.statistics.videoCount,
                 channelVideosURL: `${channelURL}/videos`,
-                channelShortsURL: `${channelURL}/shorts`
-            }
+                channelShortsURL: `${channelURL}/shorts`,
+            };
         } catch (e) {
             handleError(e);
         }

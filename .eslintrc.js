@@ -47,5 +47,6 @@ module.exports = {
                 ignoreDeclarationSort: true,
             },
         ],
+        'no-useless-escape': 0
     },
 };

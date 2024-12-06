@@ -1,18 +1,21 @@
 export interface JavascriptDeclaration {
-    type: string,
-    name: string,
-    value: string
-};
+    type: string;
+    name: string;
+    value: string;
+}
 
 const DECLARATION_REGEX = /(const|let|var)\s+(\w+)\s*=\s*(.+?)\s*(?=(?:^|\s+)(const|let|var)\s+|$)/g;
 
-export function getJavascriptDeclarationByName(name: string, elements: Element[]|NodeList): JavascriptDeclaration | undefined {
+export function getJavascriptDeclarationByName(
+    name: string,
+    elements: Element[] | NodeList,
+): JavascriptDeclaration | undefined {
     return getJavascriptDeclarationsFromElement(elements).find((declaration: JavascriptDeclaration) => {
         return declaration.name === name;
     });
 }
 
-function getJavascriptDeclarationsFromElement(elements: Element[]|NodeList): JavascriptDeclaration[] {
+function getJavascriptDeclarationsFromElement(elements: Element[] | NodeList): JavascriptDeclaration[] {
     const declarations: JavascriptDeclaration[] = [];
     let match;
 
@@ -21,7 +24,7 @@ function getJavascriptDeclarationsFromElement(elements: Element[]|NodeList): Jav
             declarations.push({
                 type: match[1].trim(),
                 name: match[2].trim(),
-                value: match[3].trim().replace(/;+\s*$/, '')
+                value: match[3].trim().replace(/;+\s*$/, ''),
             });
         }
     });

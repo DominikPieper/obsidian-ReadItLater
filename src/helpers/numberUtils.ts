@@ -3,10 +3,10 @@ export function lexify(number: number): string {
         return String(number);
     }
     if (number < 1000000) {
-        return `${toFixedWithoutZeros(Number(number / 1000), 1)}K`
+        return `${toFixedWithoutZeros(Number(number / 1000), 1)}K`;
     }
     if (number < 1000000000) {
-        return `${toFixedWithoutZeros(Number(number / 1000000), 1)}M`
+        return `${toFixedWithoutZeros(Number(number / 1000000), 1)}M`;
     }
 
     return String(number);

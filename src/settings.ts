@@ -132,5 +132,6 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     filesystemLimitFileName: null,
     youtubeChannelContentTypeSlug: 'youtube-channel',
     youtubeChannelNoteTitle: '{{ title }}',
-    youtubeChannelNote: '[[ReadItLater]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
+    youtubeChannelNote:
+        '[[ReadItLater]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
 };
