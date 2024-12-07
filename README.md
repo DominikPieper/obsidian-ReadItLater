@@ -5,6 +5,7 @@
 - [Introduction](#introduction)
 - [Content Types](#content-types)
     - [Youtube](#youtube)
+    - [Youtube Channel](#youtube-channel)
     - [Vimeo](#vimeo)
     - [Bilibili](#bilibili)
     - [Twitter](#twitter)
@@ -57,6 +58,18 @@ Modifies first character to uppercase and others to lowercase.
 {{ 'hello world'|capitalize}}
 
 outputs: Hello world
+```
+</details>
+
+<details>
+<summary>numberLexify</summary>
+
+Converts number to lexified format.
+
+```
+{{ 12682|numberLexify}}
+
+outputs: 12.6K
 ```
 </details>
 
@@ -141,6 +154,27 @@ Parsing of HTML DOM has its limitations thus additional data can be fetched only
 | videoPublishDate          | Video plublish date formatted in content format from plugin settings |
 | videoTags                 | Formatted list of tags delimited by space                            |
 | videoViewsCount           | Video views count                                                    |
+
+### Youtube Channel
+
+| Title template variable | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| title                   | Channel title.                               |
+| date                    | Current date in format from plugin settings. |
+
+| Content template variable | Description                                          |
+| ------------------------- | ---------------------------------------------------- |
+| date                      | Current date in format from plugin settings.         |
+| channelId                 | Channel ID.                                          |
+| channelTitle              | Channel title.                                       |
+| channelDescription        | Channel description.                                 |
+| channelURL                | Channel URL on Youtube.com.                          |
+| channelAvater             | URL of channel's avatar (thumbnail) image.           |
+| channelBanner             | URL of channel's banner image.                       |
+| channelSubscribersCount   | The number of subscribers that the channel has.      |
+| channelVideosCount        | The number of public videos uploaded to the channel. |
+| channelVideosURL          | URL to channel's videos on Youtube.com               |
+| channelShortsURL          | URL to channel's shorts on Youtube.com               |
 
 ### Vimeo
 

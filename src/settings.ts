@@ -61,6 +61,9 @@ export interface ReadItLaterSettings {
     extendShareMenu: boolean;
     filesystemLimitPath: number | null;
     filesystemLimitFileName: number | null;
+    youtubeChannelContentTypeSlug: string;
+    youtubeChannelNoteTitle: string;
+    youtubeChannelNote: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -127,4 +130,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     extendShareMenu: true,
     filesystemLimitPath: null,
     filesystemLimitFileName: null,
+    youtubeChannelContentTypeSlug: 'youtube-channel',
+    youtubeChannelNoteTitle: '{{ title }}',
+    youtubeChannelNote:
+        '[[ReadItLater]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n![{{ channelTitle }}|300]({{ channelAvatar }})\n\n[Videos]({{ channelVideosURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
 };

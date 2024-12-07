@@ -29,6 +29,7 @@ import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
 import { Note } from './parsers/Note';
 import { FilesystemLimits, getFileSystemLimits, getOsOptimizedPath } from './helpers/fileutils';
+import YoutubeChannelParser from './parsers/YoutubeChannelParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     settings: ReadItLaterSettings;
@@ -48,6 +49,7 @@ export default class ReadItLaterPlugin extends Plugin {
         this.templateEngine = new TemplateEngine();
         this.parserCreator = new ParserCreator([
             new YoutubeParser(this.app, this, this.templateEngine),
+            new YoutubeChannelParser(this.app, this, this.templateEngine),
             new VimeoParser(this.app, this, this.templateEngine),
             new BilibiliParser(this.app, this, this.templateEngine),
             new TwitterParser(this.app, this, this.templateEngine),

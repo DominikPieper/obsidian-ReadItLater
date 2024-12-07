@@ -169,6 +169,21 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
+        new Setting(containerEl)
+            .setName('Youtube Data API v3 key')
+            .setDesc('If entered, Youtube related content types will use Youtube API to fetc the data.')
+            .addText((text) =>
+                text
+                    .setPlaceholder('')
+                    .setValue(this.plugin.settings.youtubeApiKey || DEFAULT_SETTINGS.youtubeApiKey)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeApiKey = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        containerEl.createEl('h1', { text: 'Content Types' });
+
         containerEl.createEl('h2', { text: 'YouTube' });
 
         new Setting(containerEl)
@@ -215,19 +230,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
-            .setName('Youtube Data API v3 key')
-            .setDesc('If entered, additional template variables are available')
-            .addText((text) =>
-                text
-                    .setPlaceholder('')
-                    .setValue(this.plugin.settings.youtubeApiKey || DEFAULT_SETTINGS.youtubeApiKey)
-                    .onChange(async (value) => {
-                        this.plugin.settings.youtubeApiKey = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
         new Setting(containerEl).setName('Youtube embed player width').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedWidth)
@@ -265,6 +267,52 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
+
+        containerEl.createEl('h2', { text: 'YouTube Channel' });
+
+        new Setting(containerEl)
+            .setName('Youtube channel content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeChannelContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.youtubeChannelContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.youtubeChannelContentTypeSlug
+                            : this.plugin.settings.youtubeChannelContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeChannelContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Youtube channel note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeChannelNoteTitle}`)
+                    .setValue(this.plugin.settings.youtubeChannelNoteTitle || DEFAULT_SETTINGS.youtubeChannelNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeChannelNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Youtube channel note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.youtubeChannelNote || DEFAULT_SETTINGS.youtubeChannelNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeChannelNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         containerEl.createEl('h2', { text: 'Vimeo' });
 
