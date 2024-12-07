@@ -169,6 +169,21 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
+        new Setting(containerEl)
+            .setName('Youtube Data API v3 key')
+            .setDesc('If entered, Youtube related content types will use Youtube API to fetc the data.')
+            .addText((text) =>
+                text
+                    .setPlaceholder('')
+                    .setValue(this.plugin.settings.youtubeApiKey || DEFAULT_SETTINGS.youtubeApiKey)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeApiKey = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        containerEl.createEl('h1', {text: 'Content Types'});
+
         containerEl.createEl('h2', { text: 'YouTube' });
 
         new Setting(containerEl)
@@ -214,19 +229,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.rows = 10;
                 textarea.inputEl.cols = 25;
             });
-
-        new Setting(containerEl)
-            .setName('Youtube Data API v3 key')
-            .setDesc('If entered, additional template variables are available')
-            .addText((text) =>
-                text
-                    .setPlaceholder('')
-                    .setValue(this.plugin.settings.youtubeApiKey || DEFAULT_SETTINGS.youtubeApiKey)
-                    .onChange(async (value) => {
-                        this.plugin.settings.youtubeApiKey = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
 
         new Setting(containerEl).setName('Youtube embed player width').addText((text) =>
             text
