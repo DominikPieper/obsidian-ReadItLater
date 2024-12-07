@@ -182,7 +182,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        containerEl.createEl('h1', {text: 'Content Types'});
+        containerEl.createEl('h1', { text: 'Content Types' });
 
         containerEl.createEl('h2', { text: 'YouTube' });
 
