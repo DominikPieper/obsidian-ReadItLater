@@ -1,8 +1,9 @@
 import { Platform, request } from 'obsidian';
-import { isValidUrl, normalizeFilename, replaceImages } from '../helpers';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
+import { isValidUrl, normalizeFilename } from 'src/helpers/fileutils';
+import { replaceImages } from 'src/helpers/replaceImages';
 
 const MASTODON_API = {
     INSTANCE: '/api/v2/instance',
@@ -158,7 +159,6 @@ class MastodonParser extends Parser {
         const mediaAttachments =
             this.plugin.settings.downloadMastodonMediaAttachments && Platform.isDesktop
                 ? await replaceImages(
-                      this.app,
                       this.plugin,
                       fileName,
                       this.prepareMedia(status.media_attachments),

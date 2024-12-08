@@ -1,10 +1,11 @@
 import { Notice, Platform, request } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
-import { getBaseUrl, normalizeFilename, replaceImages } from '../helpers';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
+import { getBaseUrl, normalizeFilename } from 'src/helpers/fileutils';
+import { replaceImages } from 'src/helpers/replaceImages';
 
 interface ReadabilityArticle {
     title: string;
@@ -153,7 +154,6 @@ class WebsiteParser extends Parser {
 
         if (this.plugin.settings.downloadImages && Platform.isDesktop) {
             processedContent = await replaceImages(
-                this.app,
                 this.plugin,
                 normalizeFilename(fileNameTemplate),
                 processedContent,
@@ -184,7 +184,6 @@ class WebsiteParser extends Parser {
 
         if (this.plugin.settings.downloadImages && Platform.isDesktop) {
             content = await replaceImages(
-                this.app,
                 this.plugin,
                 normalizeFilename(fileNameTemplate),
                 content,

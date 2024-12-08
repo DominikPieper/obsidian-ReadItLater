@@ -1,4 +1,4 @@
-import { normalizeFilename } from 'src/helpers';
+import { normalizeFilename } from "src/helpers/fileutils";
 
 export class Note {
     constructor(

@@ -90,18 +90,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Batch process URLs')
-            .setDesc('If enabled, a list of URLs will processed in sequence. Delimiter can be set in setting bellow.')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(this.plugin.settings.batchProcess ?? DEFAULT_SETTINGS.batchProcess)
-                    .onChange(async (value) => {
-                        this.plugin.settings.batchProcess = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
             .setName('Batch note creation delimiter')
             .setDesc('Delimiter for batch list of notes')
             .addDropdown((dropdown) => {

@@ -4,7 +4,7 @@ export interface ReadItLaterSettings {
     inboxDir: string;
     assetsDir: string;
     openNewNote: boolean;
-    batchProcess: boolean;
+    batchProcess: boolean; // deprecated
     batchProcessDelimiter: Delimiter;
     openNewNoteInNewTab: boolean;
     youtubeContentTypeSlug: string;
@@ -70,7 +70,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     inboxDir: 'ReadItLater Inbox',
     assetsDir: 'ReadItLater Inbox/assets',
     openNewNote: false,
-    batchProcess: false,
+    batchProcess: false, // deperecated
     batchProcessDelimiter: Delimiter.NewLine,
     openNewNoteInNewTab: false,
     youtubeContentTypeSlug: 'youtube',
