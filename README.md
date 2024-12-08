@@ -21,8 +21,6 @@ Save the web with ReadItLater plugin for Obsidian. Archive web pages for reading
 
 ReadItLater can do a lot more than converting web pages to markdown. For every content type there is specific template with carefully selected variables to ease up your archiving process.
 
-To add something to your Vault just click the `ReadItLater: Save clipboard` ribbon or run the `ReadItLater: Save clipboard` command. New note will be created in folder configured in plugin settings.
-
 ### What makes ReadItLater plugin great?
 
 - Simple, but powerful template engine
@@ -30,6 +28,12 @@ To add something to your Vault just click the `ReadItLater: Save clipboard` ribb
 - Compatibility with Obsidian iOS and Android apps
 - Downloading images from articles to your Vault
 - Batch processing of URLs list
+
+### How to use ReadItLater plugin?
+
+To create single note you can either click on the plugin ribbon icon, select `ReadItLater: Create from clipboard` from command palette or click on `ReadItLater` shortcut in context or share menu. You can also create multiple notes from batch of URLs, delimited by selected delimiter in plugin settings using `ReadItLater: Create from batch in clipboard` command.
+
+If you want just add content to existing note, you can use `ReadItLater: Insert at the cursor position` command to insert content after the current cursor position.
 
 ## Template engine
 
