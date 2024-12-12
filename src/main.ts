@@ -88,6 +88,8 @@ export default class ReadItLaterPlugin extends Plugin {
             },
         });
 
+        this.addSettingTab(new ReadItLaterSettingsTab(this.app, this));
+
         if (this.settings.extendShareMenu) {
             this.registerEvent(
                 //eslint-disable-next-line @typescript-eslint/ban-ts-comment
