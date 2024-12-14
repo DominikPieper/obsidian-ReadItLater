@@ -1,6 +1,8 @@
 import { App, Notice, Platform, PluginSettingTab, Setting } from 'obsidian';
 import { Delimiter, getDelimiterOptions } from 'src/enums/delimiter';
+import { FileExistsStrategy, getFileExistStrategyOptions } from 'src/enums/fileExistsStrategy';
 import { getDefaultFilesystenLimits } from 'src/helpers/fileutils';
+import { createHTMLDiv } from 'src/helpers/setting';
 import ReadItLaterPlugin from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
 
@@ -88,6 +90,22 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         this.display();
                     }),
             );
+
+        new Setting(containerEl)
+            .setName('Duplicate note filename behavior')
+            .setDesc('Applied when note with the same filename already exists')
+            .addDropdown((dropdown) => {
+                getFileExistStrategyOptions().forEach((fileExistsStrategyOption) =>
+                    dropdown.addOption(fileExistsStrategyOption.option, fileExistsStrategyOption.label),
+                );
+
+                dropdown.setValue(this.plugin.settings.fileExistsStrategy || DEFAULT_SETTINGS.fileExistsStrategy);
+
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.fileExistsStrategy = value as FileExistsStrategy;
+                    await this.plugin.saveSettings();
+                });
+            });
 
         new Setting(containerEl)
             .setName('Batch note creation delimiter')
@@ -996,12 +1014,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
     }
 
-    private createHTMLDiv(html: string): DocumentFragment {
-        return createFragment((documentFragment) => (documentFragment.createDiv().innerHTML = html));
-    }
-
     private createTemplateVariableReferenceDiv(prepend: string = ''): DocumentFragment {
-        return this.createHTMLDiv(
+        return createHTMLDiv(
             `<p>${prepend} See the <a href="https://github.com/DominikPieper/obsidian-ReadItLater?tab=readme-ov-file#template-engine">template variables reference</a></p>`,
         );
     }

@@ -1,8 +1,8 @@
 import { moment, request } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
+import { handleError } from 'src/helpers/error';
 import { Note } from './Note';
 import { Parser } from './Parser';
-import { handleError } from 'src/helpers/error';
 
 interface YoutubeNoteData {
     date: string;

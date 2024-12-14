@@ -1,10 +1,10 @@
 import { Platform, request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
+import { normalizeFilename } from 'src/helpers/fileutils';
+import { replaceImages } from 'src/helpers/replaceImages';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
-import { normalizeFilename } from 'src/helpers/fileutils';
-import { replaceImages } from 'src/helpers/replaceImages';
 
 interface StackExchangeQuestion {
     title: string;
@@ -80,12 +80,7 @@ class StackExchangeParser extends Parser {
         );
 
         if (this.plugin.settings.downloadStackExchangeAssets && Platform.isDesktop) {
-            content = await replaceImages(
-                this.plugin,
-                normalizeFilename(fileNameTemplate),
-                content,
-                assetsDir,
-            );
+            content = await replaceImages(this.plugin, normalizeFilename(fileNameTemplate), content, assetsDir);
         }
 
         return new Note(fileNameTemplate, 'md', content, this.plugin.settings.stackExchangeContentType, createdAt);

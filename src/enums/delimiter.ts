@@ -1,3 +1,5 @@
+import { DropdownEnumOption } from './enum';
+
 export enum Delimiter {
     NewLine = 'newLine',
     Comma = 'comma',
@@ -5,12 +7,7 @@ export enum Delimiter {
     Semicolon = 'semicolon',
 }
 
-export interface DelimiterOption {
-    label: string;
-    option: string;
-}
-
-export function getDelimiterOptions(): DelimiterOption[] {
+export function getDelimiterOptions(): DropdownEnumOption[] {
     return [
         { label: 'New Line', option: Delimiter.NewLine },
         { label: 'Comma', option: Delimiter.Comma },
