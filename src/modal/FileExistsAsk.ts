@@ -7,9 +7,9 @@ export default class FileExistsAsk extends Modal {
     constructor(app: App, notes: Note[], onSubmit: (strategy: FileExistsStrategy, doNotAskAgain: boolean) => void) {
         super(app);
 
-        this.setTitle('Duplicate notes filenames detected');
+        this.setTitle('Duplicate notes detected');
 
-        const fileNames = notes.map((note) => `<li>${note.fileName}</li>`);
+        const fileNames = notes.map((note) => `<li>${note.fileName}</li>`).join('');
         this.setContent(createHTMLDiv(`<ul>${fileNames}</ul>`));
 
         let doNotAskAgain = false;
@@ -21,7 +21,7 @@ export default class FileExistsAsk extends Modal {
         new Setting(this.contentEl)
             .addButton((btn) =>
                 btn
-                    .setButtonText('Append')
+                    .setButtonText('Append to existing')
                     .setCta()
                     .onClick(() => {
                         this.close();

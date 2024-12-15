@@ -3,13 +3,11 @@ import ParserCreator from './parsers/ParserCreator';
 import { VaultRepository } from './repository/VaultRepository';
 import { ReadItLaterSettings } from './settings';
 import { Note } from './parsers/Note';
-import { getDelimiterValue } from './enums/delimiter';
-import { isValidUrl } from './helpers/fileutils';
-import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 import FileExistsError from './error/FileExists';
 import FileExistsAsk from './modal/FileExistsAsk';
 import { FileExistsStrategy } from './enums/fileExistsStrategy';
 import ReadItLaterPlugin from './main';
+import { getAndCheckUrls } from './helpers/stringUtils';
 
 export class NoteService {
     constructor(
@@ -17,7 +15,7 @@ export class NoteService {
         private plugin: ReadItLaterPlugin,
         private repository: VaultRepository,
         private settings: ReadItLaterSettings,
-    ) {}
+    ) { }
 
     public async createNote(content: string): Promise<void> {
         const note = await this.makeNote(content);
@@ -31,18 +29,22 @@ export class NoteService {
     }
 
     public async createNotesFromBatch(contentBatch: string): Promise<void> {
-        const clipboardSegmentsList = (() => {
-            const cleanClipboardData = contentBatch
-                .trim()
-                .split(getDelimiterValue(this.settings.batchProcessDelimiter))
-                .filter((line) => line.trim().length > 0);
-            const everyLineIsURL = cleanClipboardData.reduce((status: boolean, url: string): boolean => {
-                return status && isValidUrl(url, [HTTP_PROTOCOL, HTTPS_PROTOCOL]);
-            }, true);
-            return everyLineIsURL ? cleanClipboardData : [contentBatch];
-        })();
-        for (const clipboardSegment of clipboardSegmentsList) {
-            this.createNote(clipboardSegment);
+        const urlCheckResult = getAndCheckUrls(contentBatch, this.settings.batchProcessDelimiter);
+        let existingNotes: Note[] = [];
+
+        for (const contentSegment of urlCheckResult.everyLineIsURL ? urlCheckResult.urls : [contentBatch]) {
+            const note = await this.makeNote(contentSegment);
+            try {
+                await this.repository.saveNote(note);
+            } catch (error) {
+                if (error instanceof FileExistsError) {
+                    existingNotes.push(note);
+                }
+            }
+        }
+
+        if (existingNotes.length > 0) {
+            this.handleFileExistsError(existingNotes);
         }
     }
 
@@ -56,6 +58,20 @@ export class NoteService {
         return await parser.prepareNote(content);
     }
 
+    private openNote(note: Note): void {
+        if (this.plugin.settings.openNewNote || this.plugin.settings.openNewNoteInNewTab) {
+            try {
+                const file = this.repository.getFileByPath(note.filePath);
+                this.plugin.app.workspace
+                    .getLeaf(this.plugin.settings.openNewNoteInNewTab ? 'tab' : false)
+                    .openFile(file);
+            } catch (error) {
+                console.error(error);
+                new Notice(`Unable to open ${note.getFullFilename()}`);
+            }
+        }
+    }
+
     private async handleFileExistsError(notes: Note[]): Promise<void> {
         switch (this.settings.fileExistsStrategy) {
             case FileExistsStrategy.Ask:
@@ -67,7 +83,7 @@ export class NoteService {
                 this.handleFileExistsStrategyNothing(notes);
                 break;
             case FileExistsStrategy.AppendToExisting:
-                console.log(notes);
+                this.handleFileExistsStrategyAppend(notes);
                 break;
         }
     }
@@ -82,16 +98,34 @@ export class NoteService {
                 this.handleFileExistsStrategyNothing(notes);
                 break;
             case FileExistsStrategy.AppendToExisting:
-                console.log(notes);
+                this.handleFileExistsStrategyAppend(notes);
                 break;
         }
 
         if (doNotAskAgain) {
             this.plugin.saveSetting('fileExistsStrategy', strategy as FileExistsStrategy);
         }
+
+        if (notes.length === 1) {
+            this.openNote(notes.shift());
+        }
     }
 
-    private async handleFileExistsStrategyNothing(notes: Note[]): Promise<void> {
-        new Notice(`${notes.map((note) => note.fileName).join(',')} already exists.`);
+    private async handleFileExistsStrategyAppend(notes: Note[]): Promise<void> {
+        for (const note of notes) {
+            try {
+                await this.repository.appendToExistingNote(note);
+                new Notice(`${note.getFullFilename()} was updated.`);
+            } catch (error) {
+                console.error(error);
+                new Notice(`${note.getFullFilename()} was not updated!`, 0);
+            }
+        }
+    }
+
+    private handleFileExistsStrategyNothing(notes: Note[]): void {
+        for (const note of notes) {
+            new Notice(`${note.getFullFilename()} already exists.`);
+        }
     }
 }

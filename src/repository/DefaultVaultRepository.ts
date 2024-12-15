@@ -1,9 +1,10 @@
 import { Note } from 'src/parsers/Note';
-import { CapacitorAdapter, FileSystemAdapter, Notice, TFolder, normalizePath } from 'obsidian';
+import { CapacitorAdapter, FileSystemAdapter, Notice, TFile, TFolder, normalizePath } from 'obsidian';
 import ReadItLaterPlugin from 'src/main';
 import { getOsOptimizedPath } from 'src/helpers/fileutils';
 import TemplateEngine from 'src/template/TemplateEngine';
 import { formatDate } from 'src/helpers/date';
+import FileNotFoundError from 'src/error/FileNotFound';
 import FileExistsError from '../error/FileExists';
 import { VaultRepository } from './VaultRepository';
 
@@ -55,10 +56,12 @@ export default class DefaultVaultRepository implements VaultRepository {
             }
         }
 
-        if (await this.exists(filePath)) {
+        note.filePath = filePath;
+
+        if (await this.exists(note.filePath)) {
             throw new FileExistsError(`${note.getFullFilename()} already exists!`);
         } else {
-            const newFile = await this.plugin.app.vault.create(filePath, note.content);
+            const newFile = await this.plugin.app.vault.create(note.filePath, note.content);
             if (this.plugin.settings.openNewNote || this.plugin.settings.openNewNoteInNewTab) {
                 this.plugin.app.workspace
                     .getLeaf(this.plugin.settings.openNewNoteInNewTab ? 'tab' : false)
@@ -79,5 +82,32 @@ export default class DefaultVaultRepository implements VaultRepository {
 
     public async exists(filePath: string): Promise<boolean> {
         return await this.plugin.app.vault.adapter.exists(filePath);
+    }
+
+    public getFileByPath(filePath: string): TFile {
+        const file = this.plugin.app.vault.getFileByPath(filePath);
+
+        if (file === null) {
+            throw new FileNotFoundError(`File not found: ${filePath}`);
+        }
+
+        return file;
+    }
+
+    public async appendToExistingNote(note: Note): Promise<void> {
+        let file;
+        try {
+            file = this.getFileByPath(note.filePath);
+        } catch (error) {
+            if (error instanceof FileNotFoundError) {
+                new Notice(`Unable to edit ${note.getFullFilename()}`);
+            } else {
+                throw error;
+            }
+        }
+
+        await this.plugin.app.vault.process(file, (data) => {
+            return `${data}\n\n${note.content}`;
+        });
     }
 }

@@ -89,10 +89,7 @@ export default class ReadItLaterPlugin extends Plugin {
             id: 'insert-at-cursor',
             name: 'Insert at the cursor position',
             editorCallback: async (editor: Editor) => {
-                await this.api.insertContentAtEditorCursorPosition(
-                    await this.getTextClipboardContent(),
-                    editor,
-                );
+                await this.api.insertContentAtEditorCursorPosition(await this.getTextClipboardContent(), editor);
             },
         });
 

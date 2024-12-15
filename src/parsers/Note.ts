@@ -1,6 +1,8 @@
 import { normalizeFilename } from 'src/helpers/fileutils';
 
 export class Note {
+    private _filePath: string | null = null;
+
     constructor(
         public readonly fileName: string,
         public readonly fileExtension: string,
@@ -13,5 +15,13 @@ export class Note {
 
     public getFullFilename(): string {
         return `${this.fileName}.${this.fileExtension}`;
+    }
+
+    public get filePath() {
+        return this._filePath;
+    }
+
+    public set filePath(filePath: string) {
+        this._filePath = filePath;
     }
 }
