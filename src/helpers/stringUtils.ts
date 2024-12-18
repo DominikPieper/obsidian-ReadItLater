@@ -1,6 +1,6 @@
-import { Delimiter, getDelimiterValue } from "src/enums/delimiter";
-import { isValidUrl } from "./fileutils";
-import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from "src/constants/urlProtocols";
+import { Delimiter, getDelimiterValue } from 'src/enums/delimiter';
+import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from 'src/constants/urlProtocols';
+import { isValidUrl } from './fileutils';
 
 export function createRandomString(length: number) {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -12,8 +12,8 @@ export function createRandomString(length: number) {
 }
 
 export interface UrlCheckResult {
-    urls: string[],
-    everyLineIsURL: boolean
+    urls: string[];
+    everyLineIsURL: boolean;
 }
 
 export function getAndCheckUrls(content: string, delimiter: Delimiter): UrlCheckResult {
@@ -28,6 +28,6 @@ export function getAndCheckUrls(content: string, delimiter: Delimiter): UrlCheck
 
     return {
         urls: delimitedContent,
-        everyLineIsURL: everyLineIsURL
+        everyLineIsURL: everyLineIsURL,
     };
 }

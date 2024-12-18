@@ -13,7 +13,7 @@ export class NoteService {
         private parserCreator: ParserCreator,
         private plugin: ReadItLaterPlugin,
         private repository: VaultRepository,
-    ) { }
+    ) {}
 
     public async createNote(content: string): Promise<void> {
         const note = await this.makeNote(content);
@@ -28,7 +28,7 @@ export class NoteService {
 
     public async createNotesFromBatch(contentBatch: string): Promise<void> {
         const urlCheckResult = getAndCheckUrls(contentBatch, this.plugin.settings.batchProcessDelimiter);
-        let existingNotes: Note[] = [];
+        const existingNotes: Note[] = [];
 
         for (const contentSegment of urlCheckResult.everyLineIsURL ? urlCheckResult.urls : [contentBatch]) {
             const note = await this.makeNote(contentSegment);
