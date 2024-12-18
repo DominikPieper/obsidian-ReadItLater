@@ -159,6 +159,7 @@ Parsing of HTML DOM has its limitations thus additional data can be fetched only
 | videoPublishDate          | Video plublish date formatted in content format from plugin settings |
 | videoTags                 | Formatted list of tags delimited by space                            |
 | videoViewsCount           | Video views count                                                    |
+| videoChapters             | List of video chapters with linked timestamps                        |
 
 ### Youtube Channel
 

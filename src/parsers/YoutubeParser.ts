@@ -17,6 +17,7 @@ interface YoutubeNoteData {
     videoURL: string;
     videoTags: string;
     videoPlayer: string;
+    videoChapters: string;
     channelId: string;
     channelName: string;
     channelURL: string;
@@ -28,6 +29,13 @@ interface YoutubeVideo {
     publishedAt: Date;
     tags: string[];
     channel: YoutubeChannel;
+    chapters: YoutubeVideoChapter[];
+}
+
+interface YoutubeVideoChapter {
+    timestamp: string;
+    title: string;
+    seconds: number;
 }
 
 interface YoutubeChannel {
@@ -60,7 +68,7 @@ class YoutubeParser extends Parser {
     }
 
     private async parseApiResponse(url: string, createdAt: Date): Promise<YoutubeNoteData> {
-        const videoId = this.PATTERN.exec(url)[4];
+        const videoId = this.PATTERN.exec(url)[1];
         try {
             const videoApiResponse = await request({
                 method: 'GET',
@@ -95,6 +103,8 @@ class YoutubeParser extends Parser {
                 ? video.snippet.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#'))
                 : [];
 
+            const chapters = this.getVideoChapters(video.snippet.description);
+
             return {
                 date: this.getFormattedDateForContent(createdAt),
                 videoId: video.id,
@@ -112,6 +122,7 @@ class YoutubeParser extends Parser {
                 videoPublishDate: moment(video.snippet.publishedAt).format(this.plugin.settings.dateContentFmt),
                 videoViewsCount: video.statistics.viewCount,
                 videoTags: tags.join(' '),
+                videoChapters: this.formatVideoChapters(video.id, chapters),
                 channelId: channel.id,
                 channelURL: `https://www.youtube.com/channel/${channel.id}`,
                 channelName: channel.snippet.title ?? '',
@@ -122,6 +133,7 @@ class YoutubeParser extends Parser {
                     channel: {
                         thumbnails: channel.snippet.thumbnails,
                     },
+                    chapters: chapters
                 },
             };
         } catch (e) {
@@ -164,6 +176,7 @@ class YoutubeParser extends Parser {
                 videoPublishDate: '',
                 videoViewsCount: 0,
                 videoTags: '',
+                videoChapters: '',
                 channelId: videoSchemaElement?.querySelector('[itemprop="channelId"')?.getAttribute('content') ?? '',
                 channelURL: personSchemaElement?.querySelector('[itemprop="url"]')?.getAttribute('href') ?? '',
                 channelName: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
@@ -206,6 +219,48 @@ class YoutubeParser extends Parser {
         }
 
         return formatted.trim();
+    }
+
+    private formatVideoChapters(videoId: string, chapters: YoutubeVideoChapter[]): string {
+        return chapters
+            .map((chapter) => {
+                return `- [${chapter.timestamp}](https://www.youtube.com/watch?v=${videoId}&t=${chapter.seconds}) ${chapter.title}`;
+            })
+            .join('\n');
+    }
+
+    private getVideoChapters(description: string): YoutubeVideoChapter[] {
+        const chapterRegex = /^((?:\d{1,2}:)?(?:\d{1,2}):(?:\d{1,2}))\s+(.+)$/gm;
+
+        const chapters = [];
+        let match;
+
+        while ((match = chapterRegex.exec(description)) !== null) {
+            const timestamp = match[1].trim(); // First capture group - timestamp only
+            const title = match[2].trim(); // Second capture group - title only
+
+            // Convert timestamp to seconds
+            const timestampSegments = timestamp.split(':');
+            let hours = 0,
+                minutes,
+                seconds;
+
+            if (timestampSegments.length === 3) {
+                [hours, minutes, seconds] = timestampSegments.map(Number);
+            } else {
+                [minutes, seconds] = timestampSegments.map(Number);
+            }
+
+            const totalSeconds = hours * 3600 + minutes * 60 + seconds;
+
+            chapters.push({
+                timestamp,
+                title,
+                seconds: totalSeconds,
+            });
+        }
+
+        return chapters;
     }
 
     private getEmbedPlayer(videoId: string): string {
