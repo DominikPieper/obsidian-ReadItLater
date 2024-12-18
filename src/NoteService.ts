@@ -1,7 +1,6 @@
 import { Editor, Notice } from 'obsidian';
 import ParserCreator from './parsers/ParserCreator';
 import { VaultRepository } from './repository/VaultRepository';
-import { ReadItLaterSettings } from './settings';
 import { Note } from './parsers/Note';
 import FileExistsError from './error/FileExists';
 import FileExistsAsk from './modal/FileExistsAsk';
@@ -14,7 +13,6 @@ export class NoteService {
         private parserCreator: ParserCreator,
         private plugin: ReadItLaterPlugin,
         private repository: VaultRepository,
-        private settings: ReadItLaterSettings,
     ) { }
 
     public async createNote(content: string): Promise<void> {
@@ -29,7 +27,7 @@ export class NoteService {
     }
 
     public async createNotesFromBatch(contentBatch: string): Promise<void> {
-        const urlCheckResult = getAndCheckUrls(contentBatch, this.settings.batchProcessDelimiter);
+        const urlCheckResult = getAndCheckUrls(contentBatch, this.plugin.settings.batchProcessDelimiter);
         let existingNotes: Note[] = [];
 
         for (const contentSegment of urlCheckResult.everyLineIsURL ? urlCheckResult.urls : [contentBatch]) {
@@ -73,7 +71,7 @@ export class NoteService {
     }
 
     private async handleFileExistsError(notes: Note[]): Promise<void> {
-        switch (this.settings.fileExistsStrategy) {
+        switch (this.plugin.settings.fileExistsStrategy) {
             case FileExistsStrategy.Ask:
                 new FileExistsAsk(this.plugin.app, notes, (strategy, doNotAskAgain) => {
                     this.handleFileAskModalResponse(strategy, doNotAskAgain, notes);

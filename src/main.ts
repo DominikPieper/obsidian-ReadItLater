@@ -60,8 +60,8 @@ export default class ReadItLaterPlugin extends Plugin {
             new TextSnippetParser(this.app, this, this.templateEngine),
         ]);
         this.vaultRepository = new DefaultVaultRepository(this, this.templateEngine);
-        this.noteService = new NoteService(this.parserCreator, this, this.vaultRepository, this.settings);
-        this.api = new ReadItLaterApi(this.noteService, this.settings);
+        this.noteService = new NoteService(this.parserCreator, this, this.vaultRepository);
+        this.api = new ReadItLaterApi(this.noteService);
 
         addIcon('read-it-later', clipboardIcon);
 

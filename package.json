@@ -1,7 +1,7 @@
 {
   "name": "obsidian-ReadItLater",
   "version": "0.9.1",
-  "description": "Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.",
+  "description": "Save online content to your Vault, utilize embedded template engine and organize your reading list to your needs. Preserve the web with ReadItLater.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs development",

@@ -1,9 +1,8 @@
 import { Editor } from 'obsidian';
-import { ReadItLaterSettings } from './settings';
 import { NoteService } from './NoteService';
 
 export class ReadItLaterApi {
-    constructor(private noteService: NoteService, private settings: ReadItLaterSettings) {}
+    constructor(private noteService: NoteService) {}
 
     public async processContent(content: string): Promise<void> {
         this.noteService.createNote(content);
