@@ -332,3 +332,7 @@ If your clipboard content is not recognized by any of above parsers plugin will 
 | ------------------------- | ------------------------------------------- |
 | content                   | Clipboard content                           |
 | date                      | Current date in format from plugin settings |
+
+## API
+
+To invoke functionality from other plugins we provide an API. You can access it via `this.app.plugins.plugins['obsidian-read-it-later'].api` which is an instance of `ReadItLaterAPI` class defined in [src/ReadItLaterApi.ts](https://github.com/DominikPieper/obsidian-ReadItLater/blob/master/src/ReadItLaterApi.ts).
