@@ -1,9 +1,9 @@
 import { Platform, request } from 'obsidian';
+import { isValidUrl, normalizeFilename } from 'src/helpers/fileutils';
+import { replaceImages } from 'src/helpers/replaceImages';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
-import { isValidUrl, normalizeFilename } from 'src/helpers/fileutils';
-import { replaceImages } from 'src/helpers/replaceImages';
 
 const MASTODON_API = {
     INSTANCE: '/api/v2/instance',
@@ -158,12 +158,7 @@ class MastodonParser extends Parser {
 
         const mediaAttachments =
             this.plugin.settings.downloadMastodonMediaAttachments && Platform.isDesktop
-                ? await replaceImages(
-                      this.plugin,
-                      fileName,
-                      this.prepareMedia(status.media_attachments),
-                      assetsDir,
-                  )
+                ? await replaceImages(this.plugin, fileName, this.prepareMedia(status.media_attachments), assetsDir)
                 : this.prepareMedia(status.media_attachments);
 
         return parsedStatusContent.concat(mediaAttachments);

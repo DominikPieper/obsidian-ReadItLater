@@ -1,6 +1,10 @@
 import { Delimiter } from './enums/delimiter';
+import { FileExistsStrategy } from './enums/fileExistsStrategy';
+
+export type ReadItLaterSettingValue = string | number | boolean | Delimiter | FileExistsStrategy | null;
 
 export interface ReadItLaterSettings {
+    [key: string]: ReadItLaterSettingValue;
     inboxDir: string;
     assetsDir: string;
     openNewNote: boolean;
@@ -64,6 +68,7 @@ export interface ReadItLaterSettings {
     youtubeChannelContentTypeSlug: string;
     youtubeChannelNoteTitle: string;
     youtubeChannelNote: string;
+    fileExistsStrategy: FileExistsStrategy;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -134,4 +139,5 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeChannelNoteTitle: '{{ title }}',
     youtubeChannelNote:
         '[[ReadItLater]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n![{{ channelTitle }}|300]({{ channelAvatar }})\n\n[Videos]({{ channelVideosURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
+    fileExistsStrategy: FileExistsStrategy.Ask,
 };

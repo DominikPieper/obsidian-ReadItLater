@@ -1,10 +1,12 @@
 import { Note } from 'src/parsers/Note';
-import { CapacitorAdapter, FileSystemAdapter, Notice, TFolder, normalizePath } from 'obsidian';
+import { CapacitorAdapter, FileSystemAdapter, Notice, TFile, TFolder, normalizePath } from 'obsidian';
 import ReadItLaterPlugin from 'src/main';
 import { getOsOptimizedPath } from 'src/helpers/fileutils';
 import TemplateEngine from 'src/template/TemplateEngine';
-import { VaultRepository } from './VaultRepository';
 import { formatDate } from 'src/helpers/date';
+import FileNotFoundError from 'src/error/FileNotFound';
+import FileExistsError from '../error/FileExists';
+import { VaultRepository } from './VaultRepository';
 
 export default class DefaultVaultRepository implements VaultRepository {
     private plugin: ReadItLaterPlugin;
@@ -15,7 +17,7 @@ export default class DefaultVaultRepository implements VaultRepository {
         this.templateEngine = templateEngine;
     }
 
-    async saveNote(note: Note): Promise<void> {
+    public async saveNote(note: Note): Promise<void> {
         let filePath;
 
         if (
@@ -54,20 +56,22 @@ export default class DefaultVaultRepository implements VaultRepository {
             }
         }
 
-        if (await this.exists(filePath)) {
-            new Notice(`${note.getFullFilename()} already exists!`);
+        note.filePath = filePath;
+
+        if (await this.exists(note.filePath)) {
+            throw new FileExistsError(`${note.getFullFilename()} already exists!`);
         } else {
-            const newFile = await this.plugin.app.vault.create(filePath, note.content);
+            const newFile = await this.plugin.app.vault.create(note.filePath, note.content);
             if (this.plugin.settings.openNewNote || this.plugin.settings.openNewNoteInNewTab) {
                 this.plugin.app.workspace
                     .getLeaf(this.plugin.settings.openNewNoteInNewTab ? 'tab' : false)
                     .openFile(newFile);
             }
-            new Notice(`${note.getFullFilename()} created successful`);
+            new Notice(`${note.getFullFilename()} created successfully`);
         }
     }
 
-    async createDirectory(directoryPath: string): Promise<void> {
+    public async createDirectory(directoryPath: string): Promise<void> {
         const normalizedPath = normalizePath(directoryPath);
         const directory = this.plugin.app.vault.getAbstractFileByPath(normalizedPath);
         if (directory && directory instanceof TFolder) {
@@ -76,7 +80,34 @@ export default class DefaultVaultRepository implements VaultRepository {
         await this.plugin.app.vault.createFolder(normalizedPath);
     }
 
-    async exists(filePath: string): Promise<boolean> {
+    public async exists(filePath: string): Promise<boolean> {
         return await this.plugin.app.vault.adapter.exists(filePath);
+    }
+
+    public getFileByPath(filePath: string): TFile {
+        const file = this.plugin.app.vault.getFileByPath(filePath);
+
+        if (file === null) {
+            throw new FileNotFoundError(`File not found: ${filePath}`);
+        }
+
+        return file;
+    }
+
+    public async appendToExistingNote(note: Note): Promise<void> {
+        let file;
+        try {
+            file = this.getFileByPath(note.filePath);
+        } catch (error) {
+            if (error instanceof FileNotFoundError) {
+                new Notice(`Unable to edit ${note.getFullFilename()}`);
+            } else {
+                throw error;
+            }
+        }
+
+        await this.plugin.app.vault.process(file, (data) => {
+            return `${data}\n\n${note.content}`;
+        });
     }
 }

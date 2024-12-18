@@ -1,5 +1,5 @@
 import { Editor, Menu, MenuItem, Platform, Plugin, addIcon } from 'obsidian';
-import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
+import { DEFAULT_SETTINGS, ReadItLaterSettingValue, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
 import YoutubeParser from './parsers/YoutubeParser';
 import VimeoParser from './parsers/VimeoParser';
@@ -14,19 +14,22 @@ import ParserCreator from './parsers/ParserCreator';
 import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 import GithubParser from './parsers/GithubParser';
 import WikipediaParser from './parsers/WikipediaParser';
-import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
 import { FilesystemLimits, getFileSystemLimits, isValidUrl } from './helpers/fileutils';
 import YoutubeChannelParser from './parsers/YoutubeChannelParser';
 import { VaultRepository } from './repository/VaultRepository';
 import DefaultVaultRepository from './repository/DefaultVaultRepository';
+import { NoteService } from './NoteService';
+import { ReadItLaterApi } from './ReadtItLaterApi';
 
 export default class ReadItLaterPlugin extends Plugin {
+    public api: ReadItLaterApi;
     public settings: ReadItLaterSettings;
 
+    private fileSystemLimits: FilesystemLimits;
+    private noteService: NoteService;
     private parserCreator: ParserCreator;
     private templateEngine: TemplateEngine;
-    private fileSystemLimits: FilesystemLimits;
     private vaultRepository: VaultRepository;
 
     getFileSystemLimits(): FilesystemLimits {
@@ -57,18 +60,20 @@ export default class ReadItLaterPlugin extends Plugin {
             new TextSnippetParser(this.app, this, this.templateEngine),
         ]);
         this.vaultRepository = new DefaultVaultRepository(this, this.templateEngine);
+        this.noteService = new NoteService(this.parserCreator, this, this.vaultRepository);
+        this.api = new ReadItLaterApi(this.noteService);
 
         addIcon('read-it-later', clipboardIcon);
 
         this.addRibbonIcon('read-it-later', 'ReadItLater: Create from clipboard', async () => {
-            await this.processClipboard();
+            await this.api.processContent(await this.getTextClipboardContent());
         });
 
         this.addCommand({
             id: 'save-clipboard-to-notice',
             name: 'Create from clipboard',
             callback: async () => {
-                await this.processClipboard();
+                await this.api.processContent(await this.getTextClipboardContent());
             },
         });
 
@@ -76,7 +81,7 @@ export default class ReadItLaterPlugin extends Plugin {
             id: 'create-from-clipboard-batch',
             name: 'Create from batch in clipboard',
             callback: async () => {
-                await this.processBatchFromClipboard();
+                await this.api.processContentBatch(await this.getTextClipboardContent());
             },
         });
 
@@ -84,7 +89,7 @@ export default class ReadItLaterPlugin extends Plugin {
             id: 'insert-at-cursor',
             name: 'Insert at the cursor position',
             editorCallback: async (editor: Editor) => {
-                await this.insertAtCursorPosition(editor);
+                await this.api.insertContentAtEditorCursorPosition(await this.getTextClipboardContent(), editor);
             },
         });
 
@@ -98,7 +103,7 @@ export default class ReadItLaterPlugin extends Plugin {
                     menu.addItem((item: MenuItem) => {
                         item.setTitle('ReadItLater');
                         item.setIcon('read-it-later');
-                        item.onClick(() => this.processContent(shareText));
+                        item.onClick(() => this.api.processContent(shareText));
                     });
                 }),
             );
@@ -110,7 +115,7 @@ export default class ReadItLaterPlugin extends Plugin {
                     menu.addItem((item: MenuItem) => {
                         item.setTitle('ReadItLater');
                         item.setIcon('read-it-later');
-                        item.onClick(() => this.processContent(url));
+                        item.onClick(() => this.api.processContent(url));
                     });
                 }
             }),
@@ -121,47 +126,17 @@ export default class ReadItLaterPlugin extends Plugin {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     }
 
+    async saveSetting(setting: string, value: ReadItLaterSettingValue): Promise<void> {
+        this.settings[setting] = value;
+        await this.saveSettings();
+    }
+
     async saveSettings(): Promise<void> {
         await this.saveData(this.settings);
     }
 
     async getTextClipboardContent(): Promise<string> {
         return await navigator.clipboard.readText();
-    }
-
-    async processClipboard(): Promise<void> {
-        this.processContent(await this.getTextClipboardContent());
-    }
-
-    async processBatchFromClipboard(): Promise<void> {
-        const clipboardContent = await this.getTextClipboardContent();
-        const clipboardSegmentsList = (() => {
-            const cleanClipboardData = clipboardContent
-                .trim()
-                .split(getDelimiterValue(this.settings.batchProcessDelimiter))
-                .filter((line) => line.trim().length > 0);
-            const everyLineIsURL = cleanClipboardData.reduce((status: boolean, url: string): boolean => {
-                return status && isValidUrl(url, [HTTP_PROTOCOL, HTTPS_PROTOCOL]);
-            }, true);
-            return everyLineIsURL ? cleanClipboardData : [clipboardContent];
-        })();
-        for (const clipboardSegment of clipboardSegmentsList) {
-            this.processContent(clipboardSegment);
-        }
-    }
-
-    async processContent(content: string): Promise<void> {
-        const parser = await this.parserCreator.createParser(content);
-
-        const note = await parser.prepareNote(content);
-        await this.vaultRepository.saveNote(note);
-    }
-
-    async insertAtCursorPosition(editor: Editor): Promise<void> {
-        const clipboardContent = await navigator.clipboard.readText();
-        const parser = await this.parserCreator.createParser(clipboardContent);
-        const note = await parser.prepareNote(clipboardContent);
-        editor.replaceRange(note.content, editor.getCursor());
     }
 }
 

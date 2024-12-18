@@ -1,8 +1,8 @@
 import { request } from 'obsidian';
 import { getJavascriptDeclarationByName } from 'src/helpers/domUtils';
+import { handleError } from 'src/helpers/error';
 import { Note } from './Note';
 import { Parser } from './Parser';
-import { handleError } from 'src/helpers/error';
 
 interface YoutubeChannelNoteData {
     date: string;

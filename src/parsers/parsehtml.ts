@@ -15,9 +15,11 @@ export async function parseHtmlContent(content: string) {
 
     turndownService.addRule('torchlightCodeBlock', {
         filter: (node) => {
-            return node.nodeName === 'PRE'
-                && node.firstChild.nodeName === 'CODE'
-                && node.firstChild.firstChild.nodeName === 'P';
+            return (
+                node.nodeName === 'PRE' &&
+                node.firstChild.nodeName === 'CODE' &&
+                node.firstChild.firstChild.nodeName === 'P'
+            );
         },
         replacement: function (_content, node, options) {
             node.querySelectorAll('p').forEach((codeLine) => {
@@ -26,11 +28,18 @@ export async function parseHtmlContent(content: string) {
             return (
                 //eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 //@ts-ignore
-                '\n\n' + options.fence + node.firstChild.getAttribute('data-lang') + '\n' +
+                '\n\n' +
+                options.fence +
+                //eslint-disable-next-line @typescript-eslint/ban-ts-comment
+                //@ts-ignore
+                node.firstChild.getAttribute('data-lang') +
+                '\n' +
                 node.firstChild.textContent +
-                '\n' + options.fence + '\n\n'
-            )
-        }
+                '\n' +
+                options.fence +
+                '\n\n'
+            );
+        },
     });
 
     turndownService.addRule('fencedCodeLangBlock', {
