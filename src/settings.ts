@@ -86,7 +86,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeUsePrivacyEnhancedEmbed: true,
     vimeoContentTypeSlug: 'vimeo',
     vimeoNoteTitle: 'Vimeo - {{ title }}',
-    vimeoNote: '[[ReadItLater]] [[Vimeo]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
+    vimeoNote:
+        '[[ReadItLater]] [[Vimeo]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
     vimeoEmbedWidth: '560',
     vimeoEmbedHeight: '315',
     bilibiliContentTypeSlug: 'bilibili',
