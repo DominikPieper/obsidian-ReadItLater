@@ -100,7 +100,8 @@ class YoutubeParser extends Parser {
 
             const duration = parse(video.contentDetails.duration);
 
-            const tags: string[] = video.snippet?.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#')) ?? [];
+            const tags: string[] =
+                video.snippet?.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#')) ?? [];
 
             const chapters = this.getVideoChapters(video.snippet.description);
 
@@ -171,8 +172,13 @@ class YoutubeParser extends Parser {
                 videoSchemaElement?.querySelector('[itemprop="description"]')?.getAttribute('content') ??
                 '';
             const chapters = this.getVideoChapters(description);
-            const publishedAt = jsonData?.engagementPanels?.[5]?.engagementPanelSectionListRenderer?.content?.structuredDescriptionContentRenderer?.items?.[0]?.videoDescriptionHeaderRenderer?.publishDate?.simpleText ?? '';
-            const videoViewsCount = jsonData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[0]?.videoPrimaryInfoRenderer?.viewCount?.videoViewCountRenderer?.originalViewCount ?? 0;
+            const publishedAt =
+                jsonData?.engagementPanels?.[5]?.engagementPanelSectionListRenderer?.content
+                    ?.structuredDescriptionContentRenderer?.items?.[0]?.videoDescriptionHeaderRenderer?.publishDate
+                    ?.simpleText ?? '';
+            const videoViewsCount =
+                jsonData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[0]?.videoPrimaryInfoRenderer
+                    ?.viewCount?.videoViewCountRenderer?.originalViewCount ?? 0;
 
             return {
                 date: this.getFormattedDateForContent(createdAt),
@@ -184,7 +190,8 @@ class YoutubeParser extends Parser {
                 videoPlayer: this.getEmbedPlayer(videoId),
                 videoDuration: 0,
                 videoDurationFormatted: '',
-                videoPublishDate: publishedAt !== '' ? moment(publishedAt).format(this.plugin.settings.dateContentFmt) : '',
+                videoPublishDate:
+                    publishedAt !== '' ? moment(publishedAt).format(this.plugin.settings.dateContentFmt) : '',
                 videoViewsCount: videoViewsCount,
                 videoTags: '',
                 videoChapters: this.formatVideoChapters(videoId, chapters),
