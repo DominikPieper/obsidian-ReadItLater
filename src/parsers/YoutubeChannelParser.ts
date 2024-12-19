@@ -57,7 +57,7 @@ export default class YoutubeChannelParser extends Parser {
             const [, channelURL] = this.PATTERN.exec(url);
             const channelHTML = new DOMParser().parseFromString(response, 'text/html');
             const declaration = getJavascriptDeclarationByName('ytInitialData', channelHTML.querySelectorAll('script'));
-            const jsonData = JSON.parse(declaration.value);
+            const jsonData = typeof declaration !== 'undefined' ? JSON.parse(declaration.value) : {};
 
             const jsonDataSubscribersCount =
                 jsonData?.header?.pageHeaderRenderer?.content?.pageHeaderViewModel?.metadata?.contentMetadataViewModel

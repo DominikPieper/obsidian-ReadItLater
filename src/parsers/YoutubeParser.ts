@@ -1,6 +1,7 @@
 import { moment, request } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
 import { handleError } from 'src/helpers/error';
+import { getJavascriptDeclarationByName } from 'src/helpers/domUtils';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
@@ -99,9 +100,7 @@ class YoutubeParser extends Parser {
 
             const duration = parse(video.contentDetails.duration);
 
-            const tags: string[] = Object.prototype.hasOwnProperty.call(video, 'tags')
-                ? video.snippet.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#'))
-                : [];
+            const tags: string[] = video.snippet?.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#')) ?? [];
 
             const chapters = this.getVideoChapters(video.snippet.description);
 
@@ -133,7 +132,7 @@ class YoutubeParser extends Parser {
                     channel: {
                         thumbnails: channel.snippet.thumbnails,
                     },
-                    chapters: chapters
+                    chapters: chapters,
                 },
             };
         } catch (e) {
@@ -153,6 +152,10 @@ class YoutubeParser extends Parser {
             });
 
             const videoHTML = new DOMParser().parseFromString(response, 'text/html');
+
+            const declaration = getJavascriptDeclarationByName('ytInitialDataa', videoHTML.querySelectorAll('script'));
+            const jsonData = typeof declaration !== 'undefined' ? JSON.parse(declaration.value) : {};
+
             const videoSchemaElement = videoHTML.querySelector('[itemtype*="http://schema.org/VideoObject"]');
 
             if (videoSchemaElement === null) {
@@ -162,21 +165,29 @@ class YoutubeParser extends Parser {
             const videoId = videoSchemaElement?.querySelector('[itemprop="identifier"]')?.getAttribute('content') ?? '';
             const personSchemaElement = videoSchemaElement.querySelector('[itemtype="http://schema.org/Person"]');
 
+            const description =
+                jsonData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[1]
+                    ?.videoSecondaryInfoRenderer?.attributedDescription?.content ??
+                videoSchemaElement?.querySelector('[itemprop="description"]')?.getAttribute('content') ??
+                '';
+            const chapters = this.getVideoChapters(description);
+            const publishedAt = jsonData?.engagementPanels?.[5]?.engagementPanelSectionListRenderer?.content?.structuredDescriptionContentRenderer?.items?.[0]?.videoDescriptionHeaderRenderer?.publishDate?.simpleText ?? '';
+            const videoViewsCount = jsonData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[0]?.videoPrimaryInfoRenderer?.viewCount?.videoViewCountRenderer?.originalViewCount ?? 0;
+
             return {
                 date: this.getFormattedDateForContent(createdAt),
                 videoId: videoId,
                 videoURL: url,
                 videoTitle: videoSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
-                videoDescription:
-                    videoSchemaElement?.querySelector('[itemprop="description"]')?.getAttribute('content') ?? '',
+                videoDescription: description,
                 videoThumbnail: videoHTML.querySelector('meta[property="og:image"]')?.getAttribute('content') ?? '',
                 videoPlayer: this.getEmbedPlayer(videoId),
                 videoDuration: 0,
                 videoDurationFormatted: '',
-                videoPublishDate: '',
-                videoViewsCount: 0,
+                videoPublishDate: publishedAt !== '' ? moment(publishedAt).format(this.plugin.settings.dateContentFmt) : '',
+                videoViewsCount: videoViewsCount,
                 videoTags: '',
-                videoChapters: '',
+                videoChapters: this.formatVideoChapters(videoId, chapters),
                 channelId: videoSchemaElement?.querySelector('[itemprop="channelId"')?.getAttribute('content') ?? '',
                 channelURL: personSchemaElement?.querySelector('[itemprop="url"]')?.getAttribute('href') ?? '',
                 channelName: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
