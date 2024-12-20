@@ -1,10 +1,14 @@
 import { Delimiter } from './enums/delimiter';
+import { FileExistsStrategy } from './enums/fileExistsStrategy';
+
+export type ReadItLaterSettingValue = string | number | boolean | Delimiter | FileExistsStrategy | null;
 
 export interface ReadItLaterSettings {
+    [key: string]: ReadItLaterSettingValue;
     inboxDir: string;
     assetsDir: string;
     openNewNote: boolean;
-    batchProcess: boolean;
+    batchProcess: boolean; // deprecated
     batchProcessDelimiter: Delimiter;
     openNewNoteInNewTab: boolean;
     youtubeContentTypeSlug: string;
@@ -61,13 +65,17 @@ export interface ReadItLaterSettings {
     extendShareMenu: boolean;
     filesystemLimitPath: number | null;
     filesystemLimitFileName: number | null;
+    youtubeChannelContentTypeSlug: string;
+    youtubeChannelNoteTitle: string;
+    youtubeChannelNote: string;
+    fileExistsStrategy: FileExistsStrategy;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     inboxDir: 'ReadItLater Inbox',
     assetsDir: 'ReadItLater Inbox/assets',
     openNewNote: false,
-    batchProcess: false,
+    batchProcess: false, // deperecated
     batchProcessDelimiter: Delimiter.NewLine,
     openNewNoteInNewTab: false,
     youtubeContentTypeSlug: 'youtube',
@@ -78,7 +86,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeUsePrivacyEnhancedEmbed: true,
     vimeoContentTypeSlug: 'vimeo',
     vimeoNoteTitle: 'Vimeo - {{ title }}',
-    vimeoNote: '[[ReadItLater]] [[Vimeo]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}',
+    vimeoNote:
+        '[[ReadItLater]] [[Vimeo]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
     vimeoEmbedWidth: '560',
     vimeoEmbedHeight: '315',
     bilibiliContentTypeSlug: 'bilibili',
@@ -127,4 +136,9 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     extendShareMenu: true,
     filesystemLimitPath: null,
     filesystemLimitFileName: null,
+    youtubeChannelContentTypeSlug: 'youtube-channel',
+    youtubeChannelNoteTitle: '{{ title }}',
+    youtubeChannelNote:
+        '[[ReadItLater]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n![{{ channelTitle }}|300]({{ channelAvatar }})\n\n[Videos]({{ channelVideosURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
+    fileExistsStrategy: FileExistsStrategy.Ask,
 };

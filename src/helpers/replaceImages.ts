@@ -1,8 +1,7 @@
-import { App, CapacitorAdapter, DataAdapter, FileSystemAdapter, normalizePath, requestUrl } from 'obsidian';
+import { CapacitorAdapter, DataAdapter, FileSystemAdapter, normalizePath, requestUrl } from 'obsidian';
 import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from 'src/constants/urlProtocols';
 import ReadItLaterPlugin from 'src/main';
 import { FilesystemLimits, getFileExtensionFromMimeType, getOsOptimizedPath, isValidUrl } from './fileutils';
-import { checkAndCreateFolder } from './checkAndCreateFolder';
 import { createRandomString } from './stringUtils';
 
 type Replacer = {
@@ -14,17 +13,12 @@ const CREATE_FILENAME_ATTEMPTS = 5;
 const MAX_FILENAME_INDEX = 1000;
 
 export async function replaceImages(
-    app: App,
     plugin: ReadItLaterPlugin,
     noteFileName: string,
     content: string,
     assetsDir: string,
 ): Promise<string> {
-    return await replaceAsync(
-        content,
-        EXTERNAL_MEDIA_LINK_PATTERN,
-        imageTagProcessor(app, plugin, noteFileName, assetsDir),
-    );
+    return await replaceAsync(content, EXTERNAL_MEDIA_LINK_PATTERN, imageTagProcessor(plugin, noteFileName, assetsDir));
 }
 
 async function replaceAsync(content: string, searchValue: string | RegExp, replacer: Replacer) {
@@ -52,13 +46,13 @@ async function replaceAsync(content: string, searchValue: string | RegExp, repla
     }
 }
 
-function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: string, assetsDir: string): Replacer {
+function imageTagProcessor(plugin: ReadItLaterPlugin, noteFileName: string, assetsDir: string): Replacer {
     return async function processImageTag(match: string, anchor: string, link: string): Promise<string> {
         if (!isValidUrl(link, [HTTP_PROTOCOL, HTTPS_PROTOCOL])) {
             return match;
         }
         const url = new URL(link);
-        await checkAndCreateFolder(app.vault, assetsDir);
+        await plugin.getVaultRepository().createDirectory(assetsDir);
 
         try {
             const { fileContent, fileExtension } = await downloadImage(url);
@@ -67,7 +61,7 @@ function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: st
             while (attempt < CREATE_FILENAME_ATTEMPTS) {
                 try {
                     const { fileName, needWrite } = await chooseFileName(
-                        app.vault.adapter,
+                        plugin.app.vault.adapter,
                         plugin.getFileSystemLimits(),
                         assetsDir,
                         noteFileName,
@@ -75,7 +69,7 @@ function imageTagProcessor(app: App, plugin: ReadItLaterPlugin, noteFileName: st
                     );
 
                     if (needWrite && fileName !== '') {
-                        await app.vault.createBinary(fileName, fileContent);
+                        await plugin.app.vault.createBinary(fileName, fileContent);
                         const maskedFilename = fileName.replace(/\s/g, '%20');
                         return `![${anchor}](${maskedFilename})`;
                     } else {

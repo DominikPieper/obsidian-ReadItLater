@@ -1,6 +1,8 @@
 import { App, Notice, Platform, PluginSettingTab, Setting } from 'obsidian';
 import { Delimiter, getDelimiterOptions } from 'src/enums/delimiter';
+import { FileExistsStrategy, getFileExistStrategyOptions } from 'src/enums/fileExistsStrategy';
 import { getDefaultFilesystenLimits } from 'src/helpers/fileutils';
+import { createHTMLDiv } from 'src/helpers/setting';
 import ReadItLaterPlugin from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
 
@@ -90,16 +92,20 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Batch process URLs')
-            .setDesc('If enabled, a list of URLs will processed in sequence. Delimiter can be set in setting bellow.')
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(this.plugin.settings.batchProcess ?? DEFAULT_SETTINGS.batchProcess)
-                    .onChange(async (value) => {
-                        this.plugin.settings.batchProcess = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
+            .setName('Duplicate note filename behavior')
+            .setDesc('Applied when note with the same filename already exists')
+            .addDropdown((dropdown) => {
+                getFileExistStrategyOptions().forEach((fileExistsStrategyOption) =>
+                    dropdown.addOption(fileExistsStrategyOption.option, fileExistsStrategyOption.label),
+                );
+
+                dropdown.setValue(this.plugin.settings.fileExistsStrategy || DEFAULT_SETTINGS.fileExistsStrategy);
+
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.fileExistsStrategy = value as FileExistsStrategy;
+                    await this.plugin.saveSettings();
+                });
+            });
 
         new Setting(containerEl)
             .setName('Batch note creation delimiter')
@@ -169,6 +175,21 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
+        new Setting(containerEl)
+            .setName('Youtube Data API v3 key')
+            .setDesc('If entered, Youtube related content types will use Youtube API to fetc the data.')
+            .addText((text) =>
+                text
+                    .setPlaceholder('')
+                    .setValue(this.plugin.settings.youtubeApiKey || DEFAULT_SETTINGS.youtubeApiKey)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeApiKey = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        containerEl.createEl('h1', { text: 'Content Types' });
+
         containerEl.createEl('h2', { text: 'YouTube' });
 
         new Setting(containerEl)
@@ -215,19 +236,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
-            .setName('Youtube Data API v3 key')
-            .setDesc('If entered, additional template variables are available')
-            .addText((text) =>
-                text
-                    .setPlaceholder('')
-                    .setValue(this.plugin.settings.youtubeApiKey || DEFAULT_SETTINGS.youtubeApiKey)
-                    .onChange(async (value) => {
-                        this.plugin.settings.youtubeApiKey = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
         new Setting(containerEl).setName('Youtube embed player width').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedWidth)
@@ -265,6 +273,52 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
+
+        containerEl.createEl('h2', { text: 'YouTube Channel' });
+
+        new Setting(containerEl)
+            .setName('Youtube channel content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeChannelContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.youtubeChannelContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.youtubeChannelContentTypeSlug
+                            : this.plugin.settings.youtubeChannelContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeChannelContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Youtube channel note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeChannelNoteTitle}`)
+                    .setValue(this.plugin.settings.youtubeChannelNoteTitle || DEFAULT_SETTINGS.youtubeChannelNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeChannelNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Youtube channel note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.youtubeChannelNote || DEFAULT_SETTINGS.youtubeChannelNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeChannelNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
 
         containerEl.createEl('h2', { text: 'Vimeo' });
 
@@ -960,12 +1014,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
     }
 
-    private createHTMLDiv(html: string): DocumentFragment {
-        return createFragment((documentFragment) => (documentFragment.createDiv().innerHTML = html));
-    }
-
     private createTemplateVariableReferenceDiv(prepend: string = ''): DocumentFragment {
-        return this.createHTMLDiv(
+        return createHTMLDiv(
             `<p>${prepend} See the <a href="https://github.com/DominikPieper/obsidian-ReadItLater?tab=readme-ov-file#template-engine">template variables reference</a></p>`,
         );
     }

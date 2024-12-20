@@ -1,9 +1,9 @@
 {
 	"id": "obsidian-read-it-later",
 	"name": "ReadItLater",
-	"version": "0.9.1",
+	"version": "0.10.0",
 	"minAppVersion": "1.7.2",
-	"description": "Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.",
+	"description": "Save online content to your Vault, utilize embedded template engine and organize your reading list to your needs. Preserve the web with ReadItLater.",
 	"author": "Dominik Pieper",
 	"authorUrl": "https://github.com/DominikPieper",
 	"isDesktopOnly": false

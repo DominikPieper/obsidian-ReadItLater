@@ -1,16 +1,5 @@
-import {
-    CapacitorAdapter,
-    FileSystemAdapter,
-    Menu,
-    MenuItem,
-    Notice,
-    Platform,
-    Plugin,
-    addIcon,
-    normalizePath,
-} from 'obsidian';
-import { checkAndCreateFolder, formatDate, isValidUrl } from './helpers';
-import { DEFAULT_SETTINGS, ReadItLaterSettings } from './settings';
+import { Editor, Menu, MenuItem, Platform, Plugin, addIcon } from 'obsidian';
+import { DEFAULT_SETTINGS, ReadItLaterSettingValue, ReadItLaterSettings } from './settings';
 import { ReadItLaterSettingsTab } from './views/settings-tab';
 import YoutubeParser from './parsers/YoutubeParser';
 import VimeoParser from './parsers/VimeoParser';
@@ -25,20 +14,30 @@ import ParserCreator from './parsers/ParserCreator';
 import { HTTPS_PROTOCOL, HTTP_PROTOCOL } from './constants/urlProtocols';
 import GithubParser from './parsers/GithubParser';
 import WikipediaParser from './parsers/WikipediaParser';
-import { getDelimiterValue } from './enums/delimiter';
 import TemplateEngine from './template/TemplateEngine';
-import { Note } from './parsers/Note';
-import { FilesystemLimits, getFileSystemLimits, getOsOptimizedPath } from './helpers/fileutils';
+import { FilesystemLimits, getFileSystemLimits, isValidUrl } from './helpers/fileutils';
+import YoutubeChannelParser from './parsers/YoutubeChannelParser';
+import { VaultRepository } from './repository/VaultRepository';
+import DefaultVaultRepository from './repository/DefaultVaultRepository';
+import { NoteService } from './NoteService';
+import { ReadItLaterApi } from './ReadtItLaterApi';
 
 export default class ReadItLaterPlugin extends Plugin {
-    settings: ReadItLaterSettings;
+    public api: ReadItLaterApi;
+    public settings: ReadItLaterSettings;
 
+    private fileSystemLimits: FilesystemLimits;
+    private noteService: NoteService;
     private parserCreator: ParserCreator;
     private templateEngine: TemplateEngine;
-    private fileSystemLimits: FilesystemLimits;
+    private vaultRepository: VaultRepository;
 
     getFileSystemLimits(): FilesystemLimits {
         return this.fileSystemLimits;
+    }
+
+    getVaultRepository(): VaultRepository {
+        return this.vaultRepository;
     }
 
     async onload(): Promise<void> {
@@ -48,6 +47,7 @@ export default class ReadItLaterPlugin extends Plugin {
         this.templateEngine = new TemplateEngine();
         this.parserCreator = new ParserCreator([
             new YoutubeParser(this.app, this, this.templateEngine),
+            new YoutubeChannelParser(this.app, this, this.templateEngine),
             new VimeoParser(this.app, this, this.templateEngine),
             new BilibiliParser(this.app, this, this.templateEngine),
             new TwitterParser(this.app, this, this.templateEngine),
@@ -59,18 +59,37 @@ export default class ReadItLaterPlugin extends Plugin {
             new WebsiteParser(this.app, this, this.templateEngine),
             new TextSnippetParser(this.app, this, this.templateEngine),
         ]);
+        this.vaultRepository = new DefaultVaultRepository(this, this.templateEngine);
+        this.noteService = new NoteService(this.parserCreator, this, this.vaultRepository);
+        this.api = new ReadItLaterApi(this.noteService);
 
         addIcon('read-it-later', clipboardIcon);
 
-        this.addRibbonIcon('read-it-later', 'ReadItLater: Save clipboard', async () => {
-            await this.processClipboard();
+        this.addRibbonIcon('read-it-later', 'ReadItLater: Create from clipboard', async () => {
+            await this.api.processContent(await this.getTextClipboardContent());
         });
 
         this.addCommand({
             id: 'save-clipboard-to-notice',
-            name: 'Save clipboard',
+            name: 'Create from clipboard',
             callback: async () => {
-                await this.processClipboard();
+                await this.api.processContent(await this.getTextClipboardContent());
+            },
+        });
+
+        this.addCommand({
+            id: 'create-from-clipboard-batch',
+            name: 'Create from batch in clipboard',
+            callback: async () => {
+                await this.api.processContentBatch(await this.getTextClipboardContent());
+            },
+        });
+
+        this.addCommand({
+            id: 'insert-at-cursor',
+            name: 'Insert at the cursor position',
+            editorCallback: async (editor: Editor) => {
+                await this.api.insertContentAtEditorCursorPosition(await this.getTextClipboardContent(), editor);
             },
         });
 
@@ -84,7 +103,7 @@ export default class ReadItLaterPlugin extends Plugin {
                     menu.addItem((item: MenuItem) => {
                         item.setTitle('ReadItLater');
                         item.setIcon('read-it-later');
-                        item.onClick(() => this.processContent(shareText));
+                        item.onClick(() => this.api.processContent(shareText));
                     });
                 }),
             );
@@ -96,7 +115,7 @@ export default class ReadItLaterPlugin extends Plugin {
                     menu.addItem((item: MenuItem) => {
                         item.setTitle('ReadItLater');
                         item.setIcon('read-it-later');
-                        item.onClick(() => this.processContent(url));
+                        item.onClick(() => this.api.processContent(url));
                     });
                 }
             }),
@@ -107,88 +126,17 @@ export default class ReadItLaterPlugin extends Plugin {
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
     }
 
+    async saveSetting(setting: string, value: ReadItLaterSettingValue): Promise<void> {
+        this.settings[setting] = value;
+        await this.saveSettings();
+    }
+
     async saveSettings(): Promise<void> {
         await this.saveData(this.settings);
     }
 
-    async processClipboard(): Promise<void> {
-        const clipboardContent = await navigator.clipboard.readText();
-        if (this.settings.batchProcess) {
-            this._processUrlsBatch(clipboardContent);
-        } else {
-            this._processUrlSingle(clipboardContent);
-        }
-    }
-
-    async _processUrlSingle(clipboardContent: string): Promise<void> {
-        const parser = await this.parserCreator.createParser(clipboardContent);
-        const note = await parser.prepareNote(clipboardContent);
-        await this.writeFile(note);
-    }
-
-    async _processUrlsBatch(clipboardContent: string): Promise<void> {
-        const clipboardSegmentsList = (() => {
-            const cleanClipboardData = clipboardContent
-                .trim()
-                .split(getDelimiterValue(this.settings.batchProcessDelimiter))
-                .filter((line) => line.trim().length > 0);
-            const everyLineIsURL = cleanClipboardData.reduce((status: boolean, url: string): boolean => {
-                return status && isValidUrl(url);
-            }, true);
-            return everyLineIsURL ? cleanClipboardData : [clipboardContent];
-        })();
-        for (const clipboardSegment of clipboardSegmentsList) {
-            this._processUrlSingle(clipboardSegment);
-        }
-    }
-
-    async processContent(content: string): Promise<void> {
-        const parser = await this.parserCreator.createParser(content);
-
-        const note = await parser.prepareNote(content);
-        await this.writeFile(note);
-    }
-
-    async writeFile(note: Note): Promise<void> {
-        let filePath;
-
-        if (this.app.vault.adapter instanceof CapacitorAdapter || this.app.vault.adapter instanceof FileSystemAdapter) {
-            filePath = getOsOptimizedPath('/', note.getFullFilename(), this.app.vault.adapter, this.fileSystemLimits);
-        } else {
-            filePath = normalizePath(`/${note.getFullFilename()}`);
-        }
-
-        if (this.settings.inboxDir) {
-            const inboxDir = this.templateEngine.render(this.settings.inboxDir, {
-                date: formatDate(note.createdAt, this.settings.dateTitleFmt),
-                fileName: note.fileName,
-                contentType: note.contentType,
-            });
-            await checkAndCreateFolder(this.app.vault, inboxDir);
-            if (
-                this.app.vault.adapter instanceof CapacitorAdapter ||
-                this.app.vault.adapter instanceof FileSystemAdapter
-            ) {
-                filePath = getOsOptimizedPath(
-                    inboxDir,
-                    note.getFullFilename(),
-                    this.app.vault.adapter,
-                    this.fileSystemLimits,
-                );
-            } else {
-                filePath = normalizePath(`${inboxDir}/${note.getFullFilename()}`);
-            }
-        }
-
-        if (await this.app.vault.adapter.exists(filePath)) {
-            new Notice(`${note.getFullFilename()} already exists!`);
-        } else {
-            const newFile = await this.app.vault.create(filePath, note.content);
-            if (this.settings.openNewNote || this.settings.openNewNoteInNewTab) {
-                this.app.workspace.getLeaf(this.settings.openNewNoteInNewTab ? 'tab' : false).openFile(newFile);
-            }
-            new Notice(`${note.getFullFilename()} created successful`);
-        }
+    async getTextClipboardContent(): Promise<string> {
+        return await navigator.clipboard.readText();
     }
 }
 
