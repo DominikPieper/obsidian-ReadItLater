@@ -497,6 +497,126 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
+        containerEl.createEl('h2', { text: 'Bluesky' });
+
+        new Setting(containerEl)
+            .setName('Bluesky content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.blueskyContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.blueskyContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.blueskyContentTypeSlug
+                            : this.plugin.settings.blueskyContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.blueskyContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Bluesky note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %tootAuthorName%')
+                    .setValue(this.plugin.settings.blueskyNoteTitle || DEFAULT_SETTINGS.blueskyNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.blueskyNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Bluesky note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.blueskyNote || DEFAULT_SETTINGS.blueskyNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.blueskyNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
+            .setName('Download media attachments')
+            .setDesc(
+                'Media attachments will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadBlueskyMediaAttachments')
+                            ? this.plugin.settings.downloadBlueskyMediaAttachments
+                            : DEFAULT_SETTINGS.downloadBlueskyMediaAttachments,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadBlueskyMediaAttachments = value;
+                        if (value === false) {
+                            this.plugin.settings.downloadBlueskyMediaAttachmentsInDir = false;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Download media attachments to note directory')
+            .setDesc(
+                'Media attachments will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(
+                            this.plugin.settings,
+                            'downloadBlueskyMediaAttachmentsInDir',
+                        )
+                            ? this.plugin.settings.downloadBlueskyMediaAttachmentsInDir
+                            : DEFAULT_SETTINGS.downloadBlueskyMediaAttachmentsInDir,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadBlueskyMediaAttachmentsInDir = value;
+                        if (value === true) {
+                            this.plugin.settings.downloadBlueskyMediaAttachments = true;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Save replies')
+            .setDesc('If enabled, post replies will be saved.')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'saveBlueskyReplies')
+                            ? this.plugin.settings.saveBlueskyPostReplies
+                            : DEFAULT_SETTINGS.saveBlueskyPostReplies,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.saveBlueskyPostReplies = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl).setName('Bluesky post reply template').addTextArea((textarea) => {
+            textarea
+                .setValue(this.plugin.settings.blueskyPostReply || DEFAULT_SETTINGS.blueskyPostReply)
+                .onChange(async (value) => {
+                    this.plugin.settings.blueskyPostReply = value;
+                    await this.plugin.saveSettings();
+                });
+            textarea.inputEl.rows = 10;
+            textarea.inputEl.cols = 25;
+        });
+
         containerEl.createEl('h2', { text: 'Stack Exchange' });
 
         new Setting(containerEl)
