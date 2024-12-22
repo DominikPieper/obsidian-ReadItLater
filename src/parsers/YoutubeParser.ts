@@ -101,7 +101,7 @@ class YoutubeParser extends Parser {
             const duration = parse(video.contentDetails.duration);
 
             const tags: string[] =
-                video.snippet?.tags.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#')) ?? [];
+                video.snippet?.tags?.map((tag) => tag.replace(/[\s:\-_.]/g, '').replace(/^/, '#')) ?? [];
 
             const chapters = this.getVideoChapters(video.snippet.description);
 
