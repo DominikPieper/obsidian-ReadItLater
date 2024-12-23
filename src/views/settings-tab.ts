@@ -596,7 +596,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'saveBlueskyReplies')
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'saveBlueskyPostReplies')
                             ? this.plugin.settings.saveBlueskyPostReplies
                             : DEFAULT_SETTINGS.saveBlueskyPostReplies,
                     )

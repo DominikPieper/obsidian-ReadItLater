@@ -1,6 +1,8 @@
-import { Notice, request } from 'obsidian';
+import { moment, Notice, request } from 'obsidian';
 import { Note } from './Note';
 import { Parser } from './Parser';
+import { normalizeFilename } from 'src/helpers/fileutils';
+import { replaceImages } from 'src/helpers/replaceImages';
 
 interface PostId {
     handle: string;
@@ -28,6 +30,12 @@ interface PostData {
     content: string;
     author: Author;
     mediaAttachments: MediaAttachment[];
+    likeCount: number;
+    replyCount: number;
+    repostCount: number;
+    quoteCount: number;
+    publishedAt: Date;
+    facets: Facet[];
 }
 
 interface Post extends PostData {
@@ -36,12 +44,46 @@ interface Post extends PostData {
 
 interface PostReply extends PostData { }
 
-interface BlueskyPostNoteData {
+interface BaseFacet {
+    byteStart: number;
+    byteEnd: number;
+    type: FacetType;
+}
+
+interface MentionFacet extends BaseFacet {
+    type: FacetType.Mention;
+    did: string;
+}
+
+interface LinkFacet extends BaseFacet {
+    type: FacetType.Link;
+    uri: string;
+}
+
+interface TagFacet extends BaseFacet {
+    type: FacetType.Tag;
+    tag: string;
+}
+
+type Facet = MentionFacet | LinkFacet | TagFacet;
+
+enum FacetType {
+    Mention = 'mention',
+    Link = 'link',
+    Tag = 'tag'
+}
+
+interface BlueskyNoteData {
     date: string;
     content: string;
     postURL: string;
+    authorHandle: string;
     authorName: string;
-    likesCount: number;
+    likeCount: number;
+    replyCount: number;
+    repostCount: number;
+    quoteCount: number;
+    publishedAt: string;
     extra: {
         post: Post;
     };
@@ -63,27 +105,67 @@ export class BlueskyParser extends Parser {
         const createdAt = new Date();
         const post = await this.loadPost(clipboardContent);
 
-        console.log(post);
-
-        return new Note('', 'md', '', '', createdAt);
-    }
-
-    private async formatPostContent(post: Post): Promise<string> {
-        let formattedPostContent = post.content + this.formatPostMediaAttachment(post.mediaAttachments);
+        let formattedPostContent = this.formatPostContent(post, createdAt);
 
         if (this.plugin.settings.saveBlueskyPostReplies) {
-
+            post.replies.forEach((reply) => {
+                formattedPostContent = formattedPostContent.concat('\n\n***\n\n', this.formatPostContent(reply, createdAt, true));
+            });
         }
-    }
 
-    private formatPostMediaAttachment(mediaAttachments: MediaAttachment[]): string {
-        let formattedPostMediaAttachments = '';
-
-        mediaAttachments.forEach((attachment) => {
-            formattedPostMediaAttachments.concat('\n\n', `![${attachment.description}](${attachment.url})`);
+        const fileName = this.templateEngine.render(this.plugin.settings.blueskyNoteTitle, {
+            date: this.getFormattedDateForFilename(createdAt),
+            authorHandle: post.author.handle,
+            authorName: post.author.displayName
         });
 
-        return formattedPostMediaAttachments;
+        if (this.plugin.settings.downloadBlueskyMediaAttachments) {
+            let assetsDir;
+            if (this.plugin.settings.downloadBlueskyMediaAttachmentsInDir) {
+                assetsDir = this.templateEngine.render(this.plugin.settings.assetsDir, {
+                    date: '',
+                    fileName: '',
+                    contentType: '',
+                });
+                assetsDir = `${assetsDir}/${normalizeFilename(fileName)}`;
+            } else {
+                assetsDir = this.templateEngine.render(this.plugin.settings.assetsDir, {
+                    date: this.getFormattedDateForFilename(createdAt),
+                    fileName: normalizeFilename(fileName),
+                    contentType: this.plugin.settings.mastodonContentTypeSlug,
+                });
+            }
+
+            formattedPostContent = await replaceImages(this.plugin, fileName, formattedPostContent, assetsDir);
+        }
+
+
+        return new Note(fileName, 'md', formattedPostContent, this.plugin.settings.blueskyContentTypeSlug, createdAt);
+    }
+
+    private formatPostContent(post: PostData, createdAt: Date, useReplyTemplate: boolean = false): string {
+        let formattedPostMediaAttachments = '';
+
+        post.mediaAttachments.forEach((attachment) => {
+            formattedPostMediaAttachments = formattedPostMediaAttachments.concat('\n\n', `![](${attachment.url})${attachment.description}`);
+        });
+
+        const content = this.replaceFacets(post) + formattedPostMediaAttachments;
+
+        let template = useReplyTemplate ? this.plugin.settings.blueskyPostReply : this.plugin.settings.blueskyNote;
+
+        return this.templateEngine.render(template, {
+            date: this.getFormattedDateForContent(createdAt),
+            content: content,
+            postURL: post.url,
+            authorHandle: post.author.handle,
+            authorName: post.author.displayName || post.author.handle,
+            likeCount: post.likeCount,
+            replyCount: post.replyCount,
+            repostCount: post.repostCount,
+            quoteCount: post.quoteCount,
+            publishedAt: this.getFormattedDateForContent(post.publishedAt)
+        });
     }
 
     private async loadPost(postUrl: string): Promise<Post> {
@@ -108,6 +190,14 @@ export class BlueskyParser extends Parser {
                 mediaAttachments: Object.prototype.hasOwnProperty.call(reply.post, 'embed')
                     ? this.createMediaAttachments(reply.post.embed, replyPostUrl)
                     : [],
+                likeCount: reply.post.likeCount,
+                replyCount: reply.post.replyCount,
+                repostCount: reply.post.repostCount,
+                quoteCount: reply.post.replyCount,
+                publishedAt: moment(reply.post.record.createdAt).toDate(),
+                facets: reply.post.record?.facets?.map((facet: any) => {
+                    return this.createFacet(facet);
+                }) ?? []
             });
         });
 
@@ -118,8 +208,89 @@ export class BlueskyParser extends Parser {
             mediaAttachments: Object.prototype.hasOwnProperty.call(response.thread.post, 'embed')
                 ? this.createMediaAttachments(response.thread.post.embed, postUrl)
                 : [],
+            likeCount: response.thread.post.likeCount,
+            replyCount: response.thread.post.replyCount,
+            repostCount: response.thread.post.repostCount,
+            quoteCount: response.thread.post.replyCount,
+            publishedAt: moment(response.thread.post.record.createdAt).toDate(),
+            facets: response.thread.post.record?.facets?.map((facet: any) => {
+                return this.createFacet(facet);
+            }) ?? [],
             replies: replies,
         };
+    }
+
+    private createFacet(facetResponse: any): Facet {
+        if (facetResponse.features?.[0].$type === 'app.bsky.richtext.facet#mention') {
+            return {
+                type: FacetType.Mention,
+                did: facetResponse.features?.[0].did,
+                byteStart: facetResponse.index.byteStart,
+                byteEnd: facetResponse.index.byteEnd
+            }
+        } else if (facetResponse.features?.[0].$type === 'app.bsky.richtext.facet#tag') {
+            return {
+                type: FacetType.Tag,
+                tag: facetResponse.features?.[0].tag,
+                byteStart: facetResponse.index.byteStart,
+                byteEnd: facetResponse.index.byteEnd
+            }
+        } else if (facetResponse.features?.[0].$type === 'app.bsky.richtext.facet#link') {
+            return {
+                type: FacetType.Link,
+                uri: facetResponse.features?.[0].uri,
+                byteStart: facetResponse.index.byteStart,
+                byteEnd: facetResponse.index.byteEnd
+            }
+        }
+
+        throw new Error(`Unrecognized facet type ${facetResponse}`);
+    }
+
+    private replaceFacets(post: PostData): string {
+        if (post.facets.length === 0) {
+            return post.content;
+        }
+
+        const encoder = new TextEncoder();
+        const decoder = new TextDecoder();
+        const bytes = encoder.encode(post.content);
+
+        // Sort facets by position
+        const sortedFacets = [...post.facets].sort((a, b) => a.byteStart - b.byteStart);
+
+        let result = '';
+        let lastPos = 0;
+
+        for (const facet of sortedFacets) {
+            // Add text before the facet
+            result += decoder.decode(bytes.slice(lastPos, facet.byteStart));
+
+            // Extract facet text
+            const facetText = decoder.decode(bytes.slice(facet.byteStart, facet.byteEnd));
+
+            // Format based on facet type
+            switch (facet.type) {
+                case FacetType.Mention:
+                    result += `[${facetText}](https://bsky.app/profile/${facet.did})`;
+                    break;
+                case FacetType.Link:
+                    result += `[${facetText}](${facet.uri})`;
+                    break;
+                case FacetType.Tag:
+                    result += `[${facetText}](https://bsky.app/search?q=${encodeURIComponent(facet.tag)})`;
+                    break;
+            }
+
+            lastPos = facet.byteEnd;
+        }
+
+        // Add remaining text
+        if (lastPos < bytes.length) {
+            result += decoder.decode(bytes.slice(lastPos));
+        }
+
+        return result;
     }
 
     private createMediaAttachments(responseEmbed: any, postUrl: string): MediaAttachment[] {

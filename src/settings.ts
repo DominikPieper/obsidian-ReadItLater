@@ -150,9 +150,9 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     fileExistsStrategy: FileExistsStrategy.Ask,
     blueskyContentTypeSlug: 'bluesky',
     blueskyNoteTitle: 'Status from {{ authorName }} ({{ date }})',
-    blueskyNote: '[[ReadItLater]] [[Bluesky]]\n\n# [{{ authorName }}]({{ postURL }})\n\n> {{ content }}',
+    blueskyNote: '[[ReadItLater]] [[Bluesky]]\n\n# [{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
     downloadBlueskyMediaAttachments: true,
     downloadBlueskyMediaAttachmentsInDir: false,
     saveBlueskyPostReplies: false,
-    blueskyPostReply: '[{{ authorName }}]({{ postURL }})\n\n> {{ content }}',
+    blueskyPostReply: '[{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
 };
