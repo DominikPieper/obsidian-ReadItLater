@@ -1,15 +1,44 @@
-import { moment, Notice, request } from 'obsidian';
-import { Note } from './Note';
-import { Parser } from './Parser';
+import { Notice, moment, request } from 'obsidian';
 import { normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
+import { Note } from './Note';
+import { Parser } from './Parser';
+
+interface BaseFacet {
+    byteStart: number;
+    byteEnd: number;
+    type: FacetType;
+}
+
+interface MentionFacet extends BaseFacet {
+    type: FacetType.Mention;
+    did: string;
+}
+
+interface LinkFacet extends BaseFacet {
+    type: FacetType.Link;
+    uri: string;
+}
+
+interface TagFacet extends BaseFacet {
+    type: FacetType.Tag;
+    tag: string;
+}
+
+type Facet = MentionFacet | LinkFacet | TagFacet;
+
+enum FacetType {
+    Mention = 'mention',
+    Link = 'link',
+    Tag = 'tag',
+}
 
 interface PostId {
     handle: string;
     id: string;
 }
 
-type MediaAttachmentType = 'image' | 'video';
+type MediaAttachmentType = 'image' | 'video' | 'external';
 
 interface MediaAttachment {
     type: MediaAttachmentType;
@@ -42,36 +71,7 @@ interface Post extends PostData {
     replies: PostReply[];
 }
 
-interface PostReply extends PostData { }
-
-interface BaseFacet {
-    byteStart: number;
-    byteEnd: number;
-    type: FacetType;
-}
-
-interface MentionFacet extends BaseFacet {
-    type: FacetType.Mention;
-    did: string;
-}
-
-interface LinkFacet extends BaseFacet {
-    type: FacetType.Link;
-    uri: string;
-}
-
-interface TagFacet extends BaseFacet {
-    type: FacetType.Tag;
-    tag: string;
-}
-
-type Facet = MentionFacet | LinkFacet | TagFacet;
-
-enum FacetType {
-    Mention = 'mention',
-    Link = 'link',
-    Tag = 'tag'
-}
+interface PostReply extends PostData {}
 
 interface BlueskyNoteData {
     date: string;
@@ -85,7 +85,7 @@ interface BlueskyNoteData {
     quoteCount: number;
     publishedAt: string;
     extra: {
-        post: Post;
+        post: PostData;
     };
 }
 
@@ -96,12 +96,13 @@ export class BlueskyParser extends Parser {
 
     private EMBED_IMAGE_TYPE = 'app.bsky.embed.images#view';
     private EMBED_VIDEO_TYPE = 'app.bsky.embed.video#view';
+    private EMBED_EXTERNAL_TYPE = 'app.bsky.embed.external#view';
 
-    test(clipboardContent: string): boolean {
+    public test(clipboardContent: string): boolean {
         return this.isValidUrl(clipboardContent) && this.PATTERN.test(clipboardContent);
     }
 
-    async prepareNote(clipboardContent: string): Promise<Note> {
+    public async prepareNote(clipboardContent: string): Promise<Note> {
         const createdAt = new Date();
         const post = await this.loadPost(clipboardContent);
 
@@ -109,14 +110,17 @@ export class BlueskyParser extends Parser {
 
         if (this.plugin.settings.saveBlueskyPostReplies) {
             post.replies.forEach((reply) => {
-                formattedPostContent = formattedPostContent.concat('\n\n***\n\n', this.formatPostContent(reply, createdAt, true));
+                formattedPostContent = formattedPostContent.concat(
+                    '\n\n***\n\n',
+                    this.formatPostContent(reply, createdAt, true),
+                );
             });
         }
 
         const fileName = this.templateEngine.render(this.plugin.settings.blueskyNoteTitle, {
             date: this.getFormattedDateForFilename(createdAt),
             authorHandle: post.author.handle,
-            authorName: post.author.displayName
+            authorName: post.author.displayName,
         });
 
         if (this.plugin.settings.downloadBlueskyMediaAttachments) {
@@ -136,36 +140,10 @@ export class BlueskyParser extends Parser {
                 });
             }
 
-            formattedPostContent = await replaceImages(this.plugin, fileName, formattedPostContent, assetsDir);
+            formattedPostContent = await replaceImages(this.plugin, normalizeFilename(fileName), formattedPostContent, assetsDir);
         }
 
-
         return new Note(fileName, 'md', formattedPostContent, this.plugin.settings.blueskyContentTypeSlug, createdAt);
-    }
-
-    private formatPostContent(post: PostData, createdAt: Date, useReplyTemplate: boolean = false): string {
-        let formattedPostMediaAttachments = '';
-
-        post.mediaAttachments.forEach((attachment) => {
-            formattedPostMediaAttachments = formattedPostMediaAttachments.concat('\n\n', `![](${attachment.url})${attachment.description}`);
-        });
-
-        const content = this.replaceFacets(post) + formattedPostMediaAttachments;
-
-        let template = useReplyTemplate ? this.plugin.settings.blueskyPostReply : this.plugin.settings.blueskyNote;
-
-        return this.templateEngine.render(template, {
-            date: this.getFormattedDateForContent(createdAt),
-            content: content,
-            postURL: post.url,
-            authorHandle: post.author.handle,
-            authorName: post.author.displayName || post.author.handle,
-            likeCount: post.likeCount,
-            replyCount: post.replyCount,
-            repostCount: post.repostCount,
-            quoteCount: post.quoteCount,
-            publishedAt: this.getFormattedDateForContent(post.publishedAt)
-        });
     }
 
     private async loadPost(postUrl: string): Promise<Post> {
@@ -188,16 +166,17 @@ export class BlueskyParser extends Parser {
                 content: reply.post.record.text,
                 author: { ...reply.post.author },
                 mediaAttachments: Object.prototype.hasOwnProperty.call(reply.post, 'embed')
-                    ? this.createMediaAttachments(reply.post.embed, replyPostUrl)
+                    ? this.makeMediaAttachments(reply.post.embed, replyPostUrl)
                     : [],
                 likeCount: reply.post.likeCount,
                 replyCount: reply.post.replyCount,
                 repostCount: reply.post.repostCount,
                 quoteCount: reply.post.replyCount,
                 publishedAt: moment(reply.post.record.createdAt).toDate(),
-                facets: reply.post.record?.facets?.map((facet: any) => {
-                    return this.createFacet(facet);
-                }) ?? []
+                facets:
+                    reply.post.record?.facets?.map((facet: any) => {
+                        return this.makeFacet(facet);
+                    }) ?? [],
             });
         });
 
@@ -206,45 +185,118 @@ export class BlueskyParser extends Parser {
             content: response.thread.post.record.text,
             author: { ...response.thread.post.author },
             mediaAttachments: Object.prototype.hasOwnProperty.call(response.thread.post, 'embed')
-                ? this.createMediaAttachments(response.thread.post.embed, postUrl)
+                ? this.makeMediaAttachments(response.thread.post.embed, postUrl)
                 : [],
             likeCount: response.thread.post.likeCount,
             replyCount: response.thread.post.replyCount,
             repostCount: response.thread.post.repostCount,
             quoteCount: response.thread.post.replyCount,
             publishedAt: moment(response.thread.post.record.createdAt).toDate(),
-            facets: response.thread.post.record?.facets?.map((facet: any) => {
-                return this.createFacet(facet);
-            }) ?? [],
+            facets:
+                response.thread.post.record?.facets?.map((facet: any) => {
+                    return this.makeFacet(facet);
+                }) ?? [],
             replies: replies,
         };
     }
 
-    private createFacet(facetResponse: any): Facet {
+    private makeMediaAttachments(responseEmbed: any, postUrl: string): MediaAttachment[] {
+        const mediaAttachments: MediaAttachment[] = [];
+
+        if (responseEmbed.$type === this.EMBED_IMAGE_TYPE) {
+            responseEmbed.images.forEach((image: any) => {
+                mediaAttachments.push({
+                    type: 'image',
+                    url: image.fullsize,
+                    thumbnail: image.thumb,
+                    description: image.alt,
+                });
+            });
+        } else if (responseEmbed.$type === this.EMBED_VIDEO_TYPE) {
+            mediaAttachments.push({
+                type: 'video',
+                url: postUrl,
+                thumbnail: responseEmbed.thumbnail,
+                description: '',
+            });
+        } else if (responseEmbed.$type === this.EMBED_EXTERNAL_TYPE) {
+            mediaAttachments.push({
+                type: 'external',
+                url: responseEmbed.external.uri,
+                thumbnail: responseEmbed.external.thumb,
+                description: responseEmbed.external?.title || responseEmbed.external.alt || ''
+            });
+        }
+
+        return mediaAttachments;
+    }
+
+    private makeFacet(facetResponse: any): Facet {
         if (facetResponse.features?.[0].$type === 'app.bsky.richtext.facet#mention') {
             return {
                 type: FacetType.Mention,
                 did: facetResponse.features?.[0].did,
                 byteStart: facetResponse.index.byteStart,
-                byteEnd: facetResponse.index.byteEnd
-            }
+                byteEnd: facetResponse.index.byteEnd,
+            };
         } else if (facetResponse.features?.[0].$type === 'app.bsky.richtext.facet#tag') {
             return {
                 type: FacetType.Tag,
                 tag: facetResponse.features?.[0].tag,
                 byteStart: facetResponse.index.byteStart,
-                byteEnd: facetResponse.index.byteEnd
-            }
+                byteEnd: facetResponse.index.byteEnd,
+            };
         } else if (facetResponse.features?.[0].$type === 'app.bsky.richtext.facet#link') {
             return {
                 type: FacetType.Link,
                 uri: facetResponse.features?.[0].uri,
                 byteStart: facetResponse.index.byteStart,
-                byteEnd: facetResponse.index.byteEnd
-            }
+                byteEnd: facetResponse.index.byteEnd,
+            };
         }
 
         throw new Error(`Unrecognized facet type ${facetResponse}`);
+    }
+
+    private formatPostContent(post: PostData, createdAt: Date, useReplyTemplate: boolean = false): string {
+        let formattedPostMediaAttachments = '';
+
+        post.mediaAttachments.forEach((attachment) => {
+            let formattedAttachment;
+            if (attachment.type === 'video') {
+                formattedAttachment = `[Watch video on Bluesky](${attachment.url})`;
+            } else if (attachment.type === 'external') {
+                formattedAttachment = `![${attachment.description}](${attachment.thumbnail})\n${attachment.url}`;
+            } else {
+                formattedAttachment = `![](${attachment.thumbnail})\n${attachment.description}`;
+            }
+
+            formattedPostMediaAttachments = formattedPostMediaAttachments.concat(
+                '\n\n',
+                formattedAttachment,
+            );
+        });
+
+        const content = this.replaceFacets(post) + formattedPostMediaAttachments;
+
+        return this.renderPost(
+            useReplyTemplate ? this.plugin.settings.blueskyPostReply : this.plugin.settings.blueskyNote,
+            {
+                date: this.getFormattedDateForContent(createdAt),
+                content: content,
+                postURL: post.url,
+                authorHandle: post.author.handle,
+                authorName: post.author.displayName || post.author.handle,
+                likeCount: post.likeCount,
+                replyCount: post.replyCount,
+                repostCount: post.repostCount,
+                quoteCount: post.quoteCount,
+                publishedAt: this.getFormattedDateForContent(post.publishedAt),
+                extra: {
+                    post: post,
+                },
+            },
+        );
     }
 
     private replaceFacets(post: PostData): string {
@@ -293,28 +345,8 @@ export class BlueskyParser extends Parser {
         return result;
     }
 
-    private createMediaAttachments(responseEmbed: any, postUrl: string): MediaAttachment[] {
-        const mediaAttachments: MediaAttachment[] = [];
-
-        if (responseEmbed.$type === this.EMBED_IMAGE_TYPE) {
-            responseEmbed.images.forEach((image: any) => {
-                mediaAttachments.push({
-                    type: 'image',
-                    url: image.fullsize,
-                    thumbnail: image.thumb,
-                    description: image.alt,
-                });
-            });
-        } else if (responseEmbed.$type === this.EMBED_VIDEO_TYPE) {
-            mediaAttachments.push({
-                type: 'video',
-                url: postUrl,
-                thumbnail: responseEmbed.thumbnail,
-                description: '',
-            });
-        }
-
-        return mediaAttachments;
+    private renderPost(template: string, noteData: BlueskyNoteData): string {
+        return this.templateEngine.render(template, noteData);
     }
 
     private getPostUrl(postId: PostId): string {
