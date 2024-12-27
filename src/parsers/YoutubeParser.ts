@@ -136,8 +136,8 @@ class YoutubeParser extends Parser {
                     chapters: chapters,
                 },
             };
-        } catch (e) {
-            handleError(e);
+        } catch (error) {
+            handleError(error, 'Unable to parse Youtube API response.');
         }
     }
 
@@ -200,8 +200,8 @@ class YoutubeParser extends Parser {
                 channelName: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
                 extra: null,
             };
-        } catch (e) {
-            handleError(e);
+        } catch (error) {
+            handleError(error, 'Unable to parse Youtube schema from DOM.');
         }
     }
 

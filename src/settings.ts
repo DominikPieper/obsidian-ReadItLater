@@ -72,8 +72,8 @@ export interface ReadItLaterSettings {
     blueskyContentTypeSlug: string;
     blueskyNoteTitle: string;
     blueskyNote: string;
-    downloadBlueskyMediaAttachments: boolean;
-    downloadBlueskyMediaAttachmentsInDir: boolean;
+    downloadBlueskyEmbeds: boolean;
+    downloadBlueskyEmbedsInDir: boolean;
     saveBlueskyPostReplies: boolean;
     blueskyPostReply: string;
 }
@@ -151,8 +151,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     blueskyContentTypeSlug: 'bluesky',
     blueskyNoteTitle: 'Status from {{ authorName }} ({{ date }})',
     blueskyNote: '[[ReadItLater]] [[Bluesky]]\n\n# [{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
-    downloadBlueskyMediaAttachments: true,
-    downloadBlueskyMediaAttachmentsInDir: false,
+    downloadBlueskyEmbeds: true,
+    downloadBlueskyEmbedsInDir: false,
     saveBlueskyPostReplies: false,
     blueskyPostReply: '[{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
 };

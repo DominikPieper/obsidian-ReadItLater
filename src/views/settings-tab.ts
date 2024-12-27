@@ -504,21 +504,21 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             });
 
         new Setting(containerEl)
-            .setName('Download media attachments')
+            .setName('Download embedded content')
             .setDesc(
-                'Media attachments will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
+                'Embedded content will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
             )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadBlueskyMediaAttachments')
-                            ? this.plugin.settings.downloadBlueskyMediaAttachments
-                            : DEFAULT_SETTINGS.downloadBlueskyMediaAttachments,
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadBlueskyEmbeds')
+                            ? this.plugin.settings.downloadBlueskyEmbeds
+                            : DEFAULT_SETTINGS.downloadBlueskyEmbeds,
                     )
                     .onChange(async (value) => {
-                        this.plugin.settings.downloadBlueskyMediaAttachments = value;
+                        this.plugin.settings.downloadBlueskyEmbeds = value;
                         if (value === false) {
-                            this.plugin.settings.downloadBlueskyMediaAttachmentsInDir = false;
+                            this.plugin.settings.downloadBlueskyEmbedsInDir = false;
                         }
                         await this.plugin.saveSettings();
                         this.display();
@@ -526,24 +526,21 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         new Setting(containerEl)
-            .setName('Download media attachments to note directory')
+            .setName('Download embedded content to note directory')
             .setDesc(
-                'Media attachments will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
+                'Embedded content will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
             )
             .addToggle((toggle) =>
                 toggle
                     .setValue(
-                        Object.prototype.hasOwnProperty.call(
-                            this.plugin.settings,
-                            'downloadBlueskyMediaAttachmentsInDir',
-                        )
-                            ? this.plugin.settings.downloadBlueskyMediaAttachmentsInDir
-                            : DEFAULT_SETTINGS.downloadBlueskyMediaAttachmentsInDir,
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadBlueskyEmbedsInDir')
+                            ? this.plugin.settings.downloadBlueskyEmbedsInDir
+                            : DEFAULT_SETTINGS.downloadBlueskyEmbedsInDir,
                     )
                     .onChange(async (value) => {
-                        this.plugin.settings.downloadBlueskyMediaAttachmentsInDir = value;
+                        this.plugin.settings.downloadBlueskyEmbedsInDir = value;
                         if (value === true) {
-                            this.plugin.settings.downloadBlueskyMediaAttachments = true;
+                            this.plugin.settings.downloadBlueskyEmbeds = true;
                         }
                         await this.plugin.saveSettings();
                         this.display();
