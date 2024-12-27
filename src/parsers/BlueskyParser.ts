@@ -93,7 +93,7 @@ interface Post extends PostData {
     replies: PostReply[];
 }
 
-interface PostReply extends PostData { }
+interface PostReply extends PostData {}
 
 interface BlueskyNoteData {
     date: string;
@@ -266,8 +266,9 @@ export class BlueskyParser extends Parser {
                     type: EmbedType.Record,
                     url: this.getPostUrl(this.getPostIdFromAtUri(responseEmbed.record.uri)),
                     thumbnail: '',
-                    title: `Status from ${responseEmbed.record.author?.displayName || responseEmbed.record.author.handle
-                        }`,
+                    title: `Post from ${
+                        responseEmbed.record.author?.displayName || responseEmbed.record.author.handle
+                    }`,
                     description: responseEmbed.record.value.text,
                 });
                 break;
@@ -276,7 +277,7 @@ export class BlueskyParser extends Parser {
                     type: EmbedType.Record,
                     url: this.getPostUrl(this.getPostIdFromAtUri(responseEmbed.uri)),
                     thumbnail: '',
-                    title: `Status from ${responseEmbed.author?.displayName || responseEmbed.author.handle}`,
+                    title: `Post from ${responseEmbed.author?.displayName || responseEmbed.author.handle}`,
                     description: responseEmbed.value.text,
                 });
                 break;
