@@ -283,15 +283,15 @@ export class BlueskyParser extends Parser {
                 break;
             case EmbedTypeApi.RecordWithMedia:
                 if (Object.prototype.hasOwnProperty.call(responseEmbed, 'media')) {
-                    const mediaEmbed = this.makeEmbeds(responseEmbed.media, postUrl).shift();
-                    if (mediaEmbed) {
-                        embeds.push(mediaEmbed);
+                    const mediaEmbeds = this.makeEmbeds(responseEmbed.media, postUrl);
+                    if (mediaEmbeds) {
+                        embeds.push(...mediaEmbeds);
                     }
                 }
                 if (Object.prototype.hasOwnProperty.call(responseEmbed, 'record')) {
-                    const recordEmbed = this.makeEmbeds(responseEmbed.record.record, postUrl).shift();
-                    if (recordEmbed) {
-                        embeds.push(recordEmbed);
+                    const recordEmbeds = this.makeEmbeds(responseEmbed.record.record, postUrl);
+                    if (recordEmbeds) {
+                        embeds.push(...recordEmbeds);
                     }
                 }
                 break;
