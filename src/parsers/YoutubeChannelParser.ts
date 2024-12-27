@@ -89,7 +89,7 @@ export default class YoutubeChannelParser extends Parser {
                 channelShortsURL: `${channelURL}/shorts`,
             };
         } catch (error) {
-            handleError(error);
+            handleError(error, 'Unable to parse Youtube channel schema from DOM.');
         }
     }
 
@@ -141,8 +141,8 @@ export default class YoutubeChannelParser extends Parser {
                 channelVideosURL: `${channelURL}/videos`,
                 channelShortsURL: `${channelURL}/shorts`,
             };
-        } catch (e) {
-            handleError(e);
+        } catch (error) {
+            handleError(error, 'Unable to parse Youtube channel API response.');
         }
     }
 

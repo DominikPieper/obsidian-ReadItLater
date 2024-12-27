@@ -21,6 +21,7 @@ import { VaultRepository } from './repository/VaultRepository';
 import DefaultVaultRepository from './repository/DefaultVaultRepository';
 import { NoteService } from './NoteService';
 import { ReadItLaterApi } from './ReadtItLaterApi';
+import { BlueskyParser } from './parsers/BlueskyParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     public api: ReadItLaterApi;
@@ -52,10 +53,11 @@ export default class ReadItLaterPlugin extends Plugin {
             new BilibiliParser(this.app, this, this.templateEngine),
             new TwitterParser(this.app, this, this.templateEngine),
             new StackExchangeParser(this.app, this, this.templateEngine),
-            new MastodonParser(this.app, this, this.templateEngine),
             new TikTokParser(this.app, this, this.templateEngine),
             new GithubParser(this.app, this, this.templateEngine),
             new WikipediaParser(this.app, this, this.templateEngine),
+            new BlueskyParser(this.app, this, this.templateEngine),
+            new MastodonParser(this.app, this, this.templateEngine),
             new WebsiteParser(this.app, this, this.templateEngine),
             new TextSnippetParser(this.app, this, this.templateEngine),
         ]);

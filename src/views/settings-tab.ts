@@ -190,6 +190,98 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         containerEl.createEl('h1', { text: 'Content Types' });
 
+        containerEl.createEl('h2', { text: 'Readable Article' });
+
+        new Setting(containerEl)
+            .setName('Readable content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.parseableArticleContentType}`)
+                    .setValue(
+                        typeof this.plugin.settings.parseableArticleContentType === 'undefined'
+                            ? DEFAULT_SETTINGS.parseableArticleContentType
+                            : this.plugin.settings.parseableArticleContentType,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.parseableArticleContentType = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Readable article note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(
+                        this.plugin.settings.parseableArticleNoteTitle || DEFAULT_SETTINGS.parseableArticleNoteTitle,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.parseableArticleNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Readable article note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.parsableArticleNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
+            .setName('Download images')
+            .setDesc(
+                'Images from article will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImages')
+                            ? this.plugin.settings.downloadImages
+                            : DEFAULT_SETTINGS.downloadImages,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadImages = value;
+                        if (value === false) {
+                            this.plugin.settings.downloadImagesInArticleDir = false;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Download images to note directory')
+            .setDesc(
+                'Images from article will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImagesInArticleDir')
+                            ? this.plugin.settings.downloadImagesInArticleDir
+                            : DEFAULT_SETTINGS.downloadImagesInArticleDir,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadImagesInArticleDir = value;
+                        if (value === true) {
+                            this.plugin.settings.downloadImages = true;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }),
+            );
+
         containerEl.createEl('h2', { text: 'YouTube' });
 
         new Setting(containerEl)
@@ -320,138 +412,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        containerEl.createEl('h2', { text: 'Vimeo' });
-
-        new Setting(containerEl)
-            .setName('Vimeo content type slug')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addText((text) =>
-                text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.vimeoContentTypeSlug}`)
-                    .setValue(
-                        typeof this.plugin.settings.vimeoContentTypeSlug === 'undefined'
-                            ? DEFAULT_SETTINGS.vimeoContentTypeSlug
-                            : this.plugin.settings.vimeoContentTypeSlug,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.vimeoContentTypeSlug = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Vimeo note title template')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addText((text) =>
-                text
-                    .setPlaceholder('Defaults to %title%')
-                    .setValue(this.plugin.settings.vimeoNoteTitle || DEFAULT_SETTINGS.vimeoNoteTitle)
-                    .onChange(async (value) => {
-                        this.plugin.settings.vimeoNoteTitle = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Vimeo note template')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addTextArea((textarea) => {
-                textarea
-                    .setValue(this.plugin.settings.vimeoNote || DEFAULT_SETTINGS.vimeoNote)
-                    .onChange(async (value) => {
-                        this.plugin.settings.vimeoNote = value;
-                        await this.plugin.saveSettings();
-                    });
-                textarea.inputEl.rows = 10;
-                textarea.inputEl.cols = 25;
-            });
-
-        new Setting(containerEl).setName('Vimeo embed player width').addText((text) =>
-            text
-                .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedWidth)
-                .setValue(this.plugin.settings.vimeoEmbedWidth || DEFAULT_SETTINGS.vimeoEmbedWidth)
-                .onChange(async (value) => {
-                    this.plugin.settings.vimeoEmbedWidth = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
-
-        new Setting(containerEl).setName('Vimeo embed player height').addText((text) =>
-            text
-                .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedHeight)
-                .setValue(this.plugin.settings.vimeoEmbedHeight || DEFAULT_SETTINGS.vimeoEmbedHeight)
-                .onChange(async (value) => {
-                    this.plugin.settings.vimeoEmbedHeight = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
-
-        containerEl.createEl('h2', { text: 'Bilibili' });
-
-        new Setting(containerEl)
-            .setName('Bilibili content type slug')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addText((text) =>
-                text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.bilibiliContentTypeSlug}`)
-                    .setValue(
-                        typeof this.plugin.settings.bilibiliContentTypeSlug === 'undefined'
-                            ? DEFAULT_SETTINGS.bilibiliContentTypeSlug
-                            : this.plugin.settings.bilibiliContentTypeSlug,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.bilibiliContentTypeSlug = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Bilibili note template title')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addText((text) =>
-                text
-                    .setPlaceholder('Defaults to %title%')
-                    .setValue(this.plugin.settings.bilibiliNoteTitle || DEFAULT_SETTINGS.bilibiliNoteTitle)
-                    .onChange(async (value) => {
-                        this.plugin.settings.bilibiliNoteTitle = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Bilibili note template')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addTextArea((textarea) => {
-                textarea
-                    .setValue(this.plugin.settings.bilibiliNote || DEFAULT_SETTINGS.bilibiliNote)
-                    .onChange(async (value) => {
-                        this.plugin.settings.bilibiliNote = value;
-                        await this.plugin.saveSettings();
-                    });
-                textarea.inputEl.rows = 10;
-                textarea.inputEl.cols = 25;
-            });
-
-        new Setting(containerEl).setName('Bilibili embed player width').addText((text) =>
-            text
-                .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedWidth)
-                .setValue(this.plugin.settings.bilibiliEmbedWidth || DEFAULT_SETTINGS.bilibiliEmbedWidth)
-                .onChange(async (value) => {
-                    this.plugin.settings.bilibiliEmbedWidth = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
-
-        new Setting(containerEl).setName('Bilibili embed player height').addText((text) =>
-            text
-                .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedHeight)
-                .setValue(this.plugin.settings.bilibiliEmbedHeight || DEFAULT_SETTINGS.bilibiliEmbedHeight)
-                .onChange(async (value) => {
-                    this.plugin.settings.bilibiliEmbedHeight = value;
-                    await this.plugin.saveSettings();
-                }),
-        );
-
         containerEl.createEl('h2', { text: 'Twitter' });
 
         new Setting(containerEl)
@@ -496,6 +456,123 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.rows = 10;
                 textarea.inputEl.cols = 25;
             });
+
+        containerEl.createEl('h2', { text: 'Bluesky' });
+
+        new Setting(containerEl)
+            .setName('Bluesky content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.blueskyContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.blueskyContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.blueskyContentTypeSlug
+                            : this.plugin.settings.blueskyContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.blueskyContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Bluesky note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %tootAuthorName%')
+                    .setValue(this.plugin.settings.blueskyNoteTitle || DEFAULT_SETTINGS.blueskyNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.blueskyNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Bluesky note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.blueskyNote || DEFAULT_SETTINGS.blueskyNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.blueskyNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
+            .setName('Download embedded content')
+            .setDesc(
+                'Embedded content will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadBlueskyEmbeds')
+                            ? this.plugin.settings.downloadBlueskyEmbeds
+                            : DEFAULT_SETTINGS.downloadBlueskyEmbeds,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadBlueskyEmbeds = value;
+                        if (value === false) {
+                            this.plugin.settings.downloadBlueskyEmbedsInDir = false;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Download embedded content to note directory')
+            .setDesc(
+                'Embedded content will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadBlueskyEmbedsInDir')
+                            ? this.plugin.settings.downloadBlueskyEmbedsInDir
+                            : DEFAULT_SETTINGS.downloadBlueskyEmbedsInDir,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadBlueskyEmbedsInDir = value;
+                        if (value === true) {
+                            this.plugin.settings.downloadBlueskyEmbeds = true;
+                        }
+                        await this.plugin.saveSettings();
+                        this.display();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Save replies')
+            .setDesc('If enabled, post replies will be saved.')
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'saveBlueskyPostReplies')
+                            ? this.plugin.settings.saveBlueskyPostReplies
+                            : DEFAULT_SETTINGS.saveBlueskyPostReplies,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.saveBlueskyPostReplies = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl).setName('Bluesky post reply template').addTextArea((textarea) => {
+            textarea
+                .setValue(this.plugin.settings.blueskyPostReply || DEFAULT_SETTINGS.blueskyPostReply)
+                .onChange(async (value) => {
+                    this.plugin.settings.blueskyPostReply = value;
+                    await this.plugin.saveSettings();
+                });
+            textarea.inputEl.rows = 10;
+            textarea.inputEl.cols = 25;
+        });
 
         containerEl.createEl('h2', { text: 'Stack Exchange' });
 
@@ -718,6 +795,138 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             textarea.inputEl.cols = 25;
         });
 
+        containerEl.createEl('h2', { text: 'Vimeo' });
+
+        new Setting(containerEl)
+            .setName('Vimeo content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.vimeoContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.vimeoContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.vimeoContentTypeSlug
+                            : this.plugin.settings.vimeoContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Vimeo note title template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(this.plugin.settings.vimeoNoteTitle || DEFAULT_SETTINGS.vimeoNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Vimeo note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.vimeoNote || DEFAULT_SETTINGS.vimeoNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.vimeoNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl).setName('Vimeo embed player width').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedWidth)
+                .setValue(this.plugin.settings.vimeoEmbedWidth || DEFAULT_SETTINGS.vimeoEmbedWidth)
+                .onChange(async (value) => {
+                    this.plugin.settings.vimeoEmbedWidth = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
+
+        new Setting(containerEl).setName('Vimeo embed player height').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedHeight)
+                .setValue(this.plugin.settings.vimeoEmbedHeight || DEFAULT_SETTINGS.vimeoEmbedHeight)
+                .onChange(async (value) => {
+                    this.plugin.settings.vimeoEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
+
+        containerEl.createEl('h2', { text: 'Bilibili' });
+
+        new Setting(containerEl)
+            .setName('Bilibili content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.bilibiliContentTypeSlug}`)
+                    .setValue(
+                        typeof this.plugin.settings.bilibiliContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.bilibiliContentTypeSlug
+                            : this.plugin.settings.bilibiliContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.bilibiliContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Bilibili note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder('Defaults to %title%')
+                    .setValue(this.plugin.settings.bilibiliNoteTitle || DEFAULT_SETTINGS.bilibiliNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.bilibiliNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Bilibili note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.bilibiliNote || DEFAULT_SETTINGS.bilibiliNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.bilibiliNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl).setName('Bilibili embed player width').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedWidth)
+                .setValue(this.plugin.settings.bilibiliEmbedWidth || DEFAULT_SETTINGS.bilibiliEmbedWidth)
+                .onChange(async (value) => {
+                    this.plugin.settings.bilibiliEmbedWidth = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
+
+        new Setting(containerEl).setName('Bilibili embed player height').addText((text) =>
+            text
+                .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedHeight)
+                .setValue(this.plugin.settings.bilibiliEmbedHeight || DEFAULT_SETTINGS.bilibiliEmbedHeight)
+                .onChange(async (value) => {
+                    this.plugin.settings.bilibiliEmbedHeight = value;
+                    await this.plugin.saveSettings();
+                }),
+        );
+
         containerEl.createEl('h2', { text: 'TikTok' });
 
         new Setting(containerEl)
@@ -783,98 +992,6 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }),
         );
-
-        containerEl.createEl('h2', { text: 'Readable Article' });
-
-        new Setting(containerEl)
-            .setName('Readable content type slug')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addText((text) =>
-                text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.parseableArticleContentType}`)
-                    .setValue(
-                        typeof this.plugin.settings.parseableArticleContentType === 'undefined'
-                            ? DEFAULT_SETTINGS.parseableArticleContentType
-                            : this.plugin.settings.parseableArticleContentType,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.parseableArticleContentType = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Readable article note template title')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addText((text) =>
-                text
-                    .setPlaceholder('Defaults to %title%')
-                    .setValue(
-                        this.plugin.settings.parseableArticleNoteTitle || DEFAULT_SETTINGS.parseableArticleNoteTitle,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.parseableArticleNoteTitle = value;
-                        await this.plugin.saveSettings();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Readable article note template')
-            .setDesc(this.createTemplateVariableReferenceDiv())
-            .addTextArea((textarea) => {
-                textarea
-                    .setValue(this.plugin.settings.parsableArticleNote || DEFAULT_SETTINGS.parsableArticleNote)
-                    .onChange(async (value) => {
-                        this.plugin.settings.parsableArticleNote = value;
-                        await this.plugin.saveSettings();
-                    });
-                textarea.inputEl.rows = 10;
-                textarea.inputEl.cols = 25;
-            });
-
-        new Setting(containerEl)
-            .setName('Download images')
-            .setDesc(
-                'Images from article will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
-            )
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImages')
-                            ? this.plugin.settings.downloadImages
-                            : DEFAULT_SETTINGS.downloadImages,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadImages = value;
-                        if (value === false) {
-                            this.plugin.settings.downloadImagesInArticleDir = false;
-                        }
-                        await this.plugin.saveSettings();
-                        this.display();
-                    }),
-            );
-
-        new Setting(containerEl)
-            .setName('Download images to note directory')
-            .setDesc(
-                'Images from article will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
-            )
-            .addToggle((toggle) =>
-                toggle
-                    .setValue(
-                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadImagesInArticleDir')
-                            ? this.plugin.settings.downloadImagesInArticleDir
-                            : DEFAULT_SETTINGS.downloadImagesInArticleDir,
-                    )
-                    .onChange(async (value) => {
-                        this.plugin.settings.downloadImagesInArticleDir = value;
-                        if (value === true) {
-                            this.plugin.settings.downloadImages = true;
-                        }
-                        await this.plugin.saveSettings();
-                        this.display();
-                    }),
-            );
 
         containerEl.createEl('h2', { text: 'Nonreadable Article' });
 

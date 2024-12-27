@@ -69,6 +69,13 @@ export interface ReadItLaterSettings {
     youtubeChannelNoteTitle: string;
     youtubeChannelNote: string;
     fileExistsStrategy: FileExistsStrategy;
+    blueskyContentTypeSlug: string;
+    blueskyNoteTitle: string;
+    blueskyNote: string;
+    downloadBlueskyEmbeds: boolean;
+    downloadBlueskyEmbedsInDir: boolean;
+    saveBlueskyPostReplies: boolean;
+    blueskyPostReply: string;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -141,4 +148,11 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeChannelNote:
         '[[ReadItLater]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n![{{ channelTitle }}|300]({{ channelAvatar }})\n\n[Videos]({{ channelVideosURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
     fileExistsStrategy: FileExistsStrategy.Ask,
+    blueskyContentTypeSlug: 'bluesky',
+    blueskyNoteTitle: 'Status from {{ authorName }} ({{ date }})',
+    blueskyNote: '[[ReadItLater]] [[Bluesky]]\n\n# [{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
+    downloadBlueskyEmbeds: true,
+    downloadBlueskyEmbedsInDir: false,
+    saveBlueskyPostReplies: false,
+    blueskyPostReply: '[{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
 };
