@@ -2,6 +2,7 @@ import { moment, request } from 'obsidian';
 import { Duration, parse, toSeconds } from 'iso8601-duration';
 import { handleError } from 'src/helpers/error';
 import { getJavascriptDeclarationByName } from 'src/helpers/domUtils';
+import { getDesktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
@@ -146,10 +147,7 @@ class YoutubeParser extends Parser {
             const response = await request({
                 method: 'GET',
                 url,
-                headers: {
-                    'user-agent':
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-                },
+                headers: { ...getDesktopBrowserUserAgent() },
             });
 
             const videoHTML = new DOMParser().parseFromString(response, 'text/html');
