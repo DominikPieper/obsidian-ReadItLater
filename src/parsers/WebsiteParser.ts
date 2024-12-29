@@ -141,6 +141,17 @@ class WebsiteParser extends Parser {
             }
         });
 
+        //fix for substack images
+        document.body.querySelectorAll('.captioned-image-container figure')?.forEach((figure) => {
+            const imgEl = figure.querySelector('img');
+            if (!imgEl) {
+                return;
+            }
+
+            figure.querySelector('.image-link').remove();
+            figure.prepend(imgEl);
+        });
+
         return document;
     }
 
