@@ -282,7 +282,7 @@ class WebsiteParser extends Parser {
             },
         });
 
-        let charset: string = charsetOverride ?? this.getCharsetFromResponseHeader(response);
+        const charset: string = charsetOverride ?? this.getCharsetFromResponseHeader(response);
 
         const buffer = response.arrayBuffer;
         const decoder = new TextDecoder(charset);
@@ -294,7 +294,8 @@ class WebsiteParser extends Parser {
         // Double-check meta tags for charset
         const metaCharset = document.querySelector('meta[charset], meta[http-equiv="Content-Type"]');
         if (metaCharset) {
-            const docCharset = metaCharset.getAttribute('charset') ||
+            const docCharset =
+                metaCharset.getAttribute('charset') ||
                 metaCharset.getAttribute('content')?.match(/charset=([^;]+)/i)?.[1];
             if (docCharset && docCharset !== charset) {
                 // If different charset found in meta, re-decode

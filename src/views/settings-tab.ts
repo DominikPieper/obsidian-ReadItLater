@@ -197,7 +197,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.parseableArticleContentType}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.parseableArticleContentType)
                     .setValue(
                         typeof this.plugin.settings.parseableArticleContentType === 'undefined'
                             ? DEFAULT_SETTINGS.parseableArticleContentType
@@ -214,7 +214,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to %title%')
+                    .setPlaceholder(DEFAULT_SETTINGS.parseableArticleNoteTitle)
                     .setValue(
                         this.plugin.settings.parseableArticleNoteTitle || DEFAULT_SETTINGS.parseableArticleNoteTitle,
                     )
@@ -289,7 +289,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.youtubeContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.youtubeContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.youtubeContentTypeSlug
@@ -306,7 +306,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeNoteTitle}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.youtubeNoteTitle)
                     .setValue(this.plugin.settings.youtubeNoteTitle || DEFAULT_SETTINGS.youtubeNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.youtubeNoteTitle = value;
@@ -373,7 +373,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeChannelContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.youtubeChannelContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.youtubeChannelContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.youtubeChannelContentTypeSlug
@@ -390,7 +390,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.youtubeChannelNoteTitle}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.youtubeChannelNoteTitle)
                     .setValue(this.plugin.settings.youtubeChannelNoteTitle || DEFAULT_SETTINGS.youtubeChannelNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.youtubeChannelNoteTitle = value;
@@ -419,7 +419,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.twitterContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.twitterContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.twitterContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.twitterContentTypeSlug
@@ -436,7 +436,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to %tweetAuthorName%')
+                    .setPlaceholder(DEFAULT_SETTINGS.twitterNoteTitle)
                     .setValue(this.plugin.settings.twitterNoteTitle || DEFAULT_SETTINGS.twitterNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.twitterNoteTitle = value;
@@ -464,7 +464,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.blueskyContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.blueskyContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.blueskyContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.blueskyContentTypeSlug
@@ -481,7 +481,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to %tootAuthorName%')
+                    .setPlaceholder(DEFAULT_SETTINGS.blueskyNoteTitle)
                     .setValue(this.plugin.settings.blueskyNoteTitle || DEFAULT_SETTINGS.blueskyNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.blueskyNoteTitle = value;
@@ -581,7 +581,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.stackExchangeContentType}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.stackExchangeContentType)
                     .setValue(
                         typeof this.plugin.settings.stackExchangeContentType === 'undefined'
                             ? DEFAULT_SETTINGS.stackExchangeContentType
@@ -595,7 +595,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
 
         new Setting(containerEl).setName('Stack Exchange note title template').addText((text) =>
             text
-                .setPlaceholder('Defaults to %title%')
+                .setPlaceholder(DEFAULT_SETTINGS.stackExchangeNoteTitle)
                 .setValue(this.plugin.settings.stackExchangeNoteTitle || DEFAULT_SETTINGS.stackExchangeNoteTitle)
                 .onChange(async (value) => {
                     this.plugin.settings.stackExchangeNoteTitle = value;
@@ -675,6 +675,70 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
+        containerEl.createEl('h2', { text: 'Pinterest' });
+
+        new Setting(containerEl)
+            .setName('Pinterest content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.pinterestContentTypeSlug)
+                    .setValue(
+                        typeof this.plugin.settings.pinterestContentTypeSlug === 'undefined'
+                            ? DEFAULT_SETTINGS.pinterestContentTypeSlug
+                            : this.plugin.settings.pinterestContentTypeSlug,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.pinterestContentTypeSlug = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Pinterest note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.pinterestNoteTitle)
+                    .setValue(this.plugin.settings.pinterestNoteTitle || DEFAULT_SETTINGS.pinterestNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.pinterestNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(containerEl)
+            .setName('Pinterest note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.pinterestNote || DEFAULT_SETTINGS.pinterestNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.pinterestNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(containerEl)
+            .setName('Download image')
+            .setDesc(
+                'Image will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadPinterestImage')
+                            ? this.plugin.settings.downloadPinterestImage
+                            : DEFAULT_SETTINGS.downloadPinterestImage,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadPinterestImage = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
         containerEl.createEl('h2', { text: 'Mastodon' });
 
         new Setting(containerEl)
@@ -682,7 +746,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.mastodonContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.mastodonContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.mastodonContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.mastodonContentTypeSlug
@@ -699,7 +763,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to %tootAuthorName%')
+                    .setPlaceholder(DEFAULT_SETTINGS.mastodonNoteTitle)
                     .setValue(this.plugin.settings.mastodonNoteTitle || DEFAULT_SETTINGS.mastodonNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.mastodonNoteTitle = value;
@@ -802,7 +866,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.vimeoContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.vimeoContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.vimeoContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.vimeoContentTypeSlug
@@ -819,7 +883,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to %title%')
+                    .setPlaceholder(DEFAULT_SETTINGS.vimeoNoteTitle)
                     .setValue(this.plugin.settings.vimeoNoteTitle || DEFAULT_SETTINGS.vimeoNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.vimeoNoteTitle = value;
@@ -868,7 +932,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.bilibiliContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.bilibiliContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.bilibiliContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.bilibiliContentTypeSlug
@@ -885,7 +949,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder('Defaults to %title%')
+                    .setPlaceholder(DEFAULT_SETTINGS.bilibiliNoteTitle)
                     .setValue(this.plugin.settings.bilibiliNoteTitle || DEFAULT_SETTINGS.bilibiliNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.bilibiliNoteTitle = value;
@@ -934,7 +998,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.tikTokContentTypeSlug}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.tikTokContentTypeSlug)
                     .setValue(
                         typeof this.plugin.settings.tikTokContentTypeSlug === 'undefined'
                             ? DEFAULT_SETTINGS.tikTokContentTypeSlug
@@ -951,7 +1015,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder('TikTok from %authorName% (%date%)')
+                    .setPlaceholder(DEFAULT_SETTINGS.tikTokNoteTitle)
                     .setValue(this.plugin.settings.tikTokNoteTitle || DEFAULT_SETTINGS.tikTokNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.tikTokNoteTitle = value;
@@ -1000,7 +1064,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.notParseableArticleContentType}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.notParseableArticleContentType)
                     .setValue(
                         typeof this.plugin.settings.notParseableArticleContentType === 'undefined'
                             ? DEFAULT_SETTINGS.notParseableArticleContentType
@@ -1017,7 +1081,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder("Defaults to 'Article %date%'")
+                    .setPlaceholder(DEFAULT_SETTINGS.notParseableArticleNoteTitle)
                     .setValue(
                         this.plugin.settings.notParseableArticleNoteTitle ||
                             DEFAULT_SETTINGS.notParseableArticleNoteTitle,
@@ -1049,7 +1113,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder(`Defaults to ${DEFAULT_SETTINGS.textSnippetContentType}`)
+                    .setPlaceholder(DEFAULT_SETTINGS.textSnippetContentType)
                     .setValue(
                         typeof this.plugin.settings.textSnippetContentType === 'undefined'
                             ? DEFAULT_SETTINGS.textSnippetContentType
@@ -1066,7 +1130,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
-                    .setPlaceholder("Defaults to 'Note %date%'")
+                    .setPlaceholder(DEFAULT_SETTINGS.textSnippetNoteTitle)
                     .setValue(this.plugin.settings.textSnippetNoteTitle || DEFAULT_SETTINGS.textSnippetNoteTitle)
                     .onChange(async (value) => {
                         this.plugin.settings.textSnippetNoteTitle = value;
