@@ -10,6 +10,7 @@
     - [Twitter](#twitter)
     - [Bluesky](#bluesky)
     - [Stack Exchange](#stack-exchange)
+    - [Pinterest](#pinterest)
     - [Mastodon](#mastodon)
     - [Vimeo](#vimeo)
     - [Bilibili](#bilibili)
@@ -197,7 +198,7 @@ Parsing of HTML DOM has its limitations thus additional data can be fetched only
 | channelTitle              | Channel title.                                       |
 | channelDescription        | Channel description.                                 |
 | channelURL                | Channel URL on Youtube.com.                          |
-| channelAvater             | URL of channel's avatar (thumbnail) image.           |
+| channelAvatar             | URL of channel's avatar (thumbnail) image.           |
 | channelBanner             | URL of channel's banner image.                       |
 | channelSubscribersCount   | The number of subscribers that the channel has.      |
 | channelVideosCount        | The number of public videos uploaded to the channel. |
@@ -289,6 +290,26 @@ If enabled in plugin settings, you can fetch also replies.
 | answerContent             | Answer content                              |
 | authorName                | Answer author name                          |
 | authorProfileURL          | Answer author profile URL                   |
+
+### Pinterest
+
+| Title template variable | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| authorName              | Pin author name                              |
+| date                    | Current date in format from plugin settings. |
+
+| Content template variable | Description                                          |
+| ------------------------- | ---------------------------------------------------- |
+| date                      | Current date in format from plugin settings.         |
+| pinId                     | Pin ID.                                              |
+| pinURL                    | URL of pin.                                          |
+| title                     | Pin title.                                           |
+| link                      | Pin link.                                            |
+| image                     | URL of pin image.                                    |
+| description               | Pin description.                                     |
+| likeCount                 | Pin like count.                                      |
+| authorName                | Pin author name.                                     |
+| authorProfileURL          | URL of Pin author page.                              |
 
 ### Mastodon
 
