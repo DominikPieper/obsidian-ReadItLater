@@ -2,7 +2,7 @@ import { Platform, request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
-import { getDesktopBrowserUserAgent } from 'src/helpers/networkUtils';
+import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
@@ -53,7 +53,7 @@ class StackExchangeParser extends Parser {
         const response = await request({
             method: 'GET',
             url: clipboardContent,
-            headers: { ...getDesktopBrowserUserAgent() },
+            headers: { ...desktopBrowserUserAgent },
         });
         const document = new DOMParser().parseFromString(response, 'text/html');
         const question = await this.parseDocument(document);

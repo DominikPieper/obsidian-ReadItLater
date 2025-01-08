@@ -1,7 +1,7 @@
 import { request } from 'obsidian';
 import { getJavascriptDeclarationByName } from 'src/helpers/domUtils';
 import { handleError } from 'src/helpers/error';
-import { getDesktopBrowserUserAgent } from 'src/helpers/networkUtils';
+import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
@@ -49,7 +49,7 @@ export default class YoutubeChannelParser extends Parser {
             const response = await request({
                 method: 'GET',
                 url,
-                headers: { ...getDesktopBrowserUserAgent() },
+                headers: { ...desktopBrowserUserAgent },
             });
 
             const [, channelURL] = this.PATTERN.exec(url);

@@ -3,10 +3,10 @@ import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { getBaseUrl, normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
-import { getDesktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
+import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 
 interface ReadabilityArticle {
     title: string;
@@ -276,10 +276,7 @@ class WebsiteParser extends Parser {
         const response = await requestUrl({
             method: 'GET',
             url: url.href,
-            headers: {
-                'user-agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            },
+            headers: { ...desktopBrowserUserAgent },
         });
 
         const charset: string = charsetOverride ?? this.getCharsetFromResponseHeader(response);

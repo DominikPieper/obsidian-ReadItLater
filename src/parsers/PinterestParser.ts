@@ -1,5 +1,5 @@
 import { request } from 'obsidian';
-import { getDesktopBrowserUserAgent } from 'src/helpers/networkUtils';
+import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
 import { Note } from './Note';
@@ -85,7 +85,7 @@ export class PinterestParser extends Parser {
         const response = await request({
             method: 'GET',
             url: url,
-            headers: { ...getDesktopBrowserUserAgent() },
+            headers: { ...desktopBrowserUserAgent },
         });
         const document = new DOMParser().parseFromString(response, 'text/html');
 
