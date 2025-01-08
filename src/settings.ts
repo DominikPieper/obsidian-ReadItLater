@@ -76,6 +76,10 @@ export interface ReadItLaterSettings {
     downloadBlueskyEmbedsInDir: boolean;
     saveBlueskyPostReplies: boolean;
     blueskyPostReply: string;
+    pinterestContentTypeSlug: string;
+    pinterestNoteTitle: string;
+    pinterestNote: string;
+    downloadPinterestImage: boolean;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -155,4 +159,9 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     downloadBlueskyEmbedsInDir: false,
     saveBlueskyPostReplies: false,
     blueskyPostReply: '[{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
+    pinterestContentTypeSlug: 'pinterest',
+    pinterestNoteTitle: 'Pin from {{ authorName }} ({{ date }})',
+    pinterestNote:
+        '[[ReadItLater]] [[Pinterest]]\n\n# [{{ authorName }}]({{ pinURL }})\n\n![{{ description }}]({{ image }})\n{{ description }}',
+    downloadPinterestImage: true,
 };

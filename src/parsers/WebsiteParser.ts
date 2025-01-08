@@ -3,6 +3,7 @@ import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { getBaseUrl, normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
+import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
@@ -275,13 +276,10 @@ class WebsiteParser extends Parser {
         const response = await requestUrl({
             method: 'GET',
             url: url.href,
-            headers: {
-                'user-agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            },
+            headers: { ...desktopBrowserUserAgent },
         });
 
-        let charset: string = charsetOverride ?? this.getCharsetFromResponseHeader(response);
+        const charset: string = charsetOverride ?? this.getCharsetFromResponseHeader(response);
 
         const buffer = response.arrayBuffer;
         const decoder = new TextDecoder(charset);
@@ -293,7 +291,8 @@ class WebsiteParser extends Parser {
         // Double-check meta tags for charset
         const metaCharset = document.querySelector('meta[charset], meta[http-equiv="Content-Type"]');
         if (metaCharset) {
-            const docCharset = metaCharset.getAttribute('charset') ||
+            const docCharset =
+                metaCharset.getAttribute('charset') ||
                 metaCharset.getAttribute('content')?.match(/charset=([^;]+)/i)?.[1];
             if (docCharset && docCharset !== charset) {
                 // If different charset found in meta, re-decode

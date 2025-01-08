@@ -112,7 +112,7 @@ interface BlueskyNoteData {
 }
 
 export class BlueskyParser extends Parser {
-    private PATTERN = /^https:\/\/bsky\.app\/profile\/(?<handle>[a-zA-Z0-9-.:]+)\/post\/(?<postId>[a-zA-Z0-9]+)$/;
+    private PATTERN = /^https:\/\/bsky\.app\/profile\/(?<handle>[a-zA-Z0-9-.:]+)\/post\/(?<postId>[a-zA-Z0-9]+)/;
     private AT_URI_PATTERN =
         /^at:\/\/(?<handle>(?:did:plc:[a-zA-Z0-9]+|[a-zA-Z0-9.-]+(?:\.[a-zA-Z0-9.-]+)*?))\/(?<collection>[a-zA-Z.]+)\/(?<rkey>[a-zA-Z0-9]+)$/;
 

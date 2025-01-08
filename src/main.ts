@@ -22,6 +22,7 @@ import DefaultVaultRepository from './repository/DefaultVaultRepository';
 import { NoteService } from './NoteService';
 import { ReadItLaterApi } from './ReadtItLaterApi';
 import { BlueskyParser } from './parsers/BlueskyParser';
+import { PinterestParser } from './parsers/PinterestParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     public api: ReadItLaterApi;
@@ -57,6 +58,7 @@ export default class ReadItLaterPlugin extends Plugin {
             new GithubParser(this.app, this, this.templateEngine),
             new WikipediaParser(this.app, this, this.templateEngine),
             new BlueskyParser(this.app, this, this.templateEngine),
+            new PinterestParser(this.app, this, this.templateEngine),
             new MastodonParser(this.app, this, this.templateEngine),
             new WebsiteParser(this.app, this, this.templateEngine),
             new TextSnippetParser(this.app, this, this.templateEngine),

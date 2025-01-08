@@ -2,6 +2,7 @@ import { Platform, request } from 'obsidian';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
+import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Parser } from './Parser';
 import { Note } from './Note';
 import { parseHtmlContent } from './parsehtml';
@@ -49,7 +50,11 @@ class StackExchangeParser extends Parser {
 
     async prepareNote(clipboardContent: string): Promise<Note> {
         const createdAt = new Date();
-        const response = await request({ method: 'GET', url: clipboardContent });
+        const response = await request({
+            method: 'GET',
+            url: clipboardContent,
+            headers: { ...desktopBrowserUserAgent },
+        });
         const document = new DOMParser().parseFromString(response, 'text/html');
         const question = await this.parseDocument(document);
 
