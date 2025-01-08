@@ -145,6 +145,12 @@ class WebsiteParser extends Parser {
             figure.prepend(imgEl);
         });
 
+        //fix for Readability removing <figure> elements in <div>
+        document.body.querySelectorAll('div > figure')?.forEach((figure) => {
+            const figureEl = figure;
+            figure.parentElement.before(figureEl);
+        });
+
         return document;
     }
 
