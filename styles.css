@@ -1,0 +1,42 @@
+summary.readitlater-setting-h1 {
+  font-variant: var(--h1-variant);
+  letter-spacing: -0.015em;
+  line-height: var(--h1-line-height);
+  font-size: var(--h1-size);
+  color: var(--h1-color);
+  font-weight: var(--h1-weight);
+  font-style: var(--h1-style);
+  font-family: var(--h1-font);
+  /*margin-block-start: var(--p-spacing);*/
+  margin-block-end: var(--p-spacing);
+}
+
+summary.readitlater-setting-h3 {
+  font-variant: var(--h3-variant);
+  letter-spacing: -0.015em;
+  line-height: var(--h3-line-height);
+  font-size: var(--h3-size);
+  color: var(--h3-color);
+  font-weight: var(--h3-weight);
+  font-style: var(--h3-style);
+  font-family: var(--h3-font);
+  margin-block-start: var(--p-spacing);
+  margin-block-end: var(--p-spacing);
+}
+
+summary.readitlater-setting-h4 {
+  font-variant: var(--h4-variant);
+  letter-spacing: -0.015em;
+  line-height: var(--h4-line-height);
+  font-size: var(--h4-size);
+  color: var(--h4-color);
+  font-weight: var(--h4-weight);
+  font-style: var(--h4-style);
+  font-family: var(--h4-font);
+  margin-block-start: var(--p-spacing);
+  margin-block-end: var(--p-spacing);
+}
+
+hr.readitlater-setting-hr {
+  margin: 1rem 0rem 0rem 0rem;
+}

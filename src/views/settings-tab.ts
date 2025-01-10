@@ -6,8 +6,26 @@ import { createHTMLDiv } from 'src/helpers/setting';
 import ReadItLaterPlugin from 'src/main';
 import { DEFAULT_SETTINGS } from 'src/settings';
 
+enum DetailsItem {
+    ReadableArticle = 'readableArticle',
+    Youtube = 'youtube',
+    YoutubeChannel = 'youtubeChannel',
+    X = 'x',
+    Bluesky = 'bluesky',
+    StackExchange = 'stackExchange',
+    Pinterest = 'pinterest',
+    Mastodon = 'mastodon',
+    Vimeo = 'vimeo',
+    Bilibili = 'bilibili',
+    TikTok = 'tikTok',
+    NonReadableArticle = 'nonReadableArticle',
+    TextSnippet = 'textSnippet',
+}
+
 export class ReadItLaterSettingsTab extends PluginSettingTab {
     plugin: ReadItLaterPlugin;
+
+    private activeDetatils: string[] = [];
 
     constructor(app: App, plugin: ReadItLaterPlugin) {
         super(app, plugin);
@@ -189,10 +207,18 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             );
 
         containerEl.createEl('h1', { text: 'Content Types' });
+        containerEl.createDiv({ text: 'Settings for each content. Click on caret to expand.' });
 
-        containerEl.createEl('h2', { text: 'Readable Article' });
+        let detailsEl: HTMLElement;
 
-        new Setting(containerEl)
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.ReadableArticle);
+        detailsEl.createEl('summary', {
+            text: 'Readable Article',
+            cls: 'readitlater-setting-h3',
+        });
+
+        new Setting(detailsEl)
             .setName('Readable content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -209,7 +235,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Readable article note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -224,7 +250,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Readable article note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -238,7 +264,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download images')
             .setDesc(
                 'Images from article will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
@@ -260,7 +286,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download images to note directory')
             .setDesc(
                 'Images from article will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
@@ -282,9 +308,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        containerEl.createEl('h2', { text: 'YouTube' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.Youtube);
+        detailsEl.createEl('summary', {
+            text: 'YouTube',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Youtube content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -301,7 +332,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Youtube note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -314,7 +345,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Youtube note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -328,7 +359,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl).setName('Youtube embed player width').addText((text) =>
+        new Setting(detailsEl).setName('Youtube embed player width').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedWidth)
                 .setValue(this.plugin.settings.youtubeEmbedWidth || DEFAULT_SETTINGS.youtubeEmbedWidth)
@@ -338,7 +369,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        new Setting(containerEl).setName('Youtube embed player height').addText((text) =>
+        new Setting(detailsEl).setName('Youtube embed player height').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedHeight)
                 .setValue(this.plugin.settings.youtubeEmbedHeight || DEFAULT_SETTINGS.youtubeEmbedHeight)
@@ -348,7 +379,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Embed in privacy enhanced mode')
             .setDesc(
                 'If enabled, content will be embeded in privacy enhanced mode, which prevents the use of views of it from influencing the viewer’s browsing experience on YouTube.',
@@ -366,9 +397,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        containerEl.createEl('h2', { text: 'YouTube Channel' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.YoutubeChannel);
+        detailsEl.createEl('summary', {
+            text: 'YouTube channel',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Youtube channel content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -385,7 +421,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Youtube channel note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -398,7 +434,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Youtube channel note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -412,10 +448,15 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        containerEl.createEl('h2', { text: 'Twitter' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.X);
+        detailsEl.createEl('summary', {
+            text: 'X.com',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
-            .setName('Twitter content type slug')
+        new Setting(detailsEl)
+            .setName('X.com content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
@@ -431,8 +472,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
-            .setName('Twitter note template title')
+        new Setting(detailsEl)
+            .setName('X.com note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
                 text
@@ -443,8 +484,8 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                         await this.plugin.saveSettings();
                     }),
             );
-        new Setting(containerEl)
-            .setName('Twitter note template')
+        new Setting(detailsEl)
+            .setName('X.com note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
                 textarea
@@ -457,9 +498,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        containerEl.createEl('h2', { text: 'Bluesky' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.Bluesky);
+        detailsEl.createEl('summary', {
+            text: 'Bluesky',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Bluesky content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -476,7 +522,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Bluesky note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -489,7 +535,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Bluesky note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -503,7 +549,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download embedded content')
             .setDesc(
                 'Embedded content will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
@@ -525,7 +571,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download embedded content to note directory')
             .setDesc(
                 'Embedded content will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
@@ -547,7 +593,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Save replies')
             .setDesc('If enabled, post replies will be saved.')
             .addToggle((toggle) =>
@@ -563,7 +609,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl).setName('Bluesky post reply template').addTextArea((textarea) => {
+        new Setting(detailsEl).setName('Bluesky post reply template').addTextArea((textarea) => {
             textarea
                 .setValue(this.plugin.settings.blueskyPostReply || DEFAULT_SETTINGS.blueskyPostReply)
                 .onChange(async (value) => {
@@ -574,9 +620,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             textarea.inputEl.cols = 25;
         });
 
-        containerEl.createEl('h2', { text: 'Stack Exchange' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.StackExchange);
+        detailsEl.createEl('summary', {
+            text: 'Stack Exchange',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Stack Exchange content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -593,7 +644,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl).setName('Stack Exchange note title template').addText((text) =>
+        new Setting(detailsEl).setName('Stack Exchange note title template').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.stackExchangeNoteTitle)
                 .setValue(this.plugin.settings.stackExchangeNoteTitle || DEFAULT_SETTINGS.stackExchangeNoteTitle)
@@ -603,7 +654,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Stack Exchange question note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -617,7 +668,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Stack Exchange answer template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -631,7 +682,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download media attachments')
             .setDesc(
                 'Media attachments will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
@@ -653,7 +704,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download media attachments to note directory')
             .setDesc(
                 'Media attachments will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
@@ -675,9 +726,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        containerEl.createEl('h2', { text: 'Pinterest' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.Pinterest);
+        detailsEl.createEl('summary', {
+            text: 'Pinterest',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Pinterest content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -694,7 +750,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Pinterest note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -707,7 +763,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Pinterest note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -721,7 +777,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download image')
             .setDesc(
                 'Image will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
@@ -739,9 +795,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        containerEl.createEl('h2', { text: 'Mastodon' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.Mastodon);
+        detailsEl.createEl('summary', {
+            text: 'Mastodon',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Mastodon content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -758,7 +819,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Mastodon note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -771,7 +832,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Mastodon note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -785,7 +846,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download media attachments')
             .setDesc(
                 'Media attachments will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
@@ -807,7 +868,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Download media attachments to note directory')
             .setDesc(
                 'Media attachments will be downloaded to the dedicated note assets directory (Desktop App feature only). Overrides assets directory template.',
@@ -832,7 +893,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Save replies')
             .setDesc('If enabled, replies of toot will be saved.')
             .addToggle((toggle) =>
@@ -848,7 +909,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl).setName('Mastodon reply template').addTextArea((textarea) => {
+        new Setting(detailsEl).setName('Mastodon reply template').addTextArea((textarea) => {
             textarea
                 .setValue(this.plugin.settings.mastodonReply || DEFAULT_SETTINGS.mastodonReply)
                 .onChange(async (value) => {
@@ -859,9 +920,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
             textarea.inputEl.cols = 25;
         });
 
-        containerEl.createEl('h2', { text: 'Vimeo' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.Vimeo);
+        detailsEl.createEl('summary', {
+            text: 'Vimeo',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Vimeo content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -878,7 +944,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Vimeo note title template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -891,7 +957,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Vimeo note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -905,7 +971,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl).setName('Vimeo embed player width').addText((text) =>
+        new Setting(detailsEl).setName('Vimeo embed player width').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedWidth)
                 .setValue(this.plugin.settings.vimeoEmbedWidth || DEFAULT_SETTINGS.vimeoEmbedWidth)
@@ -915,7 +981,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        new Setting(containerEl).setName('Vimeo embed player height').addText((text) =>
+        new Setting(detailsEl).setName('Vimeo embed player height').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.vimeoEmbedHeight)
                 .setValue(this.plugin.settings.vimeoEmbedHeight || DEFAULT_SETTINGS.vimeoEmbedHeight)
@@ -925,9 +991,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        containerEl.createEl('h2', { text: 'Bilibili' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.Bilibili);
+        detailsEl.createEl('summary', {
+            text: 'Bilibili',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Bilibili content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -944,7 +1015,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Bilibili note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -957,7 +1028,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Bilibili note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -971,7 +1042,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl).setName('Bilibili embed player width').addText((text) =>
+        new Setting(detailsEl).setName('Bilibili embed player width').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedWidth)
                 .setValue(this.plugin.settings.bilibiliEmbedWidth || DEFAULT_SETTINGS.bilibiliEmbedWidth)
@@ -981,7 +1052,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        new Setting(containerEl).setName('Bilibili embed player height').addText((text) =>
+        new Setting(detailsEl).setName('Bilibili embed player height').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.bilibiliEmbedHeight)
                 .setValue(this.plugin.settings.bilibiliEmbedHeight || DEFAULT_SETTINGS.bilibiliEmbedHeight)
@@ -991,9 +1062,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        containerEl.createEl('h2', { text: 'TikTok' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.TikTok);
+        detailsEl.createEl('summary', {
+            text: 'TikTok',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('TikTok content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -1010,7 +1086,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('TikTok note title template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -1023,7 +1099,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('TikTok note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -1037,7 +1113,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        new Setting(containerEl).setName('TikTok embed player width').addText((text) =>
+        new Setting(detailsEl).setName('TikTok embed player width').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.tikTokEmbedWidth)
                 .setValue(this.plugin.settings.tikTokEmbedWidth || DEFAULT_SETTINGS.tikTokEmbedWidth)
@@ -1047,7 +1123,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        new Setting(containerEl).setName('TikTok embed player height').addText((text) =>
+        new Setting(detailsEl).setName('TikTok embed player height').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.tikTokEmbedHeight)
                 .setValue(this.plugin.settings.tikTokEmbedHeight || DEFAULT_SETTINGS.tikTokEmbedHeight)
@@ -1057,9 +1133,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 }),
         );
 
-        containerEl.createEl('h2', { text: 'Nonreadable Article' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.NonReadableArticle);
+        detailsEl.createEl('summary', {
+            text: 'Nonreadable Article',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Nonreadable content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -1076,7 +1157,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Nonreadable article note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -1092,7 +1173,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Nonreadable article note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -1106,9 +1187,14 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
-        containerEl.createEl('h2', { text: 'Text Snippet' });
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.TextSnippet);
+        detailsEl.createEl('summary', {
+            text: 'Text Snippet',
+            cls: 'readitlater-setting-h3',
+        });
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Text Snippet content type slug')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -1125,7 +1211,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Text snippet note template title')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addText((text) =>
@@ -1138,7 +1224,7 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
-        new Setting(containerEl)
+        new Setting(detailsEl)
             .setName('Text snippet note template')
             .setDesc(this.createTemplateVariableReferenceDiv())
             .addTextArea((textarea) => {
@@ -1193,6 +1279,23 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }),
             );
+    }
+
+    private createDetailsElement(parentElement: HTMLElement, itemId: DetailsItem): HTMLElement {
+        const details = parentElement.createEl('details');
+        details.addEventListener('toggle', () => {
+            if (details.open) {
+                this.activeDetatils.push(itemId);
+            } else {
+                this.activeDetatils = this.activeDetatils.filter((item) => item !== itemId);
+            }
+        });
+
+        if (this.activeDetatils.includes(itemId)) {
+            details.setAttribute('open', '');
+        }
+
+        return details;
     }
 
     private createTemplateVariableReferenceDiv(prepend: string = ''): DocumentFragment {
