@@ -162,6 +162,6 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     pinterestContentTypeSlug: 'pinterest',
     pinterestNoteTitle: 'Pin from {{ authorName }} ({{ date }})',
     pinterestNote:
-        '[[ReadItLater]] [[Pinterest]]\n\n# [{{ authorName }}]({{ pinURL }})\n\n![{{ description }}]({{ image }})\n{{ description }}',
+        '[[ReadItLater]] [[Pinterest]]\n\n# [{{ authorName }}]({{ pinURL }})\n\n![]({{ image }})\n{{ description }}',
     downloadPinterestImage: true,
 };

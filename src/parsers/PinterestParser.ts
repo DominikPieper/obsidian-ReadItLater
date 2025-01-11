@@ -4,6 +4,7 @@ import { normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
 import { Note } from './Note';
 import { Parser } from './Parser';
+import { handleError } from 'src/helpers/error';
 
 interface PinAuthor {
     fullName: string;
@@ -44,7 +45,12 @@ export class PinterestParser extends Parser {
 
     public async prepareNote(clipboardContent: string): Promise<Note> {
         const createdAt = new Date();
-        const pin = await this.parseHtml(clipboardContent);
+        let pin: Pin;
+        try {
+            pin = await this.parseHtml(clipboardContent);
+        } catch (e) {
+            handleError(e, 'Unable to parse Pinterest note data.');
+        }
 
         const fileName = this.templateEngine.render(this.plugin.settings.pinterestNoteTitle, {
             date: this.getFormattedDateForFilename(createdAt),
@@ -93,7 +99,7 @@ export class PinterestParser extends Parser {
         let desktopRelayResponse;
         relayResponseElements.forEach((el) => {
             const jsonData = JSON.parse(el.textContent);
-            if (jsonData?.variables?.isDesktop === true && jsonData?.variables?.isAuth === undefined) {
+            if (jsonData?.variables?.isDesktop === true) {
                 desktopRelayResponse = jsonData;
             }
         });
@@ -101,7 +107,13 @@ export class PinterestParser extends Parser {
             desktopRelayResponse = JSON.parse(relayResponseElements?.[0].textContent) ?? {};
         }
 
-        const pinJsonData = desktopRelayResponse?.response?.data?.v3GetPinQuery?.data ?? {};
+        const pinJsonData = desktopRelayResponse?.response?.data?.v3GetPinQuery?.data;
+
+        if (pinJsonData === undefined) {
+            throw new Error('pinJsonData is undefined');
+        }
+
+        const pinner = pinJsonData?.originPinner ?? pinJsonData?.pinner ?? {};
 
         return {
             id: url.match(this.PATTERN)[1],
@@ -120,12 +132,12 @@ export class PinterestParser extends Parser {
                 document.querySelector("[data-test-id='pin-closeup-image'] img")?.getAttribute('src') ??
                 '',
             author: {
-                fullName: pinJsonData?.pinner?.fullName ?? '',
-                username: pinJsonData?.pinner?.username ?? '',
-                profileURL: `https://www.pinterest.com/${pinJsonData?.pinner?.username ?? ''}`,
+                fullName: pinner?.fullName ?? '',
+                username: pinner?.username ?? '',
+                profileURL: `https://www.pinterest.com/${pinner?.username ?? ''}`,
             },
             likeCount:
-                pinJsonData?.reactionCountsDatb?.find((countData: any) => countData?.reactionType === 1)
+                pinJsonData?.reactionCountsData?.find((countData: any) => countData?.reactionType === 1)
                     ?.reactionCount ?? 0,
         };
     }
