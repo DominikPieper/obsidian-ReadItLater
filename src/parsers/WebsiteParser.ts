@@ -1,8 +1,9 @@
-import { Notice, Platform, request } from 'obsidian';
+import { Notice, Platform, RequestUrlResponse, requestUrl } from 'obsidian';
 import { Readability, isProbablyReaderable } from '@mozilla/readability';
 import * as DOMPurify from 'isomorphic-dompurify';
 import { getBaseUrl, normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
+import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Note } from './Note';
 import { Parser } from './Parser';
 import { parseHtmlContent } from './parsehtml';
@@ -81,15 +82,7 @@ class WebsiteParser extends Parser {
     }
 
     protected async getDocument(url: URL): Promise<Document> {
-        const response = await request({
-            method: 'GET',
-            url: url.href,
-            headers: {
-                'user-agent':
-                    'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-            },
-        });
-        const document = new DOMParser().parseFromString(response, 'text/html');
+        const document = await this.parseHtmlDom(url);
 
         //check for existing base element
         const originBasElements = document.getElementsByTagName('base');
@@ -139,6 +132,23 @@ class WebsiteParser extends Parser {
             if (codeSource.firstChild.nodeName !== 'CODE' && !codeSource.className.includes('language')) {
                 codeSource.id = 'code-lang-text';
             }
+        });
+
+        //fix for substack images
+        document.body.querySelectorAll('.captioned-image-container figure')?.forEach((figure) => {
+            const imgEl = figure.querySelector('img');
+            if (!imgEl) {
+                return;
+            }
+
+            figure.querySelector('.image-link').remove();
+            figure.prepend(imgEl);
+        });
+
+        //fix for Readability removing <figure> elements in <div>
+        document.body.querySelectorAll('div > figure')?.forEach((figure) => {
+            const figureEl = figure;
+            figure.parentElement.before(figureEl);
         });
 
         return document;
@@ -266,6 +276,50 @@ class WebsiteParser extends Parser {
         ]);
 
         return readingSpeed.get(lang) || readingSpeed.get('en');
+    }
+
+    private async parseHtmlDom(url: URL, charsetOverride: string | null = null): Promise<Document> {
+        const response = await requestUrl({
+            method: 'GET',
+            url: url.href,
+            headers: { ...desktopBrowserUserAgent },
+        });
+
+        const charset: string = charsetOverride ?? this.getCharsetFromResponseHeader(response);
+
+        const buffer = response.arrayBuffer;
+        const decoder = new TextDecoder(charset);
+        const text = decoder.decode(buffer);
+
+        const parser = new DOMParser();
+        const document = parser.parseFromString(text, 'text/html');
+
+        // Double-check meta tags for charset
+        const metaCharset = document.querySelector('meta[charset], meta[http-equiv="Content-Type"]');
+        if (metaCharset) {
+            const docCharset =
+                metaCharset.getAttribute('charset') ||
+                metaCharset.getAttribute('content')?.match(/charset=([^;]+)/i)?.[1];
+            if (docCharset && docCharset !== charset) {
+                // If different charset found in meta, re-decode
+                return this.parseHtmlDom(url, docCharset);
+            }
+        }
+
+        return document;
+    }
+
+    private getCharsetFromResponseHeader(response: RequestUrlResponse): string {
+        const contentType = response.headers?.['content-type'];
+        let charset = 'UTF-8';
+
+        // Try to extract charset from content-type header
+        const charsetMatch = contentType?.match(/charset=([^;]+)/i);
+        if (charsetMatch) {
+            charset = charsetMatch[1];
+        }
+
+        return charset;
     }
 }
 

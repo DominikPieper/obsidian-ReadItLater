@@ -4,15 +4,17 @@
 
 - [Introduction](#introduction)
 - [Content Types](#content-types)
+    - [Website Article](#website-article)
     - [Youtube](#youtube)
     - [Youtube Channel](#youtube-channel)
+    - [Twitter](#twitter)
+    - [Bluesky](#bluesky)
+    - [Stack Exchange](#stack-exchange)
+    - [Pinterest](#pinterest)
+    - [Mastodon](#mastodon)
     - [Vimeo](#vimeo)
     - [Bilibili](#bilibili)
-    - [Twitter](#twitter)
-    - [Stack Exchange](#stack-exchange)
-    - [Mastodon](#mastodon)
     - [TikTok](#tiktok)
-    - [Website URL](#website-url)
     - [Text Snippet](#text-snippet)
 - [API](#api)
 
@@ -130,6 +132,27 @@ Structure of note content is determined by URL. Currenty plugin supports saving 
 
 Available content types are ordered by URL detection priority.
 
+### Website Article
+
+Will be parsed to readable form using [Mozilla Readability](https://github.com/mozilla/readability) and then converted to markdown. In case website content is marked by [Readbility](https://github.com/mozilla/readability) as not readable, empty note with URL will be created.
+
+If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/assets`) configured in plugin settings. (Supported only on desktop for now)
+
+| Title template variable | Description                                 |
+| ------------------------| ----------------------------------------    |
+| title                   | Article title from `<title>` HTML tag       |
+| date                    | Current date in format from plugin settings |
+
+| Content template variable | Description                                                                                                                                                                               |
+|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| articleTitle              | Article title from `<title>` HTML tag                                                                                                                                                     |
+| articleURL                | Article URL                                                                                                                                                                               |
+| articleReadingTime        | Estimated reading time in minutes by Readbility.js                                                                                                                                        |
+| articleContent            | Article content                                                                                                                                                                           |
+| date                      | Current date in format from plugin settings                                                                                                                                               |
+| previewURL                | Aritlce preview image URL parsed from [OpenGraph](https://ogp.me/) or [Twitter](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup) image `<meta>` property |
+| publishedTime             | Article publish time parsed from [OpenGraph](https://ogp.me/) `<meta>` property or [Schema.org](https://schema.org/) JSON and formatted in content format from plugin settings            |
+
 ### Youtube
 
 | Title template variable | Description                                 |
@@ -175,12 +198,142 @@ Parsing of HTML DOM has its limitations thus additional data can be fetched only
 | channelTitle              | Channel title.                                       |
 | channelDescription        | Channel description.                                 |
 | channelURL                | Channel URL on Youtube.com.                          |
-| channelAvater             | URL of channel's avatar (thumbnail) image.           |
+| channelAvatar             | URL of channel's avatar (thumbnail) image.           |
 | channelBanner             | URL of channel's banner image.                       |
 | channelSubscribersCount   | The number of subscribers that the channel has.      |
 | channelVideosCount        | The number of public videos uploaded to the channel. |
 | channelVideosURL          | URL to channel's videos on Youtube.com               |
 | channelShortsURL          | URL to channel's shorts on Youtube.com               |
+
+### X.com (Twitter)
+
+Parser use [X Publish API](https://publish.twitter.com/) to fetch data.
+
+| Title template variable | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| tweetAuthorName         | Post author name                            |
+| date                    | Current date in format from plugin settings |
+
+| Content template variable | Description                                                        |
+| ------------------------- | ------------------------------------------------------------------ |
+| tweetAuthorName           | Post author name                                                   |
+| date                      | Current date in format from plugin settings                        |
+| tweetURL                  | Post URL on X.com                                                  |
+| tweetContent              | Post content                                                       |
+| tweetPublishDate          | Post publish date formatted in content format from plugin settings |
+
+### Bluesky
+
+Parser fetch the content from Bluesky API.
+
+| Title template variable | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| authorHandle            | Post author handle                          |
+| authorName              | Post author name                            |
+| date                    | Current date in format from plugin settings |
+
+| Content template variable | Description                                                                     |
+| ------------------------- | ------------------------------------------------------------------------------- |
+| date                      | Current date in format from plugin settings                                     |
+| content                   | Formatted post content with embedded content. If enabled, replies are appended. |
+| postURL                   | Post URL                                                                        |
+| authorHandle              | Post author handle                                                              |
+| authorName                | Post author name                                                                |
+| likeCount                 | Post like count                                                                 |
+| replyCount                | Post reply count                                                                |
+| repostCount               | Post repost count                                                               |
+| quouteCount               | Post quote count                                                                |
+| publishedAt               | Post publish time                                                               |
+
+If enabled in plugin settings, you can fetch also replies.
+
+***Reply template variable***
+
+| Content template variable | Description                                   |
+| ------------------------- | --------------------------------------------- |
+| date                      | Current date in format from plugin settings   |
+| content                   | Formatted post content with embedded content. |
+| postURL                   | Reply URL                                     |
+| authorHandle              | Reply author handle                           |
+| authorName                | Reply author name                             |
+| likeCount                 | Reply like count                              |
+| replyCount                | Reply reply count                             |
+| repostCount               | Reply repost count                            |
+| quouteCount               | Reply quote count                             |
+| publishedAt               | Reply publish time                            |
+
+### Stack Exchange
+
+| Title template variable | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| title                   | Question title                              |
+| date                    | Current date in format from plugin settings |
+
+***Note template variables***
+
+| Content template variable | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| date                      | Current date in format from plugin settings |
+| questionTitle             | Question title                              |
+| questionURL               | Question URL on selected StackExchange site |
+| questionContent           | Question content                            |
+| authorName                | Question author name                        |
+| authorProfileURL          | Question author profile URL                 |
+| topAnswer                 | Formatted first answer                      |
+| answers                   | Formatted other answers                     |
+
+***Answer template variables***
+
+| Content template variable | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| date                      | Current date in format from plugin settings |
+| answerContent             | Answer content                              |
+| authorName                | Answer author name                          |
+| authorProfileURL          | Answer author profile URL                   |
+
+### Pinterest
+
+| Title template variable | Description                                  |
+| ----------------------- | -------------------------------------------- |
+| authorName              | Pin author name                              |
+| date                    | Current date in format from plugin settings. |
+
+| Content template variable | Description                                          |
+| ------------------------- | ---------------------------------------------------- |
+| date                      | Current date in format from plugin settings.         |
+| pinId                     | Pin ID.                                              |
+| pinURL                    | URL of pin.                                          |
+| title                     | Pin title.                                           |
+| link                      | Pin link.                                            |
+| image                     | URL of pin image.                                    |
+| description               | Pin description.                                     |
+| likeCount                 | Pin like count.                                      |
+| authorName                | Pin author name.                                     |
+| authorProfileURL          | URL of Pin author page.                              |
+
+### Mastodon
+
+| Title template variable | Description                                 |
+| ----------------------- | ------------------------------------------- |
+| tootAuthorName          | Status author name                          |
+| date                    | Current date in format from plugin settings |
+
+| Content template variable | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| tootAuthorName            | Status author name                          |
+| date                      | Current date in format from plugin settings |
+| tootURL                   | Status URL on selected Mastodon instance    |
+| tootContent               | Status content                              |
+
+If enabled in plugin settings, you can fetch also replies.
+
+***Reply template variable***
+
+| Content template variable | Description                                 |
+| ------------------------- | ------------------------------------------- |
+| tootAuthorName            | Reply author name                           |
+| tootURL                   | Reply URL on selected Mastodon instance     |
+| tootContent               | Reply content                               |
 
 ### Vimeo
 
@@ -214,76 +367,6 @@ Parsing of HTML DOM has its limitations thus additional data can be fetched only
 | videoId                   | Video ID                                    |
 | videoPlayer               | Embeded player generated by plugin          |
 
-### X.com (Twitter)
-
-Parser use [X Publish API](https://publish.twitter.com/) to fetch data.
-
-| Title template variable | Description                                 |
-| ----------------------- | ------------------------------------------- |
-| tweetAuthorName         | Post author name                            |
-| date                    | Current date in format from plugin settings |
-
-| Content template variable | Description                                                        |
-| ------------------------- | ------------------------------------------------------------------ |
-| tweetAuthorName           | Post author name                                                   |
-| date                      | Current date in format from plugin settings                        |
-| tweetURL                  | Post URL on X.com                                                  |
-| tweetContent              | Post content                                                       |
-| tweetPublishDate          | Post publish date formatted in content format from plugin settings |
-
-### Stack Exchange
-
-| Title template variable | Description                                 |
-| ----------------------- | ------------------------------------------- |
-| title                   | Question title                              |
-| date                    | Current date in format from plugin settings |
-
-***Note template variables***
-
-| Content template variable | Description                                 |
-| ------------------------- | ------------------------------------------- |
-| date                      | Current date in format from plugin settings |
-| questionTitle             | Question title                              |
-| questionURL               | Question URL on selected StackExchange site |
-| questionContent           | Question content                            |
-| authorName                | Question author name                        |
-| authorProfileURL          | Question author profile URL                 |
-| topAnswer                 | Formatted first answer                      |
-| answers                   | Formatted other answers                     |
-
-***Answer template variables***
-
-| Content template variable | Description                                 |
-| ------------------------- | ------------------------------------------- |
-| date                      | Current date in format from plugin settings |
-| answerContent             | Answer content                              |
-| authorName                | Answer author name                          |
-| authorProfileURL          | Answer author profile URL                   |
-
-### Mastodon
-
-| Title template variable | Description                                 |
-| ----------------------- | ------------------------------------------- |
-| tootAuthorName          | Status author name                          |
-| date                    | Current date in format from plugin settings |
-
-| Content template variable | Description                                 |
-| ------------------------- | ------------------------------------------- |
-| tootAuthorName            | Status author name                          |
-| date                      | Current date in format from plugin settings |
-| tootURL                   | Status URL on selected Mastodon instance    |
-| tootContent               | Status content                              |
-
-If enabled in plugin settings, you can fetch also replies.
-
-***Reply template variable***
-
-| Content template variable | Description                                 |
-| ------------------------- | ------------------------------------------- |
-| tootAuthorName            | Reply author name                           |
-| tootURL                   | Reply URL on selected Mastodon instance     |
-| tootContent               | Reply content                               |
-
 ### TikTok
 
 | Title template variable | Description                                 |
@@ -300,27 +383,6 @@ If enabled in plugin settings, you can fetch also replies.
 | videoPlayer               | Embeded player generated by plugin          |
 | authorName                | Author name                                 |
 | authorURL                 | Author profile URL on TikTok.com            |
-
-### Website URL
-
-Will be parsed to readable form using [Mozilla Readability](https://github.com/mozilla/readability) and then converted to markdown. In case website content is marked by [Readbility](https://github.com/mozilla/readability) as not readable, empty note with URL will be created.
-
-If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/assets`) configured in plugin settings. (Supported only on desktop for now)
-
-| Title template variable | Description                                 |
-| ------------------------| ----------------------------------------    |
-| title                   | Article title from `<title>` HTML tag       |
-| date                    | Current date in format from plugin settings |
-
-| Content template variable | Description                                                                                                                                                                               |
-|---------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| articleTitle              | Article title from `<title>` HTML tag                                                                                                                                                     |
-| articleURL                | Article URL                                                                                                                                                                               |
-| articleReadingTime        | Estimated reading time in minutes by Readbility.js                                                                                                                                        |
-| articleContent            | Article content                                                                                                                                                                           |
-| date                      | Current date in format from plugin settings                                                                                                                                               |
-| previewURL                | Aritlce preview image URL parsed from [OpenGraph](https://ogp.me/) or [Twitter](https://developer.twitter.com/en/docs/twitter-for-websites/cards/overview/markup) image `<meta>` property |
-| publishedTime             | Article publish time parsed from [OpenGraph](https://ogp.me/) `<meta>` property or [Schema.org](https://schema.org/) JSON and formatted in content format from plugin settings            |
 
 ### Text Snippet
 
