@@ -138,7 +138,7 @@ export class BlueskyParser extends Parser {
         const fileName = this.templateEngine.render(this.plugin.settings.blueskyNoteTitle, {
             date: this.getFormattedDateForFilename(createdAt),
             authorHandle: post.author.handle,
-            authorName: post.author.displayName,
+            authorName: normalizeFilename(post.author.displayName, false),
         });
 
         if (this.plugin.settings.downloadBlueskyEmbeds) {
