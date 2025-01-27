@@ -2,9 +2,9 @@ import { request } from 'obsidian';
 import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { normalizeFilename } from 'src/helpers/fileutils';
 import { replaceImages } from 'src/helpers/replaceImages';
+import { handleError } from 'src/helpers/error';
 import { Note } from './Note';
 import { Parser } from './Parser';
-import { handleError } from 'src/helpers/error';
 
 interface PinAuthor {
     fullName: string;

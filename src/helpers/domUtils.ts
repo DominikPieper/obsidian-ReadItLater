@@ -4,7 +4,7 @@ export interface JavascriptDeclaration {
     value: string;
 }
 
-const DECLARATION_REGEX = /(const|let|var)\s+(\w+)\s*=\s*(.+?)\s*(?=(?:^|\s+)(const|let|var)\s+|$)/g;
+const DECLARATION_REGEX = /(const|let|var)\s+(\w+)\s*=\s*(.+|\n+?)\s*(?=(?:^|\s+)(const|let|var)\s+|$)/g;
 
 export function getJavascriptDeclarationByName(
     name: string,

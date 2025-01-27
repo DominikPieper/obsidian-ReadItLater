@@ -152,7 +152,7 @@ class YoutubeParser extends Parser {
 
             const videoHTML = new DOMParser().parseFromString(response, 'text/html');
 
-            const declaration = getJavascriptDeclarationByName('ytInitialDataa', videoHTML.querySelectorAll('script'));
+            const declaration = getJavascriptDeclarationByName('ytInitialData', videoHTML.querySelectorAll('script'));
             const jsonData = typeof declaration !== 'undefined' ? JSON.parse(declaration.value) : {};
 
             const videoSchemaElement = videoHTML.querySelector('[itemtype*="http://schema.org/VideoObject"]');
@@ -177,6 +177,11 @@ class YoutubeParser extends Parser {
             const videoViewsCount =
                 jsonData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[0]?.videoPrimaryInfoRenderer
                     ?.viewCount?.videoViewCountRenderer?.originalViewCount ?? 0;
+            const channelId =
+                jsonData?.contents?.twoColumnWatchNextResults?.results?.results?.contents?.[1]
+                    ?.videoSecondaryInfoRenderer?.subscribeButton?.subscribeButtonRenderer?.channelId ??
+                videoSchemaElement?.querySelector('[itemprop="channelId"]')?.getAttribute('content') ??
+                '';
 
             return {
                 date: this.getFormattedDateForContent(createdAt),
@@ -193,7 +198,7 @@ class YoutubeParser extends Parser {
                 videoViewsCount: videoViewsCount,
                 videoTags: '',
                 videoChapters: this.formatVideoChapters(videoId, chapters),
-                channelId: videoSchemaElement?.querySelector('[itemprop="channelId"')?.getAttribute('content') ?? '',
+                channelId: channelId,
                 channelURL: personSchemaElement?.querySelector('[itemprop="url"]')?.getAttribute('href') ?? '',
                 channelName: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
                 extra: null,
