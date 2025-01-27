@@ -1,7 +1,7 @@
 {
 	"id": "obsidian-read-it-later",
 	"name": "ReadItLater",
-	"version": "0.11.2",
+	"version": "0.11.3",
 	"minAppVersion": "1.7.7",
 	"description": "Save online content to your Vault, utilize embedded template engine and organize your reading list to your needs. Preserve the web with ReadItLater.",
 	"author": "Dominik Pieper",
