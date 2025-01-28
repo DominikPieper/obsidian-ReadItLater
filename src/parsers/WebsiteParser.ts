@@ -151,6 +151,14 @@ class WebsiteParser extends Parser {
             figure.parentElement.before(figureEl);
         });
 
+        //fix for WeChat site (https://github.com/DominikPieper/obsidian-ReadItLater/issues/187)
+        document.body.querySelector('.rich_media_content.js_underline_content')?.removeAttribute('style');
+        document.body.querySelectorAll('.rich_media_content.js_underline_content img[data-src]')?.forEach((imgEl) => {
+            if (imgEl.getAttribute('src') === null) {
+                imgEl.setAttribute('src', imgEl.getAttribute('data-src'));
+            }
+        });
+
         return document;
     }
 
