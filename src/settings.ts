@@ -92,7 +92,8 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     openNewNoteInNewTab: false,
     youtubeContentTypeSlug: 'youtube',
     youtubeNoteTitle: 'Youtube - {{ title }}',
-    youtubeNote: '[[ReadItLater]] [[Youtube]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
+    youtubeNote:
+        '[[ReadItLater]] [[Youtube]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
     youtubeChapter: '- [{{ chapterTimestamp }}]({{ chapterUrl }}) {{ chapterTitle }}',
     youtubeEmbedWidth: '560',
     youtubeEmbedHeight: '315',
