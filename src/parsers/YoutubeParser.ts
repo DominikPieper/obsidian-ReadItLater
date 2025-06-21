@@ -245,8 +245,13 @@ class YoutubeParser extends Parser {
     private formatVideoChapters(videoId: string, chapters: YoutubeVideoChapter[]): string {
         return chapters
             .map((chapter) => {
-                return `- [${chapter.timestamp}](https://www.youtube.com/watch?v=${videoId}&t=${chapter.seconds}) ${chapter.title}`;
-            })
+                return this.templateEngine.render(this.plugin.settings.youtubeChapter, {
+                    chapterTimestamp: chapter.timestamp,
+                    chapterTitle: chapter.title,
+                    chapterSeconds: chapter.seconds,
+                    chapterUrl: `https://www.youtube.com/watch?v=${videoId}&t=${chapter.seconds}`,
+                });
+            }, this)
             .join('\n');
     }
 
