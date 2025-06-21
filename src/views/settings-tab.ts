@@ -359,6 +359,20 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                 textarea.inputEl.cols = 25;
             });
 
+        new Setting(detailsEl)
+            .setName('Youtube chapter template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.youtubeChapter || DEFAULT_SETTINGS.youtubeChapter)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeChapter = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
         new Setting(detailsEl).setName('Youtube embed player width').addText((text) =>
             text
                 .setPlaceholder(DEFAULT_SETTINGS.youtubeEmbedWidth)

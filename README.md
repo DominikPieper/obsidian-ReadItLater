@@ -176,6 +176,13 @@ If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/a
 | videoPublishDate          | Video plublish date formatted in content format from plugin settings |
 | videoViewsCount           | Video views count                                                    |
 
+| Chapter template variable | Description                   |
+| ------------------------- | ----------------------------- |
+| chapterTitle              | Chapter title                 |
+| chapterTimestamp          | Chapter start time in mm:ss   |
+| chapterSeconds            | Chapter start time in seconds |
+| chapterUrl                | Url to chapter start          |
+
 Parsing of HTML DOM has its limitations thus additional data can be fetched only from [Google API](https://developers.google.com/youtube/v3/getting-started). Retrieved API key can be set in plugin settings and then plugin will use the Google API for fetching data.
 
 | Content template variable | Description                                                          |
