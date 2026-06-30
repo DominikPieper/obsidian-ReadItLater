@@ -411,6 +411,78 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     }),
             );
 
+        new Setting(detailsEl)
+            .setName('Fetch video transcript')
+            .setDesc(
+                'If enabled, the video closed captions are fetched and made available as the {{ videoTranscript }} template variable.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'youtubeFetchTranscript')
+                            ? this.plugin.settings.youtubeFetchTranscript
+                            : DEFAULT_SETTINGS.youtubeFetchTranscript,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeFetchTranscript = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(detailsEl)
+            .setName('Transcript language')
+            .setDesc(
+                'Preferred transcript language code (e.g. "en", "zh"). Leave empty to use the default/first available track.',
+            )
+            .addText((text) =>
+                text
+                    .setPlaceholder('en')
+                    .setValue(
+                        this.plugin.settings.youtubeTranscriptLanguage || DEFAULT_SETTINGS.youtubeTranscriptLanguage,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeTranscriptLanguage = value.trim();
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(detailsEl)
+            .setName('Youtube transcript line template')
+            .setDesc(
+                'Template for each transcript line. Available variables: transcriptTimestamp, transcriptText, transcriptSeconds, transcriptUrl.',
+            )
+            .addText((text) =>
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.youtubeTranscriptLine)
+                    .setValue(this.plugin.settings.youtubeTranscriptLine || DEFAULT_SETTINGS.youtubeTranscriptLine)
+                    .onChange(async (value) => {
+                        this.plugin.settings.youtubeTranscriptLine = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(detailsEl)
+            .setName('Youtube transcript caption lines per block')
+            .setDesc('Number of caption lines grouped into one timestamped transcript block.')
+            .addText((text) =>
+                text
+                    .setPlaceholder(String(DEFAULT_SETTINGS.youtubeTranscriptLinesPerBlock))
+                    .setValue(
+                        String(
+                            this.plugin.settings.youtubeTranscriptLinesPerBlock ||
+                                DEFAULT_SETTINGS.youtubeTranscriptLinesPerBlock,
+                        ),
+                    )
+                    .onChange(async (value) => {
+                        const parsed = parseInt(value, 10);
+                        this.plugin.settings.youtubeTranscriptLinesPerBlock =
+                            Number.isNaN(parsed) || parsed < 1
+                                ? DEFAULT_SETTINGS.youtubeTranscriptLinesPerBlock
+                                : parsed;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
         containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
         detailsEl = this.createDetailsElement(containerEl, DetailsItem.YoutubeChannel);
         detailsEl.createEl('summary', {

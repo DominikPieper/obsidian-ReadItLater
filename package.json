@@ -1,7 +1,7 @@
 {
-  "name": "obsidian-ReadItLater",
-  "version": "0.11.4",
-  "description": "Save online content to your Vault, utilize embedded template engine and organize your reading list to your needs. Preserve the web with ReadItLater.",
+  "name": "read-it-never",
+  "version": "1.0.0",
+  "description": "Save online content to your Vault, utilize embedded template engine and organize your reading list to your needs. Preserve the web with Read It Never.",
   "main": "main.js",
   "scripts": {
     "dev": "node esbuild.config.mjs development",
@@ -9,7 +9,7 @@
     "lint": "eslint ./src --fix"
   },
   "keywords": [],
-  "author": "Dominik Pieper",
+  "author": "Jakob",
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^16.18.11",

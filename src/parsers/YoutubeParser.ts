@@ -6,6 +6,11 @@ import { desktopBrowserUserAgent } from 'src/helpers/networkUtils';
 import { Note } from './Note';
 import { Parser } from './Parser';
 
+// YouTube's public InnerTube API key and an iOS client User-Agent. The iOS client returns caption
+// track URLs that work without a proof-of-origin token; see `getVideoTranscript`.
+const YOUTUBE_INNERTUBE_API_KEY = 'AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8';
+const YOUTUBE_IOS_USER_AGENT = 'com.google.ios.youtube/20.10.38 (iPhone16,2; U; CPU iOS 17_5_1 like Mac OS X)';
+
 interface YoutubeNoteData {
     date: string;
     videoId: string;
@@ -20,6 +25,7 @@ interface YoutubeNoteData {
     videoTags: string;
     videoPlayer: string;
     videoChapters: string;
+    videoTranscript: string;
     channelId: string;
     channelName: string;
     channelURL: string;
@@ -37,6 +43,11 @@ interface YoutubeVideo {
 interface YoutubeVideoChapter {
     timestamp: string;
     title: string;
+    seconds: number;
+}
+
+interface YoutubeTranscriptSegment {
+    text: string;
     seconds: number;
 }
 
@@ -106,6 +117,8 @@ class YoutubeParser extends Parser {
 
             const chapters = this.getVideoChapters(video.snippet.description);
 
+            const videoTranscript = await this.getVideoTranscript(video.id);
+
             return {
                 date: this.getFormattedDateForContent(createdAt),
                 videoId: video.id,
@@ -124,6 +137,7 @@ class YoutubeParser extends Parser {
                 videoViewsCount: video.statistics.viewCount,
                 videoTags: tags.join(' '),
                 videoChapters: this.formatVideoChapters(video.id, chapters),
+                videoTranscript: videoTranscript,
                 channelId: channel.id,
                 channelURL: `https://www.youtube.com/channel/${channel.id}`,
                 channelName: channel.snippet.title ?? '',
@@ -183,6 +197,8 @@ class YoutubeParser extends Parser {
                 videoSchemaElement?.querySelector('[itemprop="channelId"]')?.getAttribute('content') ??
                 '';
 
+            const videoTranscript = await this.getVideoTranscript(videoId);
+
             return {
                 date: this.getFormattedDateForContent(createdAt),
                 videoId: videoId,
@@ -194,10 +210,15 @@ class YoutubeParser extends Parser {
                 videoDuration: 0,
                 videoDurationFormatted: '',
                 videoPublishDate:
-                    publishedAt !== '' ? moment(publishedAt).format(this.plugin.settings.dateContentFmt) : '',
+                    publishedAt !== ''
+                        ? moment(publishedAt, ['MMM D, YYYY', 'MMMM D, YYYY', 'D MMM YYYY', moment.ISO_8601]).format(
+                              this.plugin.settings.dateContentFmt,
+                          )
+                        : '',
                 videoViewsCount: videoViewsCount,
                 videoTags: '',
                 videoChapters: this.formatVideoChapters(videoId, chapters),
+                videoTranscript: videoTranscript,
                 channelId: channelId,
                 channelURL: personSchemaElement?.querySelector('[itemprop="url"]')?.getAttribute('href') ?? '',
                 channelName: personSchemaElement?.querySelector('[itemprop="name"]')?.getAttribute('content') ?? '',
@@ -287,6 +308,129 @@ class YoutubeParser extends Parser {
         }
 
         return chapters;
+    }
+
+    /**
+     * Fetches the video transcript (closed captions) as plain text.
+     *
+     * The caption track URLs embedded in the watch page (and the public timedtext endpoint) require
+     * a proof-of-origin token and return empty bodies for non-browser requests. Querying the
+     * InnerTube `player` endpoint with the iOS client returns caption track URLs that still work
+     * without such a token. (The ANDROID client stopped returning captions in early 2026.)
+     */
+    private async getVideoTranscript(videoId: string): Promise<string> {
+        if (!this.plugin.settings.youtubeFetchTranscript) {
+            return '';
+        }
+
+        try {
+            const language = this.plugin.settings.youtubeTranscriptLanguage || 'en';
+
+            const playerResponse = JSON.parse(
+                await request({
+                    method: 'POST',
+                    url: `https://www.youtube.com/youtubei/v1/player?key=${YOUTUBE_INNERTUBE_API_KEY}`,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'User-Agent': YOUTUBE_IOS_USER_AGENT,
+                    },
+                    body: JSON.stringify({
+                        context: {
+                            client: { clientName: 'IOS', clientVersion: '20.10.38', hl: language, gl: 'US' },
+                        },
+                        videoId,
+                    }),
+                }),
+            );
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const captionTracks: any[] = playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [];
+            if (captionTracks.length === 0) {
+                return '';
+            }
+
+            const track =
+                captionTracks.find((captionTrack) => captionTrack.languageCode === language) ??
+                captionTracks.find((captionTrack) => captionTrack.languageCode?.startsWith(`${language}-`)) ??
+                captionTracks.find((captionTrack) => captionTrack.kind !== 'asr') ??
+                captionTracks[0];
+
+            const transcriptXml = await request({
+                method: 'GET',
+                url: track.baseUrl,
+                headers: { 'Accept-Language': 'en-US,en;q=0.9' },
+            });
+
+            return this.formatVideoTranscript(videoId, this.parseTranscriptSegments(transcriptXml));
+        } catch (error) {
+            // A missing/unavailable transcript should not block note creation.
+            return '';
+        }
+    }
+
+    private parseTranscriptSegments(xml: string): YoutubeTranscriptSegment[] {
+        const textTagRegex = /<text\s+start="([\d.]+)"[^>]*>([\s\S]*?)<\/text>/g;
+        const segments: YoutubeTranscriptSegment[] = [];
+        let match;
+
+        while ((match = textTagRegex.exec(xml)) !== null) {
+            const text = this.decodeHtmlEntities(match[2].replace(/<[^>]+>/g, ''))
+                .replace(/\s+/g, ' ')
+                .trim();
+            if (text === '') {
+                continue;
+            }
+            segments.push({ text, seconds: Math.floor(parseFloat(match[1])) });
+        }
+
+        return segments;
+    }
+
+    private formatVideoTranscript(videoId: string, segments: YoutubeTranscriptSegment[]): string {
+        // Group several caption segments into one block so each line is a readable chunk of text
+        // prefixed by a single linked timestamp, instead of one tiny fragment per line.
+        const linesPerBlock = Math.max(1, this.plugin.settings.youtubeTranscriptLinesPerBlock);
+        const blocks: YoutubeTranscriptSegment[] = [];
+
+        segments.forEach((segment, index) => {
+            if (index % linesPerBlock === 0) {
+                blocks.push({ text: segment.text, seconds: segment.seconds });
+            } else {
+                blocks[blocks.length - 1].text += ` ${segment.text}`;
+            }
+        });
+
+        return blocks
+            .map((block) => {
+                return this.templateEngine.render(this.plugin.settings.youtubeTranscriptLine, {
+                    transcriptTimestamp: this.formatTimestamp(block.seconds),
+                    transcriptText: block.text.trim(),
+                    transcriptSeconds: block.seconds,
+                    transcriptUrl: `https://www.youtube.com/watch?v=${videoId}&t=${block.seconds}`,
+                });
+            }, this)
+            .join('\n');
+    }
+
+    private formatTimestamp(totalSeconds: number): string {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        const pad = (value: number): string => String(value).padStart(2, '0');
+
+        return hours > 0 ? `${pad(hours)}:${pad(minutes)}:${pad(seconds)}` : `${pad(minutes)}:${pad(seconds)}`;
+    }
+
+    private decodeHtmlEntities(text: string): string {
+        return text
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#39;/g, "'")
+            .replace(/&apos;/g, "'")
+            .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(parseInt(code, 10)))
+            .replace(/&#x([a-fA-F0-9]+);/g, (_, code) => String.fromCharCode(parseInt(code, 16)));
     }
 
     private getEmbedPlayer(videoId: string): string {

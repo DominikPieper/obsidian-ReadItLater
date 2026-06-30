@@ -56,7 +56,7 @@ export class NoteService {
             const parser = await this.parserCreator.createParser(content);
             return await parser.prepareNote(content);
         } catch (error) {
-            new Notice(`ReadItLater: Failed to process content. ${error.message}`);
+            new Notice(`Read It Never: Failed to process content. ${error.message}`);
             throw error;
         }
     }

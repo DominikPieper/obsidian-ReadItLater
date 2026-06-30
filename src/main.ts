@@ -69,7 +69,7 @@ export default class ReadItLaterPlugin extends Plugin {
 
         addIcon('read-it-later', clipboardIcon);
 
-        this.addRibbonIcon('read-it-later', 'ReadItLater: Create from clipboard', async () => {
+        this.addRibbonIcon('read-it-later', 'Read It Never: Create from clipboard', async () => {
             await this.api.processContent(await this.getTextClipboardContent());
         });
 
@@ -105,7 +105,7 @@ export default class ReadItLaterPlugin extends Plugin {
                 //@ts-ignore
                 this.app.workspace.on('receive-text-menu', (menu: Menu, shareText: string) => {
                     menu.addItem((item: MenuItem) => {
-                        item.setTitle('ReadItLater');
+                        item.setTitle('Read It Never');
                         item.setIcon('read-it-later');
                         item.onClick(() => this.api.processContent(shareText));
                     });
@@ -117,7 +117,7 @@ export default class ReadItLaterPlugin extends Plugin {
             this.app.workspace.on('url-menu', (menu: Menu, url: string) => {
                 if (isValidUrl(url, [HTTP_PROTOCOL, HTTPS_PROTOCOL])) {
                     menu.addItem((item: MenuItem) => {
-                        item.setTitle('ReadItLater');
+                        item.setTitle('Read It Never');
                         item.setIcon('read-it-later');
                         item.onClick(() => this.api.processContent(url));
                     });

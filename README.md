@@ -1,8 +1,11 @@
-# ReadItLater Plugin for Obsidian
+# Read It Never Plugin for Obsidian
+
+> A rebranded fork of [ReadItLater](https://github.com/DominikPieper/obsidian-ReadItLater) by Dominik Pieper.
 
 ## Table of contents
 
 - [Introduction](#introduction)
+- [Installation](#installation)
 - [Content Types](#content-types)
     - [Website Article](#website-article)
     - [Youtube](#youtube)
@@ -20,11 +23,11 @@
 
 ## Introduction
 
-Save the web with ReadItLater plugin for Obsidian. Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.
+Save the web with Read It Never plugin for Obsidian. Archive web pages for reading later, referencing in your second brain or for other flexible use case Obsidian provides.
 
-ReadItLater can do a lot more than converting web pages to markdown. For every content type there is specific template with carefully selected variables to ease up your archiving process.
+Read It Never can do a lot more than converting web pages to markdown. For every content type there is specific template with carefully selected variables to ease up your archiving process.
 
-### What makes ReadItLater plugin great?
+### What makes Read It Never plugin great?
 
 - Simple, but powerful template engine
 - Carefully selected predefined template variables to straightforward archiving process
@@ -32,15 +35,23 @@ ReadItLater can do a lot more than converting web pages to markdown. For every c
 - Downloading images from articles to your Vault
 - Batch processing of URLs list
 
-### How to use ReadItLater plugin?
+## Installation
 
-To create single note you can either click on the plugin ribbon icon, select `ReadItLater: Create from clipboard` from command palette or click on `ReadItLater` shortcut in context or share menu. You can also create multiple notes from batch of URLs, delimited by selected delimiter in plugin settings using `ReadItLater: Create from batch in clipboard` command.
+This plugin is distributed outside the Obsidian community store.
 
-If you want just add content to existing note, you can use `ReadItLater: Insert at the cursor position` command to insert content after the current cursor position.
+**Via [BRAT](https://github.com/TfTHacker/obsidian42-brat) (recommended):** add the beta plugin `leweii/read-it-never`.
+
+**Manual:** download `main.js`, `manifest.json`, and `styles.css` from the [latest release](https://github.com/leweii/read-it-never/releases/latest) into `<vault>/.obsidian/plugins/read-it-never/`, then enable **Read It Never** in Settings → Community plugins.
+
+### How to use Read It Never plugin?
+
+To create single note you can either click on the plugin ribbon icon, select `Read It Never: Create from clipboard` from command palette or click on `Read It Never` shortcut in context or share menu. You can also create multiple notes from batch of URLs, delimited by selected delimiter in plugin settings using `Read It Never: Create from batch in clipboard` command.
+
+If you want just add content to existing note, you can use `Read It Never: Insert at the cursor position` command to insert content after the current cursor position.
 
 ## Template engine
 
-ReadItLater provides for every content type dedicated template that can be edited in plugin settings.
+Read It Never provides for every content type dedicated template that can be edited in plugin settings.
 
 ### Variables
 
@@ -136,7 +147,7 @@ Available content types are ordered by URL detection priority.
 
 Will be parsed to readable form using [Mozilla Readability](https://github.com/mozilla/readability) and then converted to markdown. In case website content is marked by [Readbility](https://github.com/mozilla/readability) as not readable, empty note with URL will be created.
 
-If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/assets`) configured in plugin settings. (Supported only on desktop for now)
+If enabled, images will be downloaded to folder (default is `Read It Never Inbox/assets`) configured in plugin settings. (Supported only on desktop for now)
 
 | Title template variable | Description                                 |
 | ------------------------| ----------------------------------------    |
@@ -173,6 +184,7 @@ If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/a
 | channelURL                | Channel URL on Youtube.com                                           |
 | videoThumbnail            | Video thumbnail image URL                                            |
 | videoChapters             | List of video chapters with linked timestamps                        |
+| videoTranscript           | Video transcript (closed captions), one timestamped line per caption |
 | videoPublishDate          | Video plublish date formatted in content format from plugin settings |
 | videoViewsCount           | Video views count                                                    |
 
@@ -182,6 +194,13 @@ If enabled, images will be downloaded to folder (default is `ReadItLater Inbox/a
 | chapterTimestamp          | Chapter start time in mm:ss   |
 | chapterSeconds            | Chapter start time in seconds |
 | chapterUrl                | Url to chapter start          |
+
+| Transcript line template variable | Description                          |
+| --------------------------------- | ------------------------------------ |
+| transcriptText                    | Caption text for the line            |
+| transcriptTimestamp               | Line start time in mm:ss             |
+| transcriptSeconds                 | Line start time in seconds           |
+| transcriptUrl                     | Url to the video at the line's start |
 
 Parsing of HTML DOM has its limitations thus additional data can be fetched only from [Google API](https://developers.google.com/youtube/v3/getting-started). Retrieved API key can be set in plugin settings and then plugin will use the Google API for fetching data.
 
@@ -406,4 +425,4 @@ If your clipboard content is not recognized by any of above parsers plugin will 
 
 ## API
 
-To invoke functionality from other plugins we provide an API. You can access it via `this.app.plugins.plugins['obsidian-read-it-later'].api` which is an instance of `ReadItLaterAPI` class defined in [src/ReadItLaterApi.ts](https://github.com/DominikPieper/obsidian-ReadItLater/blob/master/src/ReadItLaterApi.ts).
+To invoke functionality from other plugins we provide an API. You can access it via `this.app.plugins.plugins['read-it-never'].api` which is an instance of `ReadItLaterApi` class defined in [src/ReadtItLaterApi.ts](https://github.com/leweii/read-it-never/blob/master/src/ReadtItLaterApi.ts).

@@ -18,6 +18,10 @@ export interface ReadItLaterSettings {
     youtubeEmbedWidth: string;
     youtubeEmbedHeight: string;
     youtubeUsePrivacyEnhancedEmbed: boolean;
+    youtubeFetchTranscript: boolean;
+    youtubeTranscriptLanguage: string;
+    youtubeTranscriptLine: string;
+    youtubeTranscriptLinesPerBlock: number;
     vimeoContentTypeSlug: string;
     vimeoNoteTitle: string;
     vimeoNote: string;
@@ -84,8 +88,8 @@ export interface ReadItLaterSettings {
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
-    inboxDir: 'ReadItLater Inbox',
-    assetsDir: 'ReadItLater Inbox/assets',
+    inboxDir: 'Read It Never Inbox',
+    assetsDir: 'Read It Never Inbox/assets',
     openNewNote: false,
     batchProcess: false, // deperecated
     batchProcessDelimiter: Delimiter.NewLine,
@@ -93,38 +97,42 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeContentTypeSlug: 'youtube',
     youtubeNoteTitle: 'Youtube - {{ title }}',
     youtubeNote:
-        '[[ReadItLater]] [[Youtube]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
+        '[[ReadItNever]] [[Youtube]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}\n\n## Transcript\n\n{{ videoTranscript }}',
     youtubeChapter: '- [{{ chapterTimestamp }}]({{ chapterUrl }}) {{ chapterTitle }}',
     youtubeEmbedWidth: '560',
     youtubeEmbedHeight: '315',
     youtubeUsePrivacyEnhancedEmbed: true,
+    youtubeFetchTranscript: true,
+    youtubeTranscriptLanguage: '',
+    youtubeTranscriptLine: '[{{ transcriptTimestamp }}]({{ transcriptUrl }}) {{ transcriptText }}',
+    youtubeTranscriptLinesPerBlock: 5,
     vimeoContentTypeSlug: 'vimeo',
     vimeoNoteTitle: 'Vimeo - {{ title }}',
     vimeoNote:
-        '[[ReadItLater]] [[Vimeo]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
+        '[[ReadItNever]] [[Vimeo]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}\n\n{{ videoChapters }}',
     vimeoEmbedWidth: '560',
     vimeoEmbedHeight: '315',
     bilibiliContentTypeSlug: 'bilibili',
     bilibiliNoteTitle: 'Bilibili - {{ title }}',
-    bilibiliNote: '[[ReadItLater]] [[Bilibili]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}',
+    bilibiliNote: '[[ReadItNever]] [[Bilibili]]\n\n# [{{ videoTitle }}]({{ videoURL }})\n\n{{ videoPlayer }}',
     bilibiliEmbedWidth: '560',
     bilibiliEmbedHeight: '315',
     twitterContentTypeSlug: 'xcom',
     twitterNoteTitle: 'Tweet from {{ tweetAuthorName }} ({{ date }})',
-    twitterNote: '[[ReadItLater]] [[Tweet]]\n\n# [{{ tweetAuthorName }}]({{ tweetURL }})\n\n{{ tweetContent }}',
+    twitterNote: '[[ReadItNever]] [[Tweet]]\n\n# [{{ tweetAuthorName }}]({{ tweetURL }})\n\n{{ tweetContent }}',
     parseableArticleContentType: 'article',
     parseableArticleNoteTitle: '{{ title }}',
     parsableArticleNote:
-        '[[ReadItLater]] [[Article]]\n\n# [{{ articleTitle }}]({{ articleURL }})\n\n{{ articleContent }}',
+        '[[ReadItNever]] [[Article]]\n\n# [{{ articleTitle }}]({{ articleURL }})\n\n{{ articleContent }}',
     notParseableArticleContentType: 'article',
     notParseableArticleNoteTitle: 'Article {{ date }}',
-    notParsableArticleNote: '[[ReadItLater]] [[Article]]\n\n[{{ articleURL }}]({{ articleURL }})',
+    notParsableArticleNote: '[[ReadItNever]] [[Article]]\n\n[{{ articleURL }}]({{ articleURL }})',
     textSnippetContentType: 'textsnippet',
     textSnippetNoteTitle: 'Note {{ date }}',
-    textSnippetNote: '[[ReadItLater]] [[Textsnippet]]\n\n{{ content }}',
+    textSnippetNote: '[[ReadItNever]] [[Textsnippet]]\n\n{{ content }}',
     mastodonContentTypeSlug: 'mastodon',
     mastodonNoteTitle: 'Toot from {{ tootAuthorName }} ({{ date }})',
-    mastodonNote: '[[ReadItLater]] [[Toot]]\n\n# [{{ tootAuthorName }}]({{ tootURL }})\n\n> {{ tootContent }}',
+    mastodonNote: '[[ReadItNever]] [[Toot]]\n\n# [{{ tootAuthorName }}]({{ tootURL }})\n\n> {{ tootContent }}',
     downloadImages: true,
     downloadImagesInArticleDir: false,
     dateTitleFmt: 'YYYY-MM-DD HH-mm-ss',
@@ -136,7 +144,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     stackExchangeContentType: 'stackexchange',
     stackExchangeNoteTitle: '{{ title }}',
     stackExchangeNote:
-        '[[ReadItLater]] [[StackExchange]]\n\n# [{{ questionTitle }}]({{ questionURL }})\n\nAuthor: [{{ authorName }}]({{ authorProfileURL }})\n\n{{ questionContent }}\n\n***\n\n{{ topAnswer }}\n\n{{ answers }}',
+        '[[ReadItNever]] [[StackExchange]]\n\n# [{{ questionTitle }}]({{ questionURL }})\n\nAuthor: [{{ authorName }}]({{ authorProfileURL }})\n\n{{ questionContent }}\n\n***\n\n{{ topAnswer }}\n\n{{ answers }}',
     stackExchangeAnswer: 'Answered by: [{{ authorName }}]({{ authorProfileURL }})\n\n{{ answerContent }}',
     downloadStackExchangeAssets: true,
     downloadStackExchangeAssetsInDir: false,
@@ -144,7 +152,7 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     tikTokContentTypeSlug: 'tiktok',
     tikTokNoteTitle: 'TikTok from {{ authorName }} ({{ date }})',
     tikTokNote:
-        '[[ReadItLater]] [[TikTok]]\n\n{{ videoDescription }}\n\n[{{ videoURL }}]({{ videoURL }})\n\n{{ videoPlayer }}',
+        '[[ReadItNever]] [[TikTok]]\n\n{{ videoDescription }}\n\n[{{ videoURL }}]({{ videoURL }})\n\n{{ videoPlayer }}',
     tikTokEmbedWidth: '325',
     tikTokEmbedHeight: '760',
     extendShareMenu: true,
@@ -153,11 +161,11 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     youtubeChannelContentTypeSlug: 'youtube-channel',
     youtubeChannelNoteTitle: '{{ title }}',
     youtubeChannelNote:
-        '[[ReadItLater]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n![{{ channelTitle }}|300]({{ channelAvatar }})\n\n[Videos]({{ channelVideosURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
+        '[[ReadItNever]] [[YoutubeChannel]]\n\n# [{{ channelTitle }}]({{ channelURL }})\n\n![{{ channelTitle }}|300]({{ channelAvatar }})\n\n[Videos]({{ channelVideosURL }})\n\n{{ channelSubscribersCount|numberLexify }} subscribers',
     fileExistsStrategy: FileExistsStrategy.Ask,
     blueskyContentTypeSlug: 'bluesky',
     blueskyNoteTitle: 'Status from {{ authorName }} ({{ date }})',
-    blueskyNote: '[[ReadItLater]] [[Bluesky]]\n\n# [{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
+    blueskyNote: '[[ReadItNever]] [[Bluesky]]\n\n# [{{ authorName }}]({{ postURL }})\n\n{{ content|blockquote }}',
     downloadBlueskyEmbeds: true,
     downloadBlueskyEmbedsInDir: false,
     saveBlueskyPostReplies: false,
@@ -165,6 +173,6 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     pinterestContentTypeSlug: 'pinterest',
     pinterestNoteTitle: 'Pin from {{ authorName }} ({{ date }})',
     pinterestNote:
-        '[[ReadItLater]] [[Pinterest]]\n\n# [{{ authorName }}]({{ pinURL }})\n\n![]({{ image }})\n{{ description }}',
+        '[[ReadItNever]] [[Pinterest]]\n\n# [{{ authorName }}]({{ pinURL }})\n\n![]({{ image }})\n{{ description }}',
     downloadPinterestImage: true,
 };

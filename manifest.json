@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-read-it-later",
-	"name": "ReadItLater",
-	"version": "0.11.4",
+	"id": "read-it-never",
+	"name": "Read It Never",
+	"version": "1.0.0",
 	"minAppVersion": "1.7.7",
-	"description": "Save online content to your Vault, utilize embedded template engine and organize your reading list to your needs. Preserve the web with ReadItLater.",
-	"author": "Dominik Pieper",
-	"authorUrl": "https://github.com/DominikPieper",
+	"description": "Save online content to your Vault, utilize embedded template engine and organize your reading list to your needs. Preserve the web with Read It Never.",
+	"author": "Jakob",
+	"authorUrl": "https://github.com/leweii",
 	"isDesktopOnly": false
 }
