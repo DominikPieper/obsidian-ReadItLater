@@ -23,6 +23,7 @@ import { NoteService } from './NoteService';
 import { ReadItLaterApi } from './ReadtItLaterApi';
 import { BlueskyParser } from './parsers/BlueskyParser';
 import { PinterestParser } from './parsers/PinterestParser';
+import XiaohongshuParser from './parsers/XiaohongshuParser';
 
 export default class ReadItLaterPlugin extends Plugin {
     public api: ReadItLaterApi;
@@ -60,6 +61,7 @@ export default class ReadItLaterPlugin extends Plugin {
             new BlueskyParser(this.app, this, this.templateEngine),
             new PinterestParser(this.app, this, this.templateEngine),
             new MastodonParser(this.app, this, this.templateEngine),
+            new XiaohongshuParser(this.app, this, this.templateEngine),
             new WebsiteParser(this.app, this, this.templateEngine),
             new TextSnippetParser(this.app, this, this.templateEngine),
         ]);

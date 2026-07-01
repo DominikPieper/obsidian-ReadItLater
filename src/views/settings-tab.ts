@@ -14,6 +14,7 @@ enum DetailsItem {
     Bluesky = 'bluesky',
     StackExchange = 'stackExchange',
     Pinterest = 'pinterest',
+    Xiaohongshu = 'xiaohongshu',
     Mastodon = 'mastodon',
     Vimeo = 'vimeo',
     Bilibili = 'bilibili',
@@ -805,6 +806,75 @@ export class ReadItLaterSettingsTab extends PluginSettingTab {
                     )
                     .onChange(async (value) => {
                         this.plugin.settings.downloadPinterestImage = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        containerEl.createEl('hr', { cls: 'readitlater-setting-hr' });
+        detailsEl = this.createDetailsElement(containerEl, DetailsItem.Xiaohongshu);
+        detailsEl.createEl('summary', {
+            text: 'Xiaohongshu',
+            cls: 'readitlater-setting-h3',
+        });
+
+        new Setting(detailsEl)
+            .setName('Xiaohongshu content type slug')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.xiaohongshuContentType)
+                    .setValue(
+                        typeof this.plugin.settings.xiaohongshuContentType === 'undefined'
+                            ? DEFAULT_SETTINGS.xiaohongshuContentType
+                            : this.plugin.settings.xiaohongshuContentType,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.xiaohongshuContentType = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(detailsEl)
+            .setName('Xiaohongshu note template title')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addText((text) =>
+                text
+                    .setPlaceholder(DEFAULT_SETTINGS.xiaohongshuNoteTitle)
+                    .setValue(this.plugin.settings.xiaohongshuNoteTitle || DEFAULT_SETTINGS.xiaohongshuNoteTitle)
+                    .onChange(async (value) => {
+                        this.plugin.settings.xiaohongshuNoteTitle = value;
+                        await this.plugin.saveSettings();
+                    }),
+            );
+
+        new Setting(detailsEl)
+            .setName('Xiaohongshu note template')
+            .setDesc(this.createTemplateVariableReferenceDiv())
+            .addTextArea((textarea) => {
+                textarea
+                    .setValue(this.plugin.settings.xiaohongshuNote || DEFAULT_SETTINGS.xiaohongshuNote)
+                    .onChange(async (value) => {
+                        this.plugin.settings.xiaohongshuNote = value;
+                        await this.plugin.saveSettings();
+                    });
+                textarea.inputEl.rows = 10;
+                textarea.inputEl.cols = 25;
+            });
+
+        new Setting(detailsEl)
+            .setName('Download media')
+            .setDesc(
+                'Images will be downloaded to the assets directory (Desktop App feature only). To dynamically change destination directory you can use variables. Check variables reference to learn more.',
+            )
+            .addToggle((toggle) =>
+                toggle
+                    .setValue(
+                        Object.prototype.hasOwnProperty.call(this.plugin.settings, 'downloadXiaohongshuMedia')
+                            ? this.plugin.settings.downloadXiaohongshuMedia
+                            : DEFAULT_SETTINGS.downloadXiaohongshuMedia,
+                    )
+                    .onChange(async (value) => {
+                        this.plugin.settings.downloadXiaohongshuMedia = value;
                         await this.plugin.saveSettings();
                     }),
             );
