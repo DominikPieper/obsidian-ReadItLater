@@ -81,6 +81,10 @@ export interface ReadItLaterSettings {
     pinterestNoteTitle: string;
     pinterestNote: string;
     downloadPinterestImage: boolean;
+    xiaohongshuContentType: string;
+    xiaohongshuNoteTitle: string;
+    xiaohongshuNote: string;
+    downloadXiaohongshuMedia: boolean;
 }
 
 export const DEFAULT_SETTINGS: ReadItLaterSettings = {
@@ -167,4 +171,9 @@ export const DEFAULT_SETTINGS: ReadItLaterSettings = {
     pinterestNote:
         '[[ReadItLater]] [[Pinterest]]\n\n# [{{ authorName }}]({{ pinURL }})\n\n![]({{ image }})\n{{ description }}',
     downloadPinterestImage: true,
+    xiaohongshuContentType: 'xiaohongshu',
+    xiaohongshuNoteTitle: '{{ title }} ({{ date }})',
+    xiaohongshuNote:
+        '[[ReadItLater]] [[Xiaohongshu]]\n\n# [{{ title }}]({{ noteURL }})\n\n{{ content }}\n\n{{ media }}',
+    downloadXiaohongshuMedia: true,
 };
