@@ -31,11 +31,15 @@ interface WebsiteNoteData {
     author: string;
     previewURL: string;
     publishedTime: string;
-    readabilityArticle: ReadabilityArticle;
+    readabilityArticle: ReadabilityArticle | null;
     articleOgDescription: string;
     articleMetaAuthor: string;
     articlePublishedTime: string;
 }
+
+// WeChat "picture message" image URLs captured from the page scripts before sanitization,
+// stashed on the document so makeNote can fall back to them (see getDocument).
+type WeChatPictureDocument = Document & { __weChatPictureImages?: string[] };
 
 class WebsiteParser extends Parser {
     test(url: string): boolean {
@@ -50,10 +54,6 @@ class WebsiteParser extends Parser {
     }
 
     protected async makeNote(document: Document, originUrl: URL): Promise<Note> {
-        if (!isProbablyReaderable(document)) {
-            new Notice('@mozilla/readability considers this document to unlikely be readerable.');
-        }
-
         const createdAt = new Date();
         const previewUrl = this.extractPreviewUrl(document);
 
@@ -67,6 +67,45 @@ class WebsiteParser extends Parser {
             '';
         const rawPublishedTime =
             document.querySelector('meta[property="article:published_time"]')?.getAttribute('content') ?? '';
+
+        // WeChat picture-message posts have no readable article body; build the note from the
+        // OG metadata plus the gallery images captured in getDocument before sanitization.
+        const weChatImages = (document as WeChatPictureDocument).__weChatPictureImages;
+        if (weChatImages && weChatImages.length > 0) {
+            const { text: weChatDescription, topics } = this.parseWeChatDescription(ogDescription);
+            const articleContent = [
+                weChatDescription,
+                // Inline code keeps the hashtags searchable without Obsidian indexing them as vault tags.
+                topics.map((topic) => `\`#${topic}\``).join(' '),
+                ...weChatImages.map((image) => `![](${image})`),
+            ]
+                .filter(Boolean)
+                .join('\n\n');
+            return this.parsableArticle(
+                {
+                    date: this.getFormattedDateForContent(createdAt),
+                    articleTitle: ogTitle || 'No title',
+                    articleURL: originUrl.href,
+                    articleReadingTime: 0,
+                    articleContent,
+                    siteName: ogSiteName,
+                    author: metaAuthor,
+                    previewURL: previewUrl || '',
+                    publishedTime: rawPublishedTime ? this.getFormattedDateForContent(rawPublishedTime) : '',
+                    readabilityArticle: null,
+                    articleOgDescription: ogDescription,
+                    articleMetaAuthor: metaAuthor,
+                    articlePublishedTime: rawPublishedTime ? this.getFormattedDateForContent(rawPublishedTime) : '',
+                },
+                createdAt,
+            );
+        }
+
+        // Checked only after the WeChat picture-message branch: those pages have no readable
+        // body by design, so warning about them would be a false alarm.
+        if (!isProbablyReaderable(document)) {
+            new Notice('@mozilla/readability considers this document to unlikely be readerable.');
+        }
 
         const readableDocument = new Readability(document).parse();
 
@@ -114,6 +153,22 @@ class WebsiteParser extends Parser {
 
     protected async getDocument(url: URL): Promise<Document> {
         const document = await this.parseHtmlDom(url);
+
+        // WeChat "picture message" posts (swipeable image galleries) have no readable article
+        // body; their images live only in a window.picture_page_info_list script that the
+        // DOMPurify pass below strips, so capture them now for makeNote to fall back on.
+        // Regular WeChat articles can also carry picture_page_info_list scripts, so only treat
+        // the page as a picture message when the article body container is absent — otherwise
+        // Readability must handle it (https://github.com/DominikPieper/obsidian-ReadItLater/pull/241).
+        if (
+            url.hostname === 'mp.weixin.qq.com' &&
+            document.querySelector('#js_content, .rich_media_content') === null
+        ) {
+            const weChatImages = this.extractWeChatPictureImages(document);
+            if (weChatImages.length > 0) {
+                (document as WeChatPictureDocument).__weChatPictureImages = weChatImages;
+            }
+        }
 
         //check for existing base element
         const originBasElements = document.getElementsByTagName('base');
@@ -262,6 +317,48 @@ class WebsiteParser extends Parser {
      * Searches for OpenGraph `og:image` and Twitter `twitter:image` meta tags.
      * @param document The document to extract preview URL from
      */
+    /**
+     * Decodes the og:description of a WeChat picture-message page. WeChat escapes newlines and
+     * ampersands as literal \xNN sequences and appends the post's topic hashtags as
+     * double-escaped `<a class="wx_topic_link">#topic</a>` anchors. Restores the escapes,
+     * decodes the entities, and splits the topics out of the body text.
+     */
+    private parseWeChatDescription(raw: string): { text: string; topics: string[] } {
+        const unescaped = raw.replace(/\\x([0-9a-fA-F]{2})/g, (_, hex: string) =>
+            String.fromCharCode(parseInt(hex, 16)),
+        );
+        const decoded = new DOMParser().parseFromString(unescaped, 'text/html').documentElement.textContent ?? '';
+        const fragment = new DOMParser().parseFromString(decoded, 'text/html');
+        const topics: string[] = [];
+        fragment.querySelectorAll('a.wx_topic_link').forEach((anchor) => {
+            const topic = anchor.textContent?.replace(/^#/, '').trim();
+            if (topic) {
+                topics.push(topic);
+            }
+            anchor.remove();
+        });
+        return { text: fragment.body.textContent?.trim() ?? '', topics };
+    }
+
+    /**
+     * Extracts image URLs from a WeChat picture-message page. The gallery lives in a
+     * `window.picture_page_info_list` array where each item is `... height: 'NNN' * 1,
+     * cdn_url: 'https://...'`; the top-level cdn_url is the image (nested watermark/share_cover
+     * cdn_urls are not preceded by `height`, so this regex skips them). Returns [] if the page
+     * is not a picture message.
+     */
+    private extractWeChatPictureImages(document: Document): string[] {
+        const scripts = Array.from(document.querySelectorAll('script'))
+            .map((script) => script.textContent ?? '')
+            .join('\n');
+        if (!scripts.includes('picture_page_info_list')) {
+            return [];
+        }
+        return Array.from(scripts.matchAll(/height:\s*'\d+'\s*\*\s*1,\s*cdn_url:\s*'([^']+)'/g)).map(
+            (match) => match[1],
+        );
+    }
+
     protected extractPreviewUrl(document: Document): string | null {
         let previewMetaElement = document.querySelector('meta[property="og:image"]');
         if (previewMetaElement == null) {
