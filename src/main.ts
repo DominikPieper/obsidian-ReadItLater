@@ -20,7 +20,7 @@ import YoutubeChannelParser from './parsers/YoutubeChannelParser';
 import { VaultRepository } from './repository/VaultRepository';
 import DefaultVaultRepository from './repository/DefaultVaultRepository';
 import { NoteService } from './NoteService';
-import { ReadItLaterApi } from './ReadtItLaterApi';
+import { ReadItLaterApi } from './ReadItLaterApi';
 import { BlueskyParser } from './parsers/BlueskyParser';
 import { PinterestParser } from './parsers/PinterestParser';
 
