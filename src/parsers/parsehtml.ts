@@ -53,7 +53,8 @@ export async function parseHtmlContent(content: string) {
         replacement: function (_content, node, options) {
             //eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
-            node.innerHTML = node.innerHTML.replaceAll('<br-keep></br-keep>', '<br>');
+            // <br> elements carry no text, so textContent would drop them; turn them into real newlines
+            node.innerHTML = node.innerHTML.replaceAll('<br-keep></br-keep>', '\n');
             //eslint-disable-next-line @typescript-eslint/ban-ts-comment
             //@ts-ignore
             const langMatch = node.id?.match(/code-lang-(.+)/);
